@@ -53,7 +53,7 @@ viewHeader page user isLoading =
     nav [ class "navbar navbar-light" ]
         [ div [ class "container" ]
             [ a [ class "navbar-brand", Route.href Route.Home ]
-                [ text "conduit" ]
+                [ text "EW Dashboards" ]
             , ul [ class "nav navbar-nav pull-xs-right" ] <|
                 lazy2 Util.viewIf isLoading spinner
                     :: navbarLink (page == Home) Route.Home [ text "Home" ]
@@ -87,11 +87,9 @@ viewFooter : Html msg
 viewFooter =
     footer []
         [ div [ class "container" ]
-            [ a [ class "logo-font", href "/" ] [ text "conduit" ]
+            [ a [ class "logo-font", href "/" ] [ text "EW Dashboards" ]
             , span [ class "attribution" ]
-                [ text "An interactive learning project from "
-                , a [ href "https://thinkster.io" ] [ text "Thinkster" ]
-                , text ". Code & design licensed under MIT."
+                [ text "An EW project for keeping us on track"
                 ]
             ]
         ]

@@ -76,8 +76,7 @@ viewBanner : Html msg
 viewBanner =
     div [ class "banner" ]
         [ div [ class "container" ]
-            [ h1 [ class "logo-font" ] [ text "conduit" ]
-            , p [] [ text "A place to share your knowledge." ]
+            [ h1 [ class "logo-font" ] [ text "Widgets" ]
             ]
         ]
 
