@@ -22,7 +22,7 @@ import Http
 import HttpBuilder exposing (RequestBuilder, withBody, withExpect, withQueryParams)
 import Json.Decode as Decode
 import Json.Encode as Encode
-import Request.Helpers exposing (apiUrl)
+import Request.Helpers exposing (mockApiUrl)
 import Util exposing ((=>))
 
 
@@ -37,7 +37,7 @@ get maybeToken slug =
                 |> Decode.field "article"
                 |> Http.expectJson
     in
-    apiUrl ("/articles/" ++ Widget.slugToString slug)
+    mockApiUrl ("/articles/" ++ Widget.slugToString slug)
         |> HttpBuilder.get
         |> HttpBuilder.withExpect expect
         |> withAuthorization maybeToken
@@ -116,7 +116,7 @@ feed config token =
 tags : Http.Request (List Tag)
 tags =
     Decode.field "tags" (Decode.list Widget.tagDecoder)
-        |> Http.get (apiUrl "/tags")
+        |> Http.get (mockApiUrl "/tags")
 
 
 
@@ -153,7 +153,7 @@ buildFavorite builderFromUrl slug token =
                 |> Decode.field "article"
                 |> Http.expectJson
     in
-    [ apiUrl "/articles", slugToString slug, "favorite" ]
+    [ mockApiUrl "/articles", slugToString slug, "favorite" ]
         |> String.join "/"
         |> builderFromUrl
         |> withAuthorization (Just token)
@@ -202,7 +202,7 @@ create config token =
             Encode.object [ "article" => article ]
                 |> Http.jsonBody
     in
-    apiUrl "/articles"
+    mockApiUrl "/articles"
         |> HttpBuilder.post
         |> withAuthorization (Just token)
         |> withBody body
@@ -229,7 +229,7 @@ update slug config token =
             Encode.object [ "article" => article ]
                 |> Http.jsonBody
     in
-    apiUrl ("/articles/" ++ slugToString slug)
+    mockApiUrl ("/articles/" ++ slugToString slug)
         |> HttpBuilder.put
         |> withAuthorization (Just token)
         |> withBody body
@@ -243,7 +243,7 @@ update slug config token =
 
 delete : Widget.Slug -> AuthToken -> Http.Request ()
 delete slug token =
-    apiUrl ("/articles/" ++ Widget.slugToString slug)
+    mockApiUrl ("/articles/" ++ Widget.slugToString slug)
         |> HttpBuilder.delete
         |> withAuthorization (Just token)
         |> HttpBuilder.toRequest
@@ -266,7 +266,7 @@ maybeVal ( key, value ) =
 buildFromQueryParams : String -> List ( String, String ) -> RequestBuilder Feed
 buildFromQueryParams url queryParams =
     url
-        |> apiUrl
+        |> mockApiUrl
         |> HttpBuilder.get
         |> withExpect (Http.expectJson Feed.decoder)
         |> withQueryParams queryParams
