@@ -25,3 +25,9 @@ Then, to build everything:
 > elm-live --output=elm.js src/Main.elm --pushstate --open --debug
 
 (Leave off the `--debug` if you don't want the time-traveling debugger.)
+
+# Deploy
+
+> firebase deploy
+
+> open https://dashboards-ui.firebaseapp.com
