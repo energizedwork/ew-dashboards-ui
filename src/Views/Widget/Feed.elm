@@ -1,6 +1,6 @@
-module Views.Article.Feed exposing (FeedSource, Model, Msg, authorFeed, favoritedFeed, globalFeed, init, selectTag, tagFeed, update, viewArticles, viewFeedSources, yourFeed)
+module Views.Widget.Feed exposing (FeedSource, Model, Msg, authorFeed, favoritedFeed, globalFeed, init, selectTag, tagFeed, update, viewWidgets, viewFeedSources, yourFeed)
 
-{-| The reusable Article Feed that appears on both the Home page as well as on
+{-| The reusable Widget Feed that appears on both the Home page as well as on
 the Profile page. There's a lot of logic here, so it's more convenient to use
 the heavyweight approach of giving this its own Model, view, and update.
 
@@ -13,8 +13,8 @@ overkill, so we use simpler APIs instead.
 
 -}
 
-import Data.Article as Article exposing (Article, Tag)
-import Data.Article.Feed exposing (Feed)
+import Data.Widget as Widget exposing (Widget, Tag)
+import Data.Widget.Feed exposing (Feed)
 import Data.AuthToken as AuthToken exposing (AuthToken)
 import Data.Session as Session exposing (Session)
 import Data.User as User exposing (Username)
@@ -23,11 +23,11 @@ import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src)
 import Html.Events exposing (onClick)
 import Http
-import Request.Article
+import Request.Widget
 import SelectList exposing (Position(..), SelectList)
 import Task exposing (Task)
 import Util exposing ((=>), onClickStopPropagation, pair, viewIf)
-import Views.Article
+import Views.Widget
 import Views.Errors as Errors
 import Views.Page exposing (bodyId)
 import Views.Spinner exposing (spinner)
@@ -77,9 +77,9 @@ init session feedSources =
 -- VIEW --
 
 
-viewArticles : Model -> List (Html Msg)
-viewArticles (Model { activePage, feed, feedSources }) =
-    List.map (Views.Article.view ToggleFavorite) feed.articles
+viewWidgets : Model -> List (Html Msg)
+viewWidgets (Model { activePage, feed, feedSources }) =
+    List.map (Views.Widget.view ToggleFavorite) feed.articles
         ++ [ pagination activePage feed (SelectList.selected feedSources) ]
 
 
@@ -123,13 +123,13 @@ sourceName source =
             "Global Feed"
 
         TagFeed tagName ->
-            "#" ++ Article.tagToString tagName
+            "#" ++ Widget.tagToString tagName
 
         FavoritedFeed username ->
-            "Favorited Articles"
+            "Favorited Widgets"
 
         AuthorFeed username ->
-            "My Articles"
+            "My Widgets"
 
 
 limit : FeedSource -> Int
@@ -188,8 +188,8 @@ type Msg
     = DismissErrors
     | SelectFeedSource FeedSource
     | FeedLoadCompleted FeedSource (Result Http.Error ( Int, Feed ))
-    | ToggleFavorite (Article ())
-    | FavoriteCompleted (Result Http.Error (Article ()))
+    | ToggleFavorite (Widget ())
+    | FavoriteCompleted (Result Http.Error (Widget ()))
     | SelectPage Int
 
 
@@ -234,7 +234,7 @@ updateInternal session msg model =
                         => Cmd.none
 
                 Just user ->
-                    Request.Article.toggleFavorite article user.token
+                    Request.Widget.toggleFavorite article user.token
                         |> Http.send FavoriteCompleted
                         |> pair model
 
@@ -244,7 +244,7 @@ updateInternal session msg model =
                     model.feed
 
                 newFeed =
-                    { feed | articles = List.map (replaceArticle article) feed.articles }
+                    { feed | articles = List.map (replaceWidget article) feed.articles }
             in
             { model | feed = newFeed } => Cmd.none
 
@@ -276,7 +276,7 @@ fetch : Maybe AuthToken -> Int -> FeedSource -> Task Http.Error ( Int, Feed )
 fetch token page feedSource =
     let
         defaultListConfig =
-            Request.Article.defaultListConfig
+            Request.Widget.defaultListConfig
 
         articlesPerPage =
             limit feedSource
@@ -292,41 +292,41 @@ fetch token page feedSource =
                 YourFeed ->
                     let
                         defaultFeedConfig =
-                            Request.Article.defaultFeedConfig
+                            Request.Widget.defaultFeedConfig
 
                         feedConfig =
                             { defaultFeedConfig | offset = offset, limit = articlesPerPage }
                     in
                     token
-                        |> Maybe.map (Request.Article.feed feedConfig >> Http.toTask)
+                        |> Maybe.map (Request.Widget.feed feedConfig >> Http.toTask)
                         |> Maybe.withDefault (Task.fail (Http.BadUrl "You need to be signed in to view your feed."))
 
                 GlobalFeed ->
-                    Request.Article.list listConfig token
+                    Request.Widget.list listConfig token
                         |> Http.toTask
 
                 TagFeed tagName ->
-                    Request.Article.list { listConfig | tag = Just tagName } token
+                    Request.Widget.list { listConfig | tag = Just tagName } token
                         |> Http.toTask
 
                 FavoritedFeed username ->
-                    Request.Article.list { listConfig | favorited = Just username } token
+                    Request.Widget.list { listConfig | favorited = Just username } token
                         |> Http.toTask
 
                 AuthorFeed username ->
-                    Request.Article.list { listConfig | author = Just username } token
+                    Request.Widget.list { listConfig | author = Just username } token
                         |> Http.toTask
     in
     task
         |> Task.map (\feed -> ( page, feed ))
 
 
-replaceArticle : Article a -> Article a -> Article a
-replaceArticle newArticle oldArticle =
-    if newArticle.slug == oldArticle.slug then
-        newArticle
+replaceWidget : Widget a -> Widget a -> Widget a
+replaceWidget newWidget oldWidget =
+    if newWidget.slug == oldWidget.slug then
+        newWidget
     else
-        oldArticle
+        oldWidget
 
 
 selectFeedSource : FeedSource -> SelectList FeedSource -> SelectList FeedSource

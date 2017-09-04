@@ -1,11 +1,11 @@
-module Page.Article exposing (Model, Msg, init, update, view)
+module Page.Widget exposing (Model, Msg, init, update, view)
 
 {-| Viewing an individual article.
 -}
 
-import Data.Article as Article exposing (Article, Body)
-import Data.Article.Author as Author exposing (Author)
-import Data.Article.Comment as Comment exposing (Comment, CommentId)
+import Data.Widget as Widget exposing (Widget, Body)
+import Data.Widget.Author as Author exposing (Author)
+import Data.Widget.Comment as Comment exposing (Comment, CommentId)
 import Data.Session as Session exposing (Session)
 import Data.User as User exposing (User)
 import Data.UserPhoto as UserPhoto
@@ -16,14 +16,14 @@ import Html.Attributes exposing (attribute, class, disabled, href, id, placehold
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Http
 import Page.Errored as Errored exposing (PageLoadError, pageLoadError)
-import Request.Article
-import Request.Article.Comments
+import Request.Widget
+import Request.Widget.Comments
 import Request.Profile
 import Route
 import Task exposing (Task)
 import Util exposing ((=>), pair, viewIf)
-import Views.Article
-import Views.Article.Favorite as Favorite
+import Views.Widget
+import Views.Widget.Favorite as Favorite
 import Views.Author
 import Views.Errors
 import Views.Page as Page
@@ -37,29 +37,29 @@ type alias Model =
     { errors : List String
     , commentText : String
     , commentInFlight : Bool
-    , article : Article Body
+    , article : Widget Body
     , comments : List Comment
     }
 
 
-init : Session -> Article.Slug -> Task PageLoadError Model
+init : Session -> Widget.Slug -> Task PageLoadError Model
 init session slug =
     let
         maybeAuthToken =
             Maybe.map .token session.user
 
-        loadArticle =
-            Request.Article.get maybeAuthToken slug
+        loadWidget =
+            Request.Widget.get maybeAuthToken slug
                 |> Http.toTask
 
         loadComments =
-            Request.Article.Comments.list maybeAuthToken slug
+            Request.Widget.Comments.list maybeAuthToken slug
                 |> Http.toTask
 
         handleLoadError _ =
-            pageLoadError Page.Other "Article is currently unavailable."
+            pageLoadError Page.Other "Widget is currently unavailable."
     in
-    Task.map2 (Model [] "" False) loadArticle loadComments
+    Task.map2 (Model [] "" False) loadWidget loadComments
         |> Task.mapError handleLoadError
 
 
@@ -87,7 +87,7 @@ view session model =
         , div [ class "container page" ]
             [ div [ class "row article-content" ]
                 [ div [ class "col-md-12" ]
-                    [ Article.bodyToHtml article.body [] ]
+                    [ Widget.bodyToHtml article.body [] ]
                 ]
             , hr [] []
             , div [ class "article-actions" ]
@@ -96,7 +96,7 @@ view session model =
                         [ img [ UserPhoto.src author.image ] [] ]
                     , div [ class "info" ]
                         [ Views.Author.view author.username
-                        , Views.Article.viewTimestamp article
+                        , Views.Widget.viewTimestamp article
                         ]
                     ]
                         ++ buttons
@@ -110,7 +110,7 @@ view session model =
         ]
 
 
-viewBanner : List String -> Article a -> Author -> Maybe User -> Html Msg
+viewBanner : List String -> Widget a -> Author -> Maybe User -> Html Msg
 viewBanner errors article author maybeUser =
     let
         buttons =
@@ -124,7 +124,7 @@ viewBanner errors article author maybeUser =
                     [ img [ UserPhoto.src author.image ] [] ]
                 , div [ class "info" ]
                     [ Views.Author.view author.username
-                    , Views.Article.viewTimestamp article
+                    , Views.Widget.viewTimestamp article
                     ]
                 ]
                     ++ buttons
@@ -166,13 +166,13 @@ viewAddComment postingDisabled maybeUser =
                 ]
 
 
-viewButtons : Article a -> Author -> Maybe User -> List (Html Msg)
+viewButtons : Widget a -> Author -> Maybe User -> List (Html Msg)
 viewButtons article author maybeUser =
     let
-        isMyArticle =
+        isMyWidget =
             Maybe.map .username maybeUser == Just author.username
     in
-    if isMyArticle then
+    if isMyWidget then
         [ editButton article
         , text " "
         , deleteButton article
@@ -227,7 +227,7 @@ formatCommentTimestamp =
 type Msg
     = DismissErrors
     | ToggleFavorite
-    | FavoriteCompleted (Result Http.Error (Article Body))
+    | FavoriteCompleted (Result Http.Error (Widget Body))
     | ToggleFollow
     | FollowCompleted (Result Http.Error Author)
     | SetCommentText String
@@ -235,8 +235,8 @@ type Msg
     | CommentDeleted CommentId (Result Http.Error ())
     | PostComment
     | CommentPosted (Result Http.Error Comment)
-    | DeleteArticle
-    | ArticleDeleted (Result Http.Error ())
+    | DeleteWidget
+    | WidgetDeleted (Result Http.Error ())
 
 
 update : Session -> Msg -> Model -> ( Model, Cmd Msg )
@@ -255,17 +255,17 @@ update session msg model =
         ToggleFavorite ->
             let
                 cmdFromAuth authToken =
-                    Request.Article.toggleFavorite model.article authToken
+                    Request.Widget.toggleFavorite model.article authToken
                         |> Http.toTask
-                        |> Task.map (\newArticle -> { newArticle | body = article.body })
+                        |> Task.map (\newWidget -> { newWidget | body = article.body })
                         |> Task.attempt FavoriteCompleted
             in
             session
                 |> Session.attempt "favorite" cmdFromAuth
                 |> Tuple.mapFirst (Util.appendErrors model)
 
-        FavoriteCompleted (Ok newArticle) ->
-            { model | article = newArticle } => Cmd.none
+        FavoriteCompleted (Ok newWidget) ->
+            { model | article = newWidget } => Cmd.none
 
         FavoriteCompleted (Err error) ->
             -- In a serious production application, we would log the error to
@@ -287,10 +287,10 @@ update session msg model =
 
         FollowCompleted (Ok { following }) ->
             let
-                newArticle =
+                newWidget =
                     { article | author = { author | following = following } }
             in
-            { model | article = newArticle } => Cmd.none
+            { model | article = newWidget } => Cmd.none
 
         FollowCompleted (Err error) ->
             { model | errors = "Unable to follow user." :: model.errors }
@@ -310,7 +310,7 @@ update session msg model =
                 let
                     cmdFromAuth authToken =
                         authToken
-                            |> Request.Article.Comments.post model.article.slug comment
+                            |> Request.Widget.Comments.post model.article.slug comment
                             |> Http.send CommentPosted
                 in
                 session
@@ -332,7 +332,7 @@ update session msg model =
             let
                 cmdFromAuth authToken =
                     authToken
-                        |> Request.Article.Comments.delete model.article.slug id
+                        |> Request.Widget.Comments.delete model.article.slug id
                         |> Http.send (CommentDeleted id)
             in
             session
@@ -347,21 +347,21 @@ update session msg model =
             { model | errors = model.errors ++ [ "Server error while trying to delete comment." ] }
                 => Cmd.none
 
-        DeleteArticle ->
+        DeleteWidget ->
             let
                 cmdFromAuth authToken =
                     authToken
-                        |> Request.Article.delete model.article.slug
-                        |> Http.send ArticleDeleted
+                        |> Request.Widget.delete model.article.slug
+                        |> Http.send WidgetDeleted
             in
             session
                 |> Session.attempt "delete articles" cmdFromAuth
                 |> Tuple.mapFirst (Util.appendErrors model)
 
-        ArticleDeleted (Ok ()) ->
+        WidgetDeleted (Ok ()) ->
             model => Route.modifyUrl Route.Home
 
-        ArticleDeleted (Err error) ->
+        WidgetDeleted (Err error) ->
             { model | errors = model.errors ++ [ "Server error while trying to delete article." ] }
                 => Cmd.none
 
@@ -375,25 +375,25 @@ withoutComment id =
     List.filter (\comment -> comment.id /= id)
 
 
-favoriteButton : Article a -> Html Msg
+favoriteButton : Widget a -> Html Msg
 favoriteButton article =
     let
         favoriteText =
-            " Favorite Article (" ++ toString article.favoritesCount ++ ")"
+            " Favorite Widget (" ++ toString article.favoritesCount ++ ")"
     in
     Favorite.button (\_ -> ToggleFavorite) article [] [ text favoriteText ]
 
 
-deleteButton : Article a -> Html Msg
+deleteButton : Widget a -> Html Msg
 deleteButton article =
-    button [ class "btn btn-outline-danger btn-sm", onClick DeleteArticle ]
-        [ i [ class "ion-trash-a" ] [], text " Delete Article" ]
+    button [ class "btn btn-outline-danger btn-sm", onClick DeleteWidget ]
+        [ i [ class "ion-trash-a" ] [], text " Delete Widget" ]
 
 
-editButton : Article a -> Html Msg
+editButton : Widget a -> Html Msg
 editButton article =
-    a [ class "btn btn-outline-secondary btn-sm", Route.href (Route.EditArticle article.slug) ]
-        [ i [ class "ion-edit" ] [], text " Edit Article" ]
+    a [ class "btn btn-outline-secondary btn-sm", Route.href (Route.EditWidget article.slug) ]
+        [ i [ class "ion-edit" ] [], text " Edit Widget" ]
 
 
 followButton : Follow.State record -> Html Msg

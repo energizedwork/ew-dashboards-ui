@@ -1,13 +1,13 @@
 module Main exposing (main)
 
-import Data.Article exposing (Slug)
+import Data.Widget exposing (Slug)
 import Data.Session as Session exposing (Session)
 import Data.User as User exposing (User, Username)
 import Html exposing (..)
 import Json.Decode as Decode exposing (Value)
 import Navigation exposing (Location)
-import Page.Article as Article
-import Page.Article.Editor as Editor
+import Page.Widget as Widget
+import Page.Widget.Editor as Editor
 import Page.Errored as Errored exposing (PageLoadError)
 import Page.Home as Home
 import Page.Login as Login
@@ -37,7 +37,7 @@ type Page
     | Login Login.Model
     | Register Register.Model
     | Profile Username Profile.Model
-    | Article Article.Model
+    | Widget Widget.Model
     | Editor (Maybe Slug) Editor.Model
 
 
@@ -137,16 +137,16 @@ viewPage session isLoading page =
                 |> frame (Page.Profile username)
                 |> Html.map ProfileMsg
 
-        Article subModel ->
-            Article.view session subModel
+        Widget subModel ->
+            Widget.view session subModel
                 |> frame Page.Other
-                |> Html.map ArticleMsg
+                |> Html.map WidgetMsg
 
         Editor maybeSlug subModel ->
             let
                 framePage =
                     if maybeSlug == Nothing then
-                        Page.NewArticle
+                        Page.NewWidget
                     else
                         Page.Other
             in
@@ -212,7 +212,7 @@ pageSubscriptions page =
         Profile _ _ ->
             Sub.none
 
-        Article _ ->
+        Widget _ ->
             Sub.none
 
         Editor _ _ ->
@@ -226,16 +226,16 @@ pageSubscriptions page =
 type Msg
     = SetRoute (Maybe Route)
     | HomeLoaded (Result PageLoadError Home.Model)
-    | ArticleLoaded (Result PageLoadError Article.Model)
+    | WidgetLoaded (Result PageLoadError Widget.Model)
     | ProfileLoaded Username (Result PageLoadError Profile.Model)
-    | EditArticleLoaded Slug (Result PageLoadError Editor.Model)
+    | EditWidgetLoaded Slug (Result PageLoadError Editor.Model)
     | HomeMsg Home.Msg
     | SettingsMsg Settings.Msg
     | SetUser (Maybe User)
     | LoginMsg Login.Msg
     | RegisterMsg Register.Msg
     | ProfileMsg Profile.Msg
-    | ArticleMsg Article.Msg
+    | WidgetMsg Widget.Msg
     | EditorMsg Editor.Msg
 
 
@@ -253,18 +253,18 @@ setRoute maybeRoute model =
         Nothing ->
             { model | pageState = Loaded NotFound } => Cmd.none
 
-        Just Route.NewArticle ->
+        Just Route.NewWidget ->
             case model.session.user of
                 Just user ->
                     { model | pageState = Loaded (Editor Nothing Editor.initNew) } => Cmd.none
 
                 Nothing ->
-                    errored Page.NewArticle "You must be signed in to post an article."
+                    errored Page.NewWidget "You must be signed in to post an article."
 
-        Just (Route.EditArticle slug) ->
+        Just (Route.EditWidget slug) ->
             case model.session.user of
                 Just user ->
-                    transition (EditArticleLoaded slug) (Editor.initEdit model.session slug)
+                    transition (EditWidgetLoaded slug) (Editor.initEdit model.session slug)
 
                 Nothing ->
                     errored Page.Other "You must be signed in to edit an article."
@@ -300,8 +300,8 @@ setRoute maybeRoute model =
         Just (Route.Profile username) ->
             transition (ProfileLoaded username) (Profile.init model.session username)
 
-        Just (Route.Article slug) ->
-            transition ArticleLoaded (Article.init model.session slug)
+        Just (Route.Widget slug) ->
+            transition WidgetLoaded (Widget.init model.session slug)
 
 
 pageErrored : Model -> ActivePage -> String -> ( Model, Cmd msg )
@@ -350,16 +350,16 @@ updatePage page msg model =
         ( ProfileLoaded username (Err error), _ ) ->
             { model | pageState = Loaded (Errored error) } => Cmd.none
 
-        ( ArticleLoaded (Ok subModel), _ ) ->
-            { model | pageState = Loaded (Article subModel) } => Cmd.none
+        ( WidgetLoaded (Ok subModel), _ ) ->
+            { model | pageState = Loaded (Widget subModel) } => Cmd.none
 
-        ( ArticleLoaded (Err error), _ ) ->
+        ( WidgetLoaded (Err error), _ ) ->
             { model | pageState = Loaded (Errored error) } => Cmd.none
 
-        ( EditArticleLoaded slug (Ok subModel), _ ) ->
+        ( EditWidgetLoaded slug (Ok subModel), _ ) ->
             { model | pageState = Loaded (Editor (Just slug) subModel) } => Cmd.none
 
-        ( EditArticleLoaded slug (Err error), _ ) ->
+        ( EditWidgetLoaded slug (Err error), _ ) ->
             { model | pageState = Loaded (Errored error) } => Cmd.none
 
         ( SetUser user, _ ) ->
@@ -443,14 +443,14 @@ updatePage page msg model =
         ( ProfileMsg subMsg, Profile username subModel ) ->
             toPage (Profile username) ProfileMsg (Profile.update model.session) subMsg subModel
 
-        ( ArticleMsg subMsg, Article subModel ) ->
-            toPage Article ArticleMsg (Article.update model.session) subMsg subModel
+        ( WidgetMsg subMsg, Widget subModel ) ->
+            toPage Widget WidgetMsg (Widget.update model.session) subMsg subModel
 
         ( EditorMsg subMsg, Editor slug subModel ) ->
             case model.session.user of
                 Nothing ->
                     if slug == Nothing then
-                        errored Page.NewArticle
+                        errored Page.NewWidget
                             "You must be signed in to post articles."
                     else
                         errored Page.Other

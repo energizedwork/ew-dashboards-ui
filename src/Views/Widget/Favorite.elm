@@ -1,9 +1,9 @@
-module Views.Article.Favorite exposing (button)
+module Views.Widget.Favorite exposing (button)
 
 {-| The Favorite button.
 -}
 
-import Data.Article as Article exposing (Article)
+import Data.Widget as Widget exposing (Widget)
 import Html exposing (Attribute, Html, i, text)
 import Html.Attributes exposing (class)
 import Util exposing ((=>), onClickStopPropagation)
@@ -16,8 +16,8 @@ You pass it some configuration, followed by a `List (Attribute msg)` and a
 
 -}
 button :
-    (Article a -> msg)
-    -> Article a
+    (Widget a -> msg)
+    -> Widget a
     -> List (Attribute msg)
     -> List (Html msg)
     -> Html msg

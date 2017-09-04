@@ -1,6 +1,6 @@
 module Route exposing (Route(..), fromLocation, href, modifyUrl)
 
-import Data.Article as Article
+import Data.Widget as Widget
 import Data.User as User exposing (Username)
 import Html exposing (Attribute)
 import Html.Attributes as Attr
@@ -17,10 +17,10 @@ type Route
     | Logout
     | Register
     | Settings
-    | Article Article.Slug
+    | Widget Widget.Slug
     | Profile Username
-    | NewArticle
-    | EditArticle Article.Slug
+    | NewWidget
+    | EditWidget Widget.Slug
 
 
 route : Parser (Route -> a) a
@@ -32,9 +32,9 @@ route =
         , Url.map Settings (s "settings")
         , Url.map Profile (s "profile" </> User.usernameParser)
         , Url.map Register (s "register")
-        , Url.map Article (s "article" </> Article.slugParser)
-        , Url.map NewArticle (s "editor")
-        , Url.map EditArticle (s "editor" </> Article.slugParser)
+        , Url.map Widget (s "article" </> Widget.slugParser)
+        , Url.map NewWidget (s "editor")
+        , Url.map EditWidget (s "editor" </> Widget.slugParser)
         ]
 
 
@@ -62,17 +62,17 @@ routeToString page =
                 Settings ->
                     [ "settings" ]
 
-                Article slug ->
-                    [ "article", Article.slugToString slug ]
+                Widget slug ->
+                    [ "article", Widget.slugToString slug ]
 
                 Profile username ->
                     [ "profile", User.usernameToString username ]
 
-                NewArticle ->
+                NewWidget ->
                     [ "editor" ]
 
-                EditArticle slug ->
-                    [ "editor", Article.slugToString slug ]
+                EditWidget slug ->
+                    [ "editor", Widget.slugToString slug ]
     in
     "#/" ++ String.join "/" pieces
 

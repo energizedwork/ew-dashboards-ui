@@ -1,6 +1,6 @@
-module Page.Article.Editor exposing (Model, Msg, initEdit, initNew, update, view)
+module Page.Widget.Editor exposing (Model, Msg, initEdit, initNew, update, view)
 
-import Data.Article as Article exposing (Article, Body)
+import Data.Widget as Widget exposing (Widget, Body)
 import Data.Session as Session exposing (Session)
 import Data.User as User exposing (User)
 import Html exposing (..)
@@ -8,7 +8,7 @@ import Html.Attributes exposing (attribute, class, defaultValue, disabled, href,
 import Html.Events exposing (onInput, onSubmit)
 import Http
 import Page.Errored as Errored exposing (PageLoadError, pageLoadError)
-import Request.Article
+import Request.Widget
 import Route
 import Task exposing (Task)
 import Util exposing ((=>), pair, viewIf)
@@ -22,7 +22,7 @@ import Views.Page as Page
 
 type alias Model =
     { errors : List Error
-    , editingArticle : Maybe Article.Slug
+    , editingWidget : Maybe Widget.Slug
     , title : String
     , body : String
     , description : String
@@ -33,7 +33,7 @@ type alias Model =
 initNew : Model
 initNew =
     { errors = []
-    , editingArticle = Nothing
+    , editingWidget = Nothing
     , title = ""
     , body = ""
     , description = ""
@@ -41,22 +41,22 @@ initNew =
     }
 
 
-initEdit : Session -> Article.Slug -> Task PageLoadError Model
+initEdit : Session -> Widget.Slug -> Task PageLoadError Model
 initEdit session slug =
     let
         maybeAuthToken =
             session.user
                 |> Maybe.map .token
     in
-    Request.Article.get maybeAuthToken slug
+    Request.Widget.get maybeAuthToken slug
         |> Http.toTask
-        |> Task.mapError (\_ -> pageLoadError Page.Other "Article is currently unavailable.")
+        |> Task.mapError (\_ -> pageLoadError Page.Other "Widget is currently unavailable.")
         |> Task.map
             (\article ->
                 { errors = []
-                , editingArticle = Just slug
+                , editingWidget = Just slug
                 , title = article.title
-                , body = Article.bodyToMarkdownString article.body
+                , body = Widget.bodyToMarkdownString article.body
                 , description = article.description
                 , tags = article.tags
                 }
@@ -85,19 +85,19 @@ viewForm : Model -> Html Msg
 viewForm model =
     let
         isEditing =
-            model.editingArticle /= Nothing
+            model.editingWidget /= Nothing
 
         saveButtonText =
             if isEditing then
-                "Update Article"
+                "Update Widget"
             else
-                "Publish Article"
+                "Publish Widget"
     in
     Html.form [ onSubmit Save ]
         [ fieldset []
             [ Form.input
                 [ class "form-control-lg"
-                , placeholder "Article Title"
+                , placeholder "Widget Title"
                 , onInput SetTitle
                 , defaultValue model.title
                 ]
@@ -137,8 +137,8 @@ type Msg
     | SetDescription String
     | SetTags String
     | SetBody String
-    | CreateCompleted (Result Http.Error (Article Body))
-    | EditCompleted (Result Http.Error (Article Body))
+    | CreateCompleted (Result Http.Error (Widget Body))
+    | EditCompleted (Result Http.Error (Widget Body))
 
 
 update : User -> Msg -> Model -> ( Model, Cmd Msg )
@@ -147,16 +147,16 @@ update user msg model =
         Save ->
             case validate model of
                 [] ->
-                    case model.editingArticle of
+                    case model.editingWidget of
                         Nothing ->
                             user.token
-                                |> Request.Article.create model
+                                |> Request.Widget.create model
                                 |> Http.send CreateCompleted
                                 |> pair { model | errors = [] }
 
                         Just slug ->
                             user.token
-                                |> Request.Article.update slug model
+                                |> Request.Widget.update slug model
                                 |> Http.send EditCompleted
                                 |> pair { model | errors = [] }
 
@@ -176,7 +176,7 @@ update user msg model =
             { model | body = body } => Cmd.none
 
         CreateCompleted (Ok article) ->
-            Route.Article article.slug
+            Route.Widget article.slug
                 |> Route.modifyUrl
                 |> pair model
 
@@ -185,7 +185,7 @@ update user msg model =
                 => Cmd.none
 
         EditCompleted (Ok article) ->
-            Route.Article article.slug
+            Route.Widget article.slug
                 |> Route.modifyUrl
                 |> pair model
 
@@ -228,6 +228,6 @@ tagsFromString str =
         |> List.filter (not << String.isEmpty)
 
 
-redirectToArticle : Article.Slug -> Cmd msg
-redirectToArticle =
-    Route.modifyUrl << Route.Article
+redirectToWidget : Widget.Slug -> Cmd msg
+redirectToWidget =
+    Route.modifyUrl << Route.Widget

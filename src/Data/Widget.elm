@@ -1,6 +1,6 @@
-module Data.Article
+module Data.Widget
     exposing
-        ( Article
+        ( Widget
         , Body
         , Slug
         , Tag
@@ -14,7 +14,7 @@ module Data.Article
         , tagToString
         )
 
-import Data.Article.Author as Author exposing (Author)
+import Data.Widget.Author as Author exposing (Author)
 import Date exposing (Date)
 import Html exposing (Attribute, Html)
 import Json.Decode as Decode exposing (Decoder)
@@ -31,23 +31,23 @@ consider the difference between the "view individual article" page (which
 renders one article, including its body) and the "article feed" -
 which displays multiple articles, but without bodies.
 
-This definition for `Article` means we can write:
+This definition for `Widget` means we can write:
 
-viewArticle : Article Body -> Html msg
-viewFeed : List (Article ()) -> Html msg
+viewWidget : Widget Body -> Html msg
+viewFeed : List (Widget ()) -> Html msg
 
-This indicates that `viewArticle` requires an article _with a `body` present_,
+This indicates that `viewWidget` requires an article _with a `body` present_,
 wereas `viewFeed` accepts articles with no bodies. (We could also have written
-it as `List (Article a)` to specify that feeds can accept either articles that
+it as `List (Widget a)` to specify that feeds can accept either articles that
 have `body` present or not. Either work, given that feeds do not attempt to
 read the `body` field from articles.)
 
-This is an important distinction, because in Request.Article, the `feed`
-function produces `List (Article ())` because the API does not return bodies.
+This is an important distinction, because in Request.Widget, the `feed`
+function produces `List (Widget ())` because the API does not return bodies.
 Those articles are useful to the feed, but not to the individual article view.
 
 -}
-type alias Article a =
+type alias Widget a =
     { description : String
     , slug : Slug
     , title : String
@@ -65,21 +65,21 @@ type alias Article a =
 -- SERIALIZATION --
 
 
-decoder : Decoder (Article ())
+decoder : Decoder (Widget ())
 decoder =
-    baseArticleDecoder
+    baseWidgetDecoder
         |> hardcoded ()
 
 
-decoderWithBody : Decoder (Article Body)
+decoderWithBody : Decoder (Widget Body)
 decoderWithBody =
-    baseArticleDecoder
+    baseWidgetDecoder
         |> required "body" bodyDecoder
 
 
-baseArticleDecoder : Decoder (a -> Article a)
-baseArticleDecoder =
-    decode Article
+baseWidgetDecoder : Decoder (a -> Widget a)
+baseWidgetDecoder =
+    decode Widget
         |> required "description" (Decode.map (Maybe.withDefault "") (Decode.nullable Decode.string))
         |> required "slug" (Decode.map Slug Decode.string)
         |> required "title" Decode.string

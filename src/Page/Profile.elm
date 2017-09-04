@@ -11,12 +11,12 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Http
 import Page.Errored as Errored exposing (PageLoadError, pageLoadError)
-import Request.Article exposing (ListConfig, defaultListConfig)
+import Request.Widget exposing (ListConfig, defaultListConfig)
 import Request.Profile
 import SelectList exposing (SelectList)
 import Task exposing (Task)
 import Util exposing ((=>), pair, viewIf)
-import Views.Article.Feed as Feed exposing (FeedSource, authorFeed, favoritedFeed)
+import Views.Widget.Feed as Feed exposing (FeedSource, authorFeed, favoritedFeed)
 import Views.Errors as Errors
 import Views.Page as Page
 import Views.User.Follow as Follow
@@ -101,7 +101,7 @@ viewFeed feed =
     div [ class "col-xs-12 col-md-10 offset-md-1" ] <|
         div [ class "articles-toggle" ]
             [ Feed.viewFeedSources feed |> Html.map FeedMsg ]
-            :: (Feed.viewArticles feed |> List.map (Html.map FeedMsg))
+            :: (Feed.viewWidgets feed |> List.map (Html.map FeedMsg))
 
 
 

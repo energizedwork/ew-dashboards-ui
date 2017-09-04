@@ -1,6 +1,6 @@
-module Data.Article.Comment exposing (Comment, CommentId, commentIdDecoder, decoder, idToString)
+module Data.Widget.Comment exposing (Comment, CommentId, commentIdDecoder, decoder, idToString)
 
-import Data.Article.Author as Author exposing (Author)
+import Data.Widget.Author as Author exposing (Author)
 import Date exposing (Date)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Extra

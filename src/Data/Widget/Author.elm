@@ -1,4 +1,4 @@
-module Data.Article.Author exposing (Author, decoder)
+module Data.Widget.Author exposing (Author, decoder)
 
 import Data.User as User exposing (Username)
 import Data.UserPhoto as UserPhoto exposing (UserPhoto)

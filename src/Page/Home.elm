@@ -3,18 +3,18 @@ module Page.Home exposing (Model, Msg, init, update, view)
 {-| The homepage. You can get here via either the / or /#/ routes.
 -}
 
-import Data.Article as Article exposing (Tag)
+import Data.Widget as Widget exposing (Tag)
 import Data.Session as Session exposing (Session)
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder)
 import Html.Events exposing (onClick)
 import Http
 import Page.Errored as Errored exposing (PageLoadError, pageLoadError)
-import Request.Article
+import Request.Widget
 import SelectList exposing (SelectList)
 import Task exposing (Task)
 import Util exposing ((=>), onClickStopPropagation)
-import Views.Article.Feed as Feed exposing (FeedSource, globalFeed, tagFeed, yourFeed)
+import Views.Widget.Feed as Feed exposing (FeedSource, globalFeed, tagFeed, yourFeed)
 import Views.Page as Page
 
 
@@ -37,7 +37,7 @@ init session =
                 SelectList.fromLists [] yourFeed [ globalFeed ]
 
         loadTags =
-            Request.Article.tags
+            Request.Widget.tags
                 |> Http.toTask
 
         loadSources =
@@ -86,7 +86,7 @@ viewFeed : Feed.Model -> List (Html Msg)
 viewFeed feed =
     div [ class "feed-toggle" ]
         [ Feed.viewFeedSources feed |> Html.map FeedMsg ]
-        :: (Feed.viewArticles feed |> List.map (Html.map FeedMsg))
+        :: (Feed.viewWidgets feed |> List.map (Html.map FeedMsg))
 
 
 viewTags : List Tag -> Html Msg
@@ -101,7 +101,7 @@ viewTag tagName =
         , href "javascript:void(0)"
         , onClick (SelectTag tagName)
         ]
-        [ text (Article.tagToString tagName) ]
+        [ text (Widget.tagToString tagName) ]
 
 
 

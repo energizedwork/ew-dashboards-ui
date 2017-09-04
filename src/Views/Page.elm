@@ -27,7 +27,7 @@ type ActivePage
     | Register
     | Settings
     | Profile Username
-    | NewArticle
+    | NewWidget
 
 
 {-| Take a page's Html and frame it with a header and footer.
@@ -71,7 +71,7 @@ viewSignIn page user =
             ]
 
         Just user ->
-            [ navbarLink (page == NewArticle) Route.NewArticle [ i [ class "ion-compose" ] [], text " New Post" ]
+            [ navbarLink (page == NewWidget) Route.NewWidget [ i [ class "ion-compose" ] [], text " New Post" ]
             , navbarLink (page == Settings) Route.Settings [ i [ class "ion-gear-a" ] [], text " Settings" ]
             , navbarLink
                 (page == Profile user.username)

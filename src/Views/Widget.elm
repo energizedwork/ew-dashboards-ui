@@ -1,15 +1,15 @@
-module Views.Article exposing (view, viewTimestamp)
+module Views.Widget exposing (view, viewTimestamp)
 
 {-| Viewing a preview of an individual article, excluding its body.
 -}
 
-import Data.Article as Article exposing (Article)
+import Data.Widget as Widget exposing (Widget)
 import Data.UserPhoto as UserPhoto exposing (UserPhoto)
 import Date.Format
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src)
 import Route exposing (Route)
-import Views.Article.Favorite as Favorite
+import Views.Widget.Favorite as Favorite
 import Views.Author
 
 
@@ -18,12 +18,12 @@ import Views.Author
 
 {-| Some pages want to view just the timestamp, not the whole article.
 -}
-viewTimestamp : Article a -> Html msg
+viewTimestamp : Widget a -> Html msg
 viewTimestamp article =
     span [ class "date" ] [ text (formattedTimestamp article) ]
 
 
-view : (Article a -> msg) -> Article a -> Html msg
+view : (Widget a -> msg) -> Widget a -> Html msg
 view toggleFavorite article =
     let
         author =
@@ -43,7 +43,7 @@ view toggleFavorite article =
                 [ class "pull-xs-right" ]
                 [ text (" " ++ toString article.favoritesCount) ]
             ]
-        , a [ class "preview-link", Route.href (Route.Article article.slug) ]
+        , a [ class "preview-link", Route.href (Route.Widget article.slug) ]
             [ h1 [] [ text article.title ]
             , p [] [ text article.description ]
             , span [] [ text "Read more..." ]
@@ -55,6 +55,6 @@ view toggleFavorite article =
 -- INTERNAL --
 
 
-formattedTimestamp : Article a -> String
+formattedTimestamp : Widget a -> String
 formattedTimestamp article =
     Date.Format.format "%B %e, %Y" article.createdAt
