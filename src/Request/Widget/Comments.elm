@@ -7,7 +7,7 @@ import Http
 import HttpBuilder exposing (RequestBuilder, withExpect, withQueryParams)
 import Json.Decode as Decode
 import Json.Encode as Encode exposing (Value)
-import Request.Helpers exposing (apiUrl)
+import Request.Helpers exposing (mockApiUrl)
 import Util exposing ((=>))
 
 
@@ -16,7 +16,7 @@ import Util exposing ((=>))
 
 list : Maybe AuthToken -> Widget.Slug -> Http.Request (List Comment)
 list maybeToken slug =
-    apiUrl ("/articles/" ++ Widget.slugToString slug ++ "/comments")
+    mockApiUrl ("/widgets/" ++ Widget.slugToString slug ++ "/comments")
         |> HttpBuilder.get
         |> HttpBuilder.withExpect (Http.expectJson (Decode.field "comments" (Decode.list Comment.decoder)))
         |> withAuthorization maybeToken
@@ -29,7 +29,7 @@ list maybeToken slug =
 
 post : Widget.Slug -> String -> AuthToken -> Http.Request Comment
 post slug body token =
-    apiUrl ("/articles/" ++ Widget.slugToString slug ++ "/comments")
+    mockApiUrl ("/widgets/" ++ Widget.slugToString slug ++ "/comments")
         |> HttpBuilder.post
         |> HttpBuilder.withBody (Http.jsonBody (encodeCommentBody body))
         |> HttpBuilder.withExpect (Http.expectJson (Decode.field "comment" Comment.decoder))
@@ -48,7 +48,7 @@ encodeCommentBody body =
 
 delete : Widget.Slug -> CommentId -> AuthToken -> Http.Request ()
 delete slug commentId token =
-    apiUrl ("/articles/" ++ Widget.slugToString slug ++ "/comments/" ++ Comment.idToString commentId)
+    mockApiUrl ("/widgets/" ++ Widget.slugToString slug ++ "/comments/" ++ Comment.idToString commentId)
         |> HttpBuilder.delete
         |> withAuthorization (Just token)
         |> HttpBuilder.toRequest

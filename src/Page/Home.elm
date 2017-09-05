@@ -46,8 +46,8 @@ init session =
         handleLoadError _ =
             pageLoadError Page.Home "Homepage is currently unavailable."
     in
-    Task.map2 Model loadTags loadSources
-        |> Task.mapError handleLoadError
+        Task.map2 Model loadTags loadSources
+            |> Task.mapError handleLoadError
 
 
 
@@ -60,13 +60,13 @@ view session model =
         [ viewBanner
         , div [ class "container page" ]
             [ div [ class "row" ]
-                [ div [ class "col-md-9" ] (viewFeed model.feed)
-                , div [ class "col-md-3" ]
-                    [ div [ class "sidebar" ]
-                        [ p [] [ text "Popular Tags" ]
-                        , viewTags model.tags
-                        ]
-                    ]
+                [ div [ class "col-md-12" ] (viewFeed model.feed)
+                , div [ class "col-md-3" ] []
+                  -- [ div [ class "sidebar" ]
+                  --     [ p [] [ text "Popular Tags" ]
+                  --     , viewTags model.tags
+                  --     ]
+                  -- ]
                 ]
             ]
         ]
@@ -120,11 +120,11 @@ update session msg model =
                 ( newFeed, subCmd ) =
                     Feed.update session subMsg model.feed
             in
-            { model | feed = newFeed } => Cmd.map FeedMsg subCmd
+                { model | feed = newFeed } => Cmd.map FeedMsg subCmd
 
         SelectTag tagName ->
             let
                 subCmd =
                     Feed.selectTag (Maybe.map .token session.user) tagName
             in
-            model => Cmd.map FeedMsg subCmd
+                model => Cmd.map FeedMsg subCmd

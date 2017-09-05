@@ -68,9 +68,9 @@ init session feedSources =
                 , isLoading = False
                 }
     in
-    source
-        |> fetch (Maybe.map .token session.user) 1
-        |> Task.map toModel
+        source
+            |> fetch (Maybe.map .token session.user) 1
+            |> Task.map toModel
 
 
 
@@ -79,7 +79,7 @@ init session feedSources =
 
 viewWidgets : Model -> List (Html Msg)
 viewWidgets (Model { activePage, feed, feedSources }) =
-    List.map (Views.Widget.view ToggleFavorite) feed.articles
+    List.map (Views.Widget.view ToggleFavorite) feed.widgets
         ++ [ pagination activePage feed (SelectList.selected feedSources) ]
 
 
@@ -108,9 +108,9 @@ selectTag maybeAuthToken tagName =
         source =
             tagFeed tagName
     in
-    source
-        |> fetch maybeAuthToken 1
-        |> Task.attempt (FeedLoadCompleted source)
+        source
+            |> fetch maybeAuthToken 1
+            |> Task.attempt (FeedLoadCompleted source)
 
 
 sourceName : FeedSource -> String
@@ -158,14 +158,14 @@ pagination activePage feed feedSource =
             limit feedSource
 
         totalPages =
-            ceiling (toFloat feed.articlesCount / toFloat articlesPerPage)
+            ceiling (toFloat feed.widgetsCount / toFloat articlesPerPage)
     in
-    if totalPages > 1 then
-        List.range 1 totalPages
-            |> List.map (\page -> pageLink page (page == activePage))
-            |> ul [ class "pagination" ]
-    else
-        Html.text ""
+        if totalPages > 1 then
+            List.range 1 totalPages
+                |> List.map (\page -> pageLink page (page == activePage))
+                |> ul [ class "pagination" ]
+        else
+            Html.text ""
 
 
 pageLink : Int -> Bool -> Html Msg
@@ -244,9 +244,9 @@ updateInternal session msg model =
                     model.feed
 
                 newFeed =
-                    { feed | articles = List.map (replaceWidget article) feed.articles }
+                    { feed | widgets = List.map (replaceWidget article) feed.widgets }
             in
-            { model | feed = newFeed } => Cmd.none
+                { model | feed = newFeed } => Cmd.none
 
         FavoriteCompleted (Err error) ->
             { model | errors = model.errors ++ [ "Server error while trying to favorite article." ] }
@@ -257,11 +257,11 @@ updateInternal session msg model =
                 source =
                     SelectList.selected model.feedSources
             in
-            source
-                |> fetch (Maybe.map .token session.user) page
-                |> Task.andThen (\feed -> Task.map (\_ -> feed) scrollToTop)
-                |> Task.attempt (FeedLoadCompleted source)
-                |> pair model
+                source
+                    |> fetch (Maybe.map .token session.user) page
+                    |> Task.andThen (\feed -> Task.map (\_ -> feed) scrollToTop)
+                    |> Task.attempt (FeedLoadCompleted source)
+                    |> pair model
 
 
 scrollToTop : Task x ()
@@ -269,7 +269,8 @@ scrollToTop =
     Dom.Scroll.toTop bodyId
         -- It's not worth showing the user anything special if scrolling fails.
         -- If anything, we'd log this to an error recording service.
-        |> Task.onError (\_ -> Task.succeed ())
+        |>
+            Task.onError (\_ -> Task.succeed ())
 
 
 fetch : Maybe AuthToken -> Int -> FeedSource -> Task Http.Error ( Int, Feed )
@@ -297,9 +298,9 @@ fetch token page feedSource =
                         feedConfig =
                             { defaultFeedConfig | offset = offset, limit = articlesPerPage }
                     in
-                    token
-                        |> Maybe.map (Request.Widget.feed feedConfig >> Http.toTask)
-                        |> Maybe.withDefault (Task.fail (Http.BadUrl "You need to be signed in to view your feed."))
+                        token
+                            |> Maybe.map (Request.Widget.feed feedConfig >> Http.toTask)
+                            |> Maybe.withDefault (Task.fail (Http.BadUrl "You need to be signed in to view your feed."))
 
                 GlobalFeed ->
                     Request.Widget.list listConfig token
@@ -317,8 +318,8 @@ fetch token page feedSource =
                     Request.Widget.list { listConfig | author = Just username } token
                         |> Http.toTask
     in
-    task
-        |> Task.map (\feed -> ( page, feed ))
+        task
+            |> Task.map (\feed -> ( page, feed ))
 
 
 replaceWidget : Widget a -> Widget a -> Widget a
@@ -354,15 +355,15 @@ selectFeedSource source sources =
                 TagFeed _ ->
                     withoutTags ++ [ source ]
     in
-    case newSources of
-        [] ->
-            -- This should never happen. If we had a logging service set up,
-            -- we would definitely want to report if it somehow did happen!
-            sources
+        case newSources of
+            [] ->
+                -- This should never happen. If we had a logging service set up,
+                -- we would definitely want to report if it somehow did happen!
+                sources
 
-        first :: rest ->
-            SelectList.fromLists [] first rest
-                |> SelectList.select ((==) source)
+            first :: rest ->
+                SelectList.fromLists [] first rest
+                    |> SelectList.select ((==) source)
 
 
 isTagFeed : FeedSource -> Bool

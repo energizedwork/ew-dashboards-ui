@@ -23,7 +23,7 @@ import Views.Page as Page
 type alias Model =
     { errors : List Error
     , editingWidget : Maybe Widget.Slug
-    , title : String
+    , name : String
     , body : String
     , description : String
     , tags : List String
@@ -34,7 +34,7 @@ initNew : Model
 initNew =
     { errors = []
     , editingWidget = Nothing
-    , title = ""
+    , name = ""
     , body = ""
     , description = ""
     , tags = []
@@ -48,19 +48,19 @@ initEdit session slug =
             session.user
                 |> Maybe.map .token
     in
-    Request.Widget.get maybeAuthToken slug
-        |> Http.toTask
-        |> Task.mapError (\_ -> pageLoadError Page.Other "Widget is currently unavailable.")
-        |> Task.map
-            (\article ->
-                { errors = []
-                , editingWidget = Just slug
-                , title = article.title
-                , body = Widget.bodyToMarkdownString article.body
-                , description = article.description
-                , tags = article.tags
-                }
-            )
+        Request.Widget.get maybeAuthToken slug
+            |> Http.toTask
+            |> Task.mapError (\_ -> pageLoadError Page.Other "Widget is currently unavailable.")
+            |> Task.map
+                (\article ->
+                    { errors = []
+                    , editingWidget = Just slug
+                    , name = article.name
+                    , body = Widget.bodyToMarkdownString article.body
+                    , description = article.description
+                    , tags = article.tags
+                    }
+                )
 
 
 
@@ -93,38 +93,38 @@ viewForm model =
             else
                 "Publish Widget"
     in
-    Html.form [ onSubmit Save ]
-        [ fieldset []
-            [ Form.input
-                [ class "form-control-lg"
-                , placeholder "Widget Title"
-                , onInput SetTitle
-                , defaultValue model.title
+        Html.form [ onSubmit Save ]
+            [ fieldset []
+                [ Form.input
+                    [ class "form-control-lg"
+                    , placeholder "Widget Name"
+                    , onInput SetName
+                    , defaultValue model.name
+                    ]
+                    []
+                , Form.input
+                    [ placeholder "What's this article about?"
+                    , onInput SetDescription
+                    , defaultValue model.description
+                    ]
+                    []
+                , Form.textarea
+                    [ placeholder "Write your article (in markdown)"
+                    , attribute "rows" "8"
+                    , onInput SetBody
+                    , defaultValue model.body
+                    ]
+                    []
+                , Form.input
+                    [ placeholder "Enter tags"
+                    , onInput SetTags
+                    , defaultValue (String.join " " model.tags)
+                    ]
+                    []
+                , button [ class "btn btn-lg pull-xs-right btn-primary" ]
+                    [ text saveButtonText ]
                 ]
-                []
-            , Form.input
-                [ placeholder "What's this article about?"
-                , onInput SetDescription
-                , defaultValue model.description
-                ]
-                []
-            , Form.textarea
-                [ placeholder "Write your article (in markdown)"
-                , attribute "rows" "8"
-                , onInput SetBody
-                , defaultValue model.body
-                ]
-                []
-            , Form.input
-                [ placeholder "Enter tags"
-                , onInput SetTags
-                , defaultValue (String.join " " model.tags)
-                ]
-                []
-            , button [ class "btn btn-lg pull-xs-right btn-primary" ]
-                [ text saveButtonText ]
             ]
-        ]
 
 
 
@@ -133,7 +133,7 @@ viewForm model =
 
 type Msg
     = Save
-    | SetTitle String
+    | SetName String
     | SetDescription String
     | SetTags String
     | SetBody String
@@ -163,8 +163,8 @@ update user msg model =
                 errors ->
                     { model | errors = errors } => Cmd.none
 
-        SetTitle title ->
-            { model | title = title } => Cmd.none
+        SetName name ->
+            { model | name = name } => Cmd.none
 
         SetDescription description ->
             { model | description = description } => Cmd.none
@@ -200,7 +200,7 @@ update user msg model =
 
 type Field
     = Form
-    | Title
+    | Name
     | Body
 
 
@@ -211,7 +211,7 @@ type alias Error =
 validate : Model -> List Error
 validate =
     Validate.all
-        [ .title >> ifBlank (Title => "title can't be blank.")
+        [ .name >> ifBlank (Name => "name can't be blank.")
         , .body >> ifBlank (Body => "body can't be blank.")
         ]
 

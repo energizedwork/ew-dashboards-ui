@@ -50,7 +50,7 @@ Those articles are useful to the feed, but not to the individual article view.
 type alias Widget a =
     { description : String
     , slug : Slug
-    , title : String
+    , name : String
     , tags : List String
     , createdAt : Date
     , updatedAt : Date
@@ -82,7 +82,7 @@ baseWidgetDecoder =
     decode Widget
         |> required "description" (Decode.map (Maybe.withDefault "") (Decode.nullable Decode.string))
         |> required "slug" (Decode.map Slug Decode.string)
-        |> required "title" Decode.string
+        |> required "name" Decode.string
         |> required "tagList" (Decode.list Decode.string)
         |> required "createdAt" Json.Decode.Extra.date
         |> required "updatedAt" Json.Decode.Extra.date

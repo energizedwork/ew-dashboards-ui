@@ -34,14 +34,14 @@ get maybeToken slug =
     let
         expect =
             Widget.decoderWithBody
-                |> Decode.field "article"
+                |> Decode.field "widget"
                 |> Http.expectJson
     in
-    mockApiUrl ("/articles/" ++ Widget.slugToString slug)
-        |> HttpBuilder.get
-        |> HttpBuilder.withExpect expect
-        |> withAuthorization maybeToken
-        |> HttpBuilder.toRequest
+        mockApiUrl ("/widgets/" ++ Widget.slugToString slug)
+            |> HttpBuilder.get
+            |> HttpBuilder.withExpect expect
+            |> withAuthorization maybeToken
+            |> HttpBuilder.toRequest
 
 
 
@@ -76,7 +76,7 @@ list config maybeToken =
     , "offset" => Just (toString config.offset)
     ]
         |> List.filterMap maybeVal
-        |> buildFromQueryParams "/articles"
+        |> buildFromQueryParams "/widgets"
         |> withAuthorization maybeToken
         |> HttpBuilder.toRequest
 
@@ -104,7 +104,7 @@ feed config token =
     , "offset" => Just (toString config.offset)
     ]
         |> List.filterMap maybeVal
-        |> buildFromQueryParams "/articles/feed"
+        |> buildFromQueryParams "/widgets/feed"
         |> withAuthorization (Just token)
         |> HttpBuilder.toRequest
 
@@ -124,11 +124,11 @@ tags =
 
 
 toggleFavorite : Widget a -> AuthToken -> Http.Request (Widget ())
-toggleFavorite article authToken =
-    if article.favorited then
-        unfavorite article.slug authToken
+toggleFavorite widget authToken =
+    if widget.favorited then
+        unfavorite widget.slug authToken
     else
-        favorite article.slug authToken
+        favorite widget.slug authToken
 
 
 favorite : Widget.Slug -> AuthToken -> Http.Request (Widget ())
@@ -150,15 +150,15 @@ buildFavorite builderFromUrl slug token =
     let
         expect =
             Widget.decoder
-                |> Decode.field "article"
+                |> Decode.field "widget"
                 |> Http.expectJson
     in
-    [ mockApiUrl "/articles", slugToString slug, "favorite" ]
-        |> String.join "/"
-        |> builderFromUrl
-        |> withAuthorization (Just token)
-        |> withExpect expect
-        |> HttpBuilder.toRequest
+        [ mockApiUrl "/widgets", slugToString slug, "favorite" ]
+            |> String.join "/"
+            |> builderFromUrl
+            |> withAuthorization (Just token)
+            |> withExpect expect
+            |> HttpBuilder.toRequest
 
 
 
@@ -167,7 +167,7 @@ buildFavorite builderFromUrl slug token =
 
 type alias CreateConfig record =
     { record
-        | title : String
+        | name : String
         , description : String
         , body : String
         , tags : List String
@@ -176,7 +176,7 @@ type alias CreateConfig record =
 
 type alias EditConfig record =
     { record
-        | title : String
+        | name : String
         , description : String
         , body : String
     }
@@ -187,27 +187,27 @@ create config token =
     let
         expect =
             Widget.decoderWithBody
-                |> Decode.field "article"
+                |> Decode.field "widget"
                 |> Http.expectJson
 
-        article =
+        widget =
             Encode.object
-                [ "title" => Encode.string config.title
+                [ "name" => Encode.string config.name
                 , "description" => Encode.string config.description
                 , "body" => Encode.string config.body
                 , "tagList" => Encode.list (List.map Encode.string config.tags)
                 ]
 
         body =
-            Encode.object [ "article" => article ]
+            Encode.object [ "widget" => widget ]
                 |> Http.jsonBody
     in
-    mockApiUrl "/articles"
-        |> HttpBuilder.post
-        |> withAuthorization (Just token)
-        |> withBody body
-        |> withExpect expect
-        |> HttpBuilder.toRequest
+        mockApiUrl "/widgets"
+            |> HttpBuilder.post
+            |> withAuthorization (Just token)
+            |> withBody body
+            |> withExpect expect
+            |> HttpBuilder.toRequest
 
 
 update : Widget.Slug -> EditConfig record -> AuthToken -> Http.Request (Widget Body)
@@ -215,26 +215,26 @@ update slug config token =
     let
         expect =
             Widget.decoderWithBody
-                |> Decode.field "article"
+                |> Decode.field "widget"
                 |> Http.expectJson
 
-        article =
+        widget =
             Encode.object
-                [ "title" => Encode.string config.title
+                [ "name" => Encode.string config.name
                 , "description" => Encode.string config.description
                 , "body" => Encode.string config.body
                 ]
 
         body =
-            Encode.object [ "article" => article ]
+            Encode.object [ "widget" => widget ]
                 |> Http.jsonBody
     in
-    mockApiUrl ("/articles/" ++ slugToString slug)
-        |> HttpBuilder.put
-        |> withAuthorization (Just token)
-        |> withBody body
-        |> withExpect expect
-        |> HttpBuilder.toRequest
+        mockApiUrl ("/widgets/" ++ slugToString slug)
+            |> HttpBuilder.put
+            |> withAuthorization (Just token)
+            |> withBody body
+            |> withExpect expect
+            |> HttpBuilder.toRequest
 
 
 
@@ -243,7 +243,7 @@ update slug config token =
 
 delete : Widget.Slug -> AuthToken -> Http.Request ()
 delete slug token =
-    mockApiUrl ("/articles/" ++ Widget.slugToString slug)
+    mockApiUrl ("/widgets/" ++ Widget.slugToString slug)
         |> HttpBuilder.delete
         |> withAuthorization (Just token)
         |> HttpBuilder.toRequest

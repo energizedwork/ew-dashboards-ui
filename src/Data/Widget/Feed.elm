@@ -6,8 +6,8 @@ import Json.Decode.Pipeline as Pipeline exposing (decode, required)
 
 
 type alias Feed =
-    { articles : List (Widget ())
-    , articlesCount : Int
+    { widgets : List (Widget ())
+    , widgetsCount : Int
     }
 
 
@@ -18,5 +18,5 @@ type alias Feed =
 decoder : Decoder Feed
 decoder =
     decode Feed
-        |> required "articles" (Decode.list Widget.decoder)
-        |> required "articlesCount" Decode.int
+        |> required "widgets" (Decode.list Widget.decoder)
+        |> required "widgetsCount" Decode.int
