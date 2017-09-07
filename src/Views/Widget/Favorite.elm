@@ -39,4 +39,4 @@ button toggleFavorite article extraAttributes extraChildren =
             [ i [ class "ion-heart" ] [] ]
                 ++ extraChildren
     in
-    Html.button attributes children
+        Html.button attributes children

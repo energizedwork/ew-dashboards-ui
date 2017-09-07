@@ -74,7 +74,7 @@ routeToString page =
                 EditWidget slug ->
                     [ "editor", Widget.slugToString slug ]
     in
-    "#/" ++ String.join "/" pieces
+        "#/" ++ String.join "/" pieces
 
 
 
