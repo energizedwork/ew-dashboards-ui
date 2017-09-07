@@ -43,8 +43,8 @@ init session =
         loadSources =
             Feed.init session feedSources
 
-        handleLoadError _ =
-            pageLoadError Page.Home "Homepage is currently unavailable."
+        handleLoadError err =
+            pageLoadError Page.Home ("Homepage is currently unavailable. " ++ (toString err))
     in
         Task.map2 Model loadTags loadSources
             |> Task.mapError handleLoadError

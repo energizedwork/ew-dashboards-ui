@@ -56,8 +56,8 @@ init session slug =
             Request.Widget.Comments.list maybeAuthToken slug
                 |> Http.toTask
 
-        handleLoadError _ =
-            pageLoadError Page.Other "Widget is currently unavailable."
+        handleLoadError err =
+            pageLoadError Page.Other ("Widget is currently unavailable. " ++ (toString err))
     in
         Task.map2 (Model [] "" False) loadWidget loadComments
             |> Task.mapError handleLoadError
