@@ -15,6 +15,7 @@ module Data.Widget
         )
 
 import Data.Widget.Author as Author exposing (Author)
+import Data.DataSource as DataSource exposing (DataSource)
 import Date exposing (Date)
 import Html exposing (Attribute, Html)
 import Json.Decode as Decode exposing (Decoder)
@@ -48,9 +49,13 @@ Those articles are useful to the feed, but not to the individual article view.
 
 -}
 type alias Widget a =
-    { description : String
+    { name : String
+    , description : String
     , slug : Slug
-    , name : String
+    , dataSources : List DataSource
+    , adapter : String
+    , renderer : String
+    , refreshRate : Int
     , tags : List String
     , createdAt : Date
     , updatedAt : Date
@@ -80,9 +85,13 @@ decoderWithBody =
 baseWidgetDecoder : Decoder (a -> Widget a)
 baseWidgetDecoder =
     decode Widget
+        |> required "name" Decode.string
         |> required "description" (Decode.map (Maybe.withDefault "") (Decode.nullable Decode.string))
         |> required "slug" (Decode.map Slug Decode.string)
-        |> required "name" Decode.string
+        |> required "dataSources" (Decode.list DataSource.decoder)
+        |> required "adapter" Decode.string
+        |> required "renderer" Decode.string
+        |> required "refreshRate" Decode.int
         |> required "tagList" (Decode.list Decode.string)
         |> required "createdAt" Json.Decode.Extra.date
         |> required "updatedAt" Json.Decode.Extra.date

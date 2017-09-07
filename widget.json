@@ -1,36 +1,26 @@
 {
-    "widgets": [{
-        "name": "My first widget",
-        "slug": "my-first-widget-6stz4w",
-        "body": "Nice place for tourists",
+    "widget": {
+        "name": "Three months",
+        "body": "Three months",
+        "description": "3 months of important data",
+        "slug": "three-months-6stz4w",
+        "dataSources": [{
+            "uuid": "some-spreadheet-uuid",
+            "name": "3 month financials"
+        }],
+        "adapter": "2D",
+        "renderer": "TABULAR",
+        "refreshRate": 30,
         "createdAt": "2017-09-04T16:03:55.948Z",
         "updatedAt": "2017-09-04T16:03:55.948Z",
         "tagList": [],
-        "description": "Nice place for tourists",
         "author": {
-            "username": "vardhan",
-            "bio": "technology guy .. \n\n",
+            "username": "msp",
+            "bio": "beautifully flawed creation .. \n\n",
             "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
             "following": false
         },
         "favorited": false,
         "favoritesCount": 0
-    }, {
-        "name": "test",
-        "slug": "test-cmumv2",
-        "body": "trefasd",
-        "createdAt": "2017-09-04T15:50:48.659Z",
-        "updatedAt": "2017-09-04T15:50:48.659Z",
-        "tagList": [],
-        "description": "tst",
-        "author": {
-            "username": "Cl3r1k",
-            "bio": null,
-            "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
-            "following": false
-        },
-        "favorited": false,
-        "favoritesCount": 0
-    }],
-    "widgetsCount": 2
+    }
 }

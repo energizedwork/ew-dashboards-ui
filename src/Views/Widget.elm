@@ -24,29 +24,30 @@ viewTimestamp article =
 
 
 view : (Widget a -> msg) -> Widget a -> Html msg
-view toggleFavorite article =
+view toggleFavorite widget =
     let
         author =
-            article.author
+            widget.author
     in
         div [ class "article-preview" ]
             [ div [ class "article-meta" ]
                 [ a [ Route.href (Route.Profile author.username) ]
                     [ img [ UserPhoto.src author.image ] [] ]
                 , div [ class "info" ]
-                    [ Views.Author.view author.username
-                    , span [ class "date" ] [ text (formattedTimestamp article) ]
+                    [ span [ class "date" ] [ text (formattedTimestamp widget) ]
                     ]
                 , Favorite.button
                     toggleFavorite
-                    article
+                    widget
                     [ class "pull-xs-right" ]
-                    [ text (" " ++ toString article.favoritesCount) ]
+                    [ text (" " ++ toString widget.favoritesCount) ]
                 ]
-            , a [ class "preview-link", Route.href (Route.Widget article.slug) ]
-                [ h1 [] [ text article.name ]
-                , p [] [ text article.description ]
-                , span [] [ text "Read more..." ]
+            , a [ class "preview-link", Route.href (Route.Widget widget.slug) ]
+                [ h1 [] [ text widget.name ]
+                , p [] [ text widget.description ]
+                , p [] [ text ("Renderer/Adapter: " ++ widget.renderer ++ "/" ++ widget.adapter) ]
+                , p [] [ text ("Data Sources: " ++ (widget.dataSources |> toString)) ]
+                , span [] [ text "View widget.." ]
                 ]
             ]
 

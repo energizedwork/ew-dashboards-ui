@@ -1,0 +1,27 @@
+{
+    "widgets": [{
+          "name": "Three months",
+          "body": "Three months",
+          "description": "3 months of important data",
+          "slug": "three-months-6stz4w",
+          "dataSources": [{
+              "uuid": "some-spreadheet-uuid",
+              "name": "3 month financials"
+          }],
+          "adapter": "2D",
+          "renderer": "TABULAR",
+          "refreshRate": 30,
+          "createdAt": "2017-09-04T16:03:55.948Z",
+          "updatedAt": "2017-09-04T16:03:55.948Z",
+          "tagList": [],
+          "author": {
+              "username": "msp",
+              "bio": "beautifully flawed creation .. \n\n",
+              "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
+              "following": false
+          },
+          "favorited": false,
+          "favoritesCount": 0
+    }],
+    "widgetsCount": 1
+}
