@@ -7,6 +7,7 @@ module Data.Widget
         , bodyToHtml
         , bodyToMarkdownString
         , decoder
+        , tableDecoder
         , decoderWithBody
         , slugParser
         , slugToString
@@ -15,6 +16,9 @@ module Data.Widget
         )
 
 import Data.Widget.Author as Author exposing (Author)
+import Data.Widget.Table as Table exposing (Data, Cell)
+import Data.Widget.Adapter exposing (Adapter(..))
+import Data.Widget.Renderer exposing (Renderer(..))
 import Data.DataSource as DataSource exposing (DataSource)
 import Date exposing (Date)
 import Html exposing (Attribute, Html)
@@ -53,8 +57,8 @@ type alias Widget a =
     , description : String
     , slug : Slug
     , dataSources : List DataSource
-    , adapter : String
-    , renderer : String
+    , adapter : Adapter
+    , renderer : Renderer
     , refreshRate : Int
     , tags : List String
     , createdAt : Date
@@ -89,8 +93,8 @@ baseWidgetDecoder =
         |> required "description" (Decode.map (Maybe.withDefault "") (Decode.nullable Decode.string))
         |> required "slug" (Decode.map Slug Decode.string)
         |> required "dataSources" (Decode.list DataSource.decoder)
-        |> required "adapter" Decode.string
-        |> required "renderer" Decode.string
+        |> required "adapter" adapterDecoder
+        |> required "renderer" rendererDecoder
         |> required "refreshRate" Decode.int
         |> required "tagList" (Decode.list Decode.string)
         |> required "createdAt" Json.Decode.Extra.date
@@ -98,6 +102,51 @@ baseWidgetDecoder =
         |> required "favorited" Decode.bool
         |> required "favoritesCount" Decode.int
         |> required "author" Author.decoder
+
+
+adapterDecoder : Decoder Adapter
+adapterDecoder =
+    Decode.string
+        |> Decode.andThen
+            (\str ->
+                case str of
+                    "2D" ->
+                        Decode.succeed TWO_D
+
+                    "XY" ->
+                        Decode.succeed XY
+
+                    somethingElse ->
+                        Decode.fail <| "Unknown adapter: " ++ somethingElse
+            )
+
+
+rendererDecoder : Decoder Renderer
+rendererDecoder =
+    Decode.string
+        |> Decode.andThen
+            (\str ->
+                case str of
+                    "TABLE" ->
+                        Decode.succeed TABLE
+
+                    "LINE" ->
+                        Decode.succeed LINE
+
+                    somethingElse ->
+                        Decode.fail <| "Unknown renderer: " ++ somethingElse
+            )
+
+
+tableDecoder : Decode.Decoder Table.Data
+tableDecoder =
+    decode Table.Data
+        |> required "data" (Decode.list rowDecoder)
+
+
+rowDecoder : Decode.Decoder (List String)
+rowDecoder =
+    Decode.list Decode.string
 
 
 

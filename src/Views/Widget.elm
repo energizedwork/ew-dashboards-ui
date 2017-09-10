@@ -45,9 +45,8 @@ view toggleFavorite widget =
             , a [ class "preview-link", Route.href (Route.Widget widget.slug) ]
                 [ h1 [] [ text widget.name ]
                 , p [] [ text widget.description ]
-                , p [] [ text ("Renderer/Adapter: " ++ widget.renderer ++ "/" ++ widget.adapter) ]
                 , p [] [ text ("Data Sources: " ++ (widget.dataSources |> toString)) ]
-                , span [] [ text "View widget.." ]
+                , span [] [ text "Click to run widget.." ]
                 ]
             ]
 

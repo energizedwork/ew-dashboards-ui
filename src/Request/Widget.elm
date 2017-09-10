@@ -8,6 +8,7 @@ module Request.Widget
         , delete
         , feed
         , get
+        , loadData
         , list
         , tags
         , toggleFavorite
@@ -17,6 +18,7 @@ module Request.Widget
 import Data.Widget as Widget exposing (Widget, Body, Tag, slugToString)
 import Data.Widget.Feed as Feed exposing (Feed)
 import Data.AuthToken as AuthToken exposing (AuthToken, withAuthorization)
+import Data.DataSource as DataSource exposing (DataSource)
 import Data.User as User exposing (Username)
 import Http
 import HttpBuilder exposing (RequestBuilder, withBody, withExpect, withQueryParams)
@@ -24,6 +26,7 @@ import Json.Decode as Decode
 import Json.Encode as Encode
 import Request.Helpers exposing (mockApiUrl)
 import Util exposing ((=>))
+import Data.Widget.Table as Table exposing (Data, Cell)
 
 
 -- SINGLE --
@@ -38,6 +41,25 @@ get maybeToken slug =
                 |> Http.expectJson
     in
         mockApiUrl ("/widgets/" ++ Widget.slugToString slug)
+            |> HttpBuilder.get
+            |> HttpBuilder.withExpect expect
+            |> withAuthorization maybeToken
+            |> HttpBuilder.toRequest
+
+
+
+-- TODO This will need to happed after the widget meta has loaded and accept
+-- a proper uuid
+
+
+loadData : Maybe AuthToken -> Widget.Slug -> Http.Request Table.Data
+loadData maybeToken slug =
+    let
+        expect =
+            Widget.tableDecoder
+                |> Http.expectJson
+    in
+        mockApiUrl ("/data/" ++ "datasource-1234")
             |> HttpBuilder.get
             |> HttpBuilder.withExpect expect
             |> withAuthorization maybeToken
