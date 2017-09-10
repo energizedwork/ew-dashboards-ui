@@ -5,11 +5,11 @@
         "description": "3 months of important data",
         "slug": "three-months-6stz4w",
         "dataSources": [{
-            "uuid": "some-spreadheet-uuid",
+            "uuid": "datasource-1234",
             "name": "3 month financials"
         }],
         "adapter": "2D",
-        "renderer": "TABULAR",
+        "renderer": "TABLE",
         "refreshRate": 30,
         "createdAt": "2017-09-04T16:03:55.948Z",
         "updatedAt": "2017-09-04T16:03:55.948Z",
