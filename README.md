@@ -1,33 +1,40 @@
-# ![RealWorld Example App](https://cloud.githubusercontent.com/assets/556934/25448178/3e7dc5c0-2a7d-11e7-8069-06da5169dae6.png)
-
-> ### [Elm](http://elm-lang.org) codebase containing real world examples (CRUD, auth, advanced patterns, etc) that adheres to the [RealWorld](https://github.com/gothinkster/realworld-example-apps) spec and API.
+# EW Dashboards UI
 
 
-### [Demo](https://rtfeldman.github.io/elm-spa-example)&nbsp;&nbsp;&nbsp;&nbsp;[Demo with Time-traveling Debugger](https://rtfeldman.github.io/elm-spa-example-with-debug)&nbsp;&nbsp;&nbsp;&nbsp;[RealWorld](https://github.com/gothinkster/realworld)
+Elm front end for the [energizedwork/ew-dashboards](https://github.com/energizedwork/ew-dashboards) app.
 
+## Local setup
 
-This codebase was created to demonstrate a fully fledged fullstack application built with [Elm](http://elm-lang.org) including CRUD operations, authentication, routing, pagination, and more.
-
-For more information on how to this works with other frontends/backends, head over to the [RealWorld](https://github.com/gothinkster/realworld) repo.
-
-# How it works
-
-Check out [the full writeup](https://dev.to/rtfeldman/tour-of-an-open-source-elm-spa)!
-
-# Getting started
+Assuming you have a [Node](https://nodejs.org/en/download/) install.
 
 If you don't already have `elm` and `elm-live`:
 
-> npm install -g elm elm-live
+``` $ npm install -g elm elm-live ```
 
 Then, to build everything:
 
-> elm-live --output=elm.js src/Main.elm --pushstate --open --debug
+``` $ elm-live --output=elm.js src/Main.elm --pushstate --open --debug ```
 
 (Leave off the `--debug` if you don't want the time-traveling debugger.)
 
-# Deploy
 
-> firebase deploy
+## Develop / Test
 
-> open https://dashboards-ui.firebaseapp.com
+[elm-live](https://github.com/tomekwi/elm-live) has you covered for auto compile on Elm src & live reload of changes.
+
+### TDD
+
+TODO: bolt in elm-test and run in elm-live
+
+### Formatting
+
+Elm is whitespace sensitive so elm-live uses [elm-format](https://atom.io/packages/elm-format) for consistency. Please follow this convention.
+
+
+
+## Deploy
+``` $ npm install -g firebase-tools ```
+
+``` $ firebase deploy ```
+
+``` $ open https://dashboards-ui.firebaseapp.com ```
