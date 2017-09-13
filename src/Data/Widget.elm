@@ -2,7 +2,7 @@ module Data.Widget
     exposing
         ( Widget
         , Body
-        , Slug
+        , UUID
         , Tag
         , bodyToHtml
         , bodyToMarkdownString
@@ -53,13 +53,12 @@ Those articles are useful to the feed, but not to the individual article view.
 
 -}
 type alias Widget a =
-    { name : String
+    { uuid : UUID
+    , name : String
     , description : String
-    , slug : Slug
     , dataSources : List DataSource
     , adapter : Adapter
     , renderer : Renderer
-    , refreshRate : Int
     , tags : List String
     , createdAt : Date
     , updatedAt : Date
@@ -89,13 +88,12 @@ decoderWithBody =
 baseWidgetDecoder : Decoder (a -> Widget a)
 baseWidgetDecoder =
     decode Widget
+        |> required "uuid" (Decode.map UUID Decode.string)
         |> required "name" Decode.string
         |> required "description" (Decode.map (Maybe.withDefault "") (Decode.nullable Decode.string))
-        |> required "slug" (Decode.map Slug Decode.string)
         |> required "dataSources" (Decode.list DataSource.decoder)
         |> required "adapter" adapterDecoder
         |> required "renderer" rendererDecoder
-        |> required "refreshRate" Decode.int
         |> required "tagList" (Decode.list Decode.string)
         |> required "createdAt" Json.Decode.Extra.date
         |> required "updatedAt" Json.Decode.Extra.date
@@ -153,17 +151,17 @@ rowDecoder =
 -- IDENTIFIERS --
 
 
-type Slug
-    = Slug String
+type UUID
+    = UUID String
 
 
-slugParser : UrlParser.Parser (Slug -> a) a
+slugParser : UrlParser.Parser (UUID -> a) a
 slugParser =
-    UrlParser.custom "SLUG" (Ok << Slug)
+    UrlParser.custom "SLUG" (Ok << UUID)
 
 
-slugToString : Slug -> String
-slugToString (Slug slug) =
+slugToString : UUID -> String
+slugToString (UUID slug) =
     slug
 
 

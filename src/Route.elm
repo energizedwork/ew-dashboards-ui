@@ -17,10 +17,10 @@ type Route
     | Logout
     | Register
     | Settings
-    | Widget Widget.Slug
+    | Widget Widget.UUID
     | Profile Username
     | NewWidget
-    | EditWidget Widget.Slug
+    | EditWidget Widget.UUID
 
 
 route : Parser (Route -> a) a

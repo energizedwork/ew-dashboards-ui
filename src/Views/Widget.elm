@@ -42,7 +42,7 @@ view toggleFavorite widget =
                     [ class "pull-xs-right" ]
                     [ text (" " ++ toString widget.favoritesCount) ]
                 ]
-            , a [ class "preview-link", Route.href (Route.Widget widget.slug) ]
+            , a [ class "preview-link", Route.href (Route.Widget widget.uuid) ]
                 [ h1 [] [ text widget.name ]
                 , p [] [ text widget.description ]
                 , p [] [ text ("Data Sources: " ++ (widget.dataSources |> toString)) ]

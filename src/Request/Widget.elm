@@ -32,7 +32,7 @@ import Data.Widget.Table as Table exposing (Data, Cell)
 -- SINGLE --
 
 
-get : Maybe AuthToken -> Widget.Slug -> Http.Request (Widget Body)
+get : Maybe AuthToken -> Widget.UUID -> Http.Request (Widget Body)
 get maybeToken slug =
     let
         expect =
@@ -52,7 +52,7 @@ get maybeToken slug =
 -- a proper uuid
 
 
-loadData : Maybe AuthToken -> Widget.Slug -> Http.Request Table.Data
+loadData : Maybe AuthToken -> Widget.UUID -> Http.Request Table.Data
 loadData maybeToken slug =
     let
         expect =
@@ -148,24 +148,24 @@ tags =
 toggleFavorite : Widget a -> AuthToken -> Http.Request (Widget ())
 toggleFavorite widget authToken =
     if widget.favorited then
-        unfavorite widget.slug authToken
+        unfavorite widget.uuid authToken
     else
-        favorite widget.slug authToken
+        favorite widget.uuid authToken
 
 
-favorite : Widget.Slug -> AuthToken -> Http.Request (Widget ())
+favorite : Widget.UUID -> AuthToken -> Http.Request (Widget ())
 favorite =
     buildFavorite HttpBuilder.post
 
 
-unfavorite : Widget.Slug -> AuthToken -> Http.Request (Widget ())
+unfavorite : Widget.UUID -> AuthToken -> Http.Request (Widget ())
 unfavorite =
     buildFavorite HttpBuilder.delete
 
 
 buildFavorite :
     (String -> RequestBuilder a)
-    -> Widget.Slug
+    -> Widget.UUID
     -> AuthToken
     -> Http.Request (Widget ())
 buildFavorite builderFromUrl slug token =
@@ -232,7 +232,7 @@ create config token =
             |> HttpBuilder.toRequest
 
 
-update : Widget.Slug -> EditConfig record -> AuthToken -> Http.Request (Widget Body)
+update : Widget.UUID -> EditConfig record -> AuthToken -> Http.Request (Widget Body)
 update slug config token =
     let
         expect =
@@ -263,7 +263,7 @@ update slug config token =
 -- DELETE --
 
 
-delete : Widget.Slug -> AuthToken -> Http.Request ()
+delete : Widget.UUID -> AuthToken -> Http.Request ()
 delete slug token =
     mockApiUrl ("/widgets/" ++ Widget.slugToString slug)
         |> HttpBuilder.delete

@@ -42,7 +42,7 @@ type alias Model =
     }
 
 
-init : Session -> Widget.Slug -> Task PageLoadError Model
+init : Session -> Widget.UUID -> Task PageLoadError Model
 init session slug =
     let
         maybeAuthToken =
@@ -293,7 +293,7 @@ update session msg model =
                 let
                     cmdFromAuth authToken =
                         authToken
-                            |> Request.Widget.delete model.article.slug
+                            |> Request.Widget.delete model.article.uuid
                             |> Http.send WidgetDeleted
                 in
                     session
@@ -334,7 +334,7 @@ deleteButton article =
 
 editButton : Widget a -> Html Msg
 editButton article =
-    a [ class "btn btn-outline-secondary btn-sm", Route.href (Route.EditWidget article.slug) ]
+    a [ class "btn btn-outline-secondary btn-sm", Route.href (Route.EditWidget article.uuid) ]
         [ i [ class "ion-edit" ] [], text " Edit Widget" ]
 
 
