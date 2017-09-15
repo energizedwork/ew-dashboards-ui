@@ -18,7 +18,6 @@ module Request.Widget
 import Data.Widget as Widget exposing (Widget, Body, Tag, slugToString)
 import Data.Widget.Feed as Feed exposing (Feed)
 import Data.AuthToken as AuthToken exposing (AuthToken, withAuthorization)
-import Data.DataSource as DataSource exposing (DataSource)
 import Data.User as User exposing (Username)
 import Http
 import HttpBuilder exposing (RequestBuilder, withBody, withExpect, withQueryParams)

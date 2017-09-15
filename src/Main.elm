@@ -21,7 +21,6 @@ import Route exposing (Route)
 import Task
 import Util exposing ((=>))
 import Views.Page as Page exposing (ActivePage)
-import Phoenix.Socket
 
 
 -- WARNING: Based on discussions around how asset management features

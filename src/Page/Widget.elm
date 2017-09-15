@@ -1,6 +1,6 @@
 module Page.Widget exposing (Model, Msg, init, update, view, subscriptions)
 
-{-| Viewing an individual article.
+{-| Viewing an individual widget.
 -}
 
 import Data.Widget as Widget exposing (Widget, Body)
@@ -18,7 +18,6 @@ import Html.Events exposing (onClick, onInput, onSubmit)
 import Http
 import Page.Errored as Errored exposing (PageLoadError, pageLoadError)
 import Request.Widget
-import Request.Widget.Comments
 import Request.Profile
 import Route
 import Task exposing (Task)

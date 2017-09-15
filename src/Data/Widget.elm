@@ -15,7 +15,6 @@ module Data.Widget
         )
 
 import Data.Widget.Author as Author exposing (Author)
-import Data.Widget.Table as Table exposing (Data, Cell)
 import Data.Widget.Adapter exposing (Adapter(..))
 import Data.Widget.Renderer exposing (Renderer(..))
 import Data.DataSource as DataSource exposing (DataSource)
