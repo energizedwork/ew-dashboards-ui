@@ -21,17 +21,17 @@ button :
     -> List (Attribute msg)
     -> List (Html msg)
     -> Html msg
-button toggleFavorite article extraAttributes extraChildren =
+button toggleFavorite widget extraAttributes extraChildren =
     let
         favoriteButtonClass =
-            if article.favorited then
+            if widget.favorited then
                 "btn-primary"
             else
                 "btn-outline-primary"
 
         attributes =
             [ class ("btn btn-sm " ++ favoriteButtonClass)
-            , onClickStopPropagation (toggleFavorite article)
+            , onClickStopPropagation (toggleFavorite widget)
             ]
                 ++ extraAttributes
 

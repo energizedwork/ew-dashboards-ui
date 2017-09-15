@@ -65,7 +65,7 @@ type alias Model =
     , newMessage : String
     , messages : List String
     , phxSocket : Phoenix.Socket.Socket Msg
-    , article : Widget Body
+    , widget : Widget Body
     , data : Data
     }
 
@@ -121,7 +121,7 @@ view : Session -> Model -> Html Msg
 view session model =
     let
         widget =
-            model.article
+            model.widget
 
         author =
             widget.author
@@ -161,20 +161,20 @@ view session model =
 
 
 viewBanner : List String -> Widget a -> Author -> Maybe User -> Html Msg
-viewBanner errors article author maybeUser =
+viewBanner errors widget author maybeUser =
     let
         buttons =
-            viewButtons article author maybeUser
+            viewButtons widget author maybeUser
     in
         div [ class "banner" ]
             [ div [ class "container" ]
-                [ h1 [] [ text article.name ]
+                [ h1 [] [ text widget.name ]
                 , div [ class "article-meta" ] <|
                     [ a [ Route.href (Route.Profile author.username) ]
                         [ img [ UserPhoto.src author.image ] [] ]
                     , div [ class "info" ]
                         [ Views.Author.view author.username
-                        , Views.Widget.viewTimestamp article
+                        , Views.Widget.viewTimestamp widget
                         ]
                     ]
                         ++ buttons
@@ -191,7 +191,7 @@ viewAddComment postingDisabled maybeUser =
                 [ a [ Route.href Route.Login ] [ text "Sign in" ]
                 , text " or "
                 , a [ Route.href Route.Register ] [ text "sign up" ]
-                , text " to add comments on this article."
+                , text " to add comments on this widget."
                 ]
 
         Just user ->
@@ -216,20 +216,20 @@ viewAddComment postingDisabled maybeUser =
 
 
 viewButtons : Widget a -> Author -> Maybe User -> List (Html Msg)
-viewButtons article author maybeUser =
+viewButtons widget author maybeUser =
     let
         isMyWidget =
             Maybe.map .username maybeUser == Just author.username
     in
         if isMyWidget then
-            [ editButton article
+            [ editButton widget
             , text " "
-            , deleteButton article
+            , deleteButton widget
             ]
         else
             [ followButton author
             , text " "
-            , favoriteButton article
+            , favoriteButton widget
             ]
 
 
@@ -342,11 +342,11 @@ update session msg model =
         socket =
             model.phxSocket
 
-        article =
-            model.article
+        widget =
+            model.widget
 
         author =
-            article.author
+            widget.author
     in
         case msg of
             DismissErrors ->
@@ -355,9 +355,9 @@ update session msg model =
             ToggleFavorite ->
                 let
                     cmdFromAuth authToken =
-                        Request.Widget.toggleFavorite model.article authToken
+                        Request.Widget.toggleFavorite model.widget authToken
                             |> Http.toTask
-                            |> Task.map (\newWidget -> { newWidget | body = article.body })
+                            |> Task.map (\newWidget -> { newWidget | body = widget.body })
                             |> Task.attempt FavoriteCompleted
                 in
                     session
@@ -365,7 +365,7 @@ update session msg model =
                         |> Tuple.mapFirst (Util.appendErrors model)
 
             FavoriteCompleted (Ok newWidget) ->
-                { model | article = newWidget } => Cmd.none
+                { model | widget = newWidget } => Cmd.none
 
             FavoriteCompleted (Err error) ->
                 -- In a serious production application, we would log the error to
@@ -388,9 +388,9 @@ update session msg model =
             FollowCompleted (Ok { following }) ->
                 let
                     newWidget =
-                        { article | author = { author | following = following } }
+                        { widget | author = { author | following = following } }
                 in
-                    { model | article = newWidget } => Cmd.none
+                    { model | widget = newWidget } => Cmd.none
 
             FollowCompleted (Err error) ->
                 { model | errors = "Unable to follow user." :: model.errors }
@@ -400,18 +400,18 @@ update session msg model =
                 let
                     cmdFromAuth authToken =
                         authToken
-                            |> Request.Widget.delete model.article.uuid
+                            |> Request.Widget.delete model.widget.uuid
                             |> Http.send WidgetDeleted
                 in
                     session
-                        |> Session.attempt "delete articles" cmdFromAuth
+                        |> Session.attempt "delete widgets" cmdFromAuth
                         |> Tuple.mapFirst (Util.appendErrors model)
 
             WidgetDeleted (Ok ()) ->
                 model => Route.modifyUrl Route.Home
 
             WidgetDeleted (Err error) ->
-                { model | errors = model.errors ++ [ "Server error while trying to delete article." ] }
+                { model | errors = model.errors ++ [ "Server error while trying to delete widget." ] }
                     => Cmd.none
 
             PhoenixMsg msg ->
@@ -510,23 +510,23 @@ withoutComment id =
 
 
 favoriteButton : Widget a -> Html Msg
-favoriteButton article =
+favoriteButton widget =
     let
         favoriteText =
-            " Favorite Widget (" ++ toString article.favoritesCount ++ ")"
+            " Favorite Widget (" ++ toString widget.favoritesCount ++ ")"
     in
-        Favorite.button (\_ -> ToggleFavorite) article [] [ text favoriteText ]
+        Favorite.button (\_ -> ToggleFavorite) widget [] [ text favoriteText ]
 
 
 deleteButton : Widget a -> Html Msg
-deleteButton article =
+deleteButton widget =
     button [ class "btn btn-outline-danger btn-sm", onClick DeleteWidget ]
         [ i [ class "ion-trash-a" ] [], text " Delete Widget" ]
 
 
 editButton : Widget a -> Html Msg
-editButton article =
-    a [ class "btn btn-outline-secondary btn-sm", Route.href (Route.EditWidget article.uuid) ]
+editButton widget =
+    a [ class "btn btn-outline-secondary btn-sm", Route.href (Route.EditWidget widget.uuid) ]
         [ i [ class "ion-edit" ] [], text " Edit Widget" ]
 
 

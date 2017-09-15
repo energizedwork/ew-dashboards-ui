@@ -261,7 +261,7 @@ setRoute maybeRoute model =
                         { model | pageState = Loaded (Editor Nothing Editor.initNew) } => Cmd.none
 
                     Nothing ->
-                        errored Page.NewWidget "You must be signed in to post an article."
+                        errored Page.NewWidget "You must be signed in to post an widget."
 
             Just (Route.EditWidget slug) ->
                 case model.session.user of
@@ -269,7 +269,7 @@ setRoute maybeRoute model =
                         transition (EditWidgetLoaded slug) (Editor.initEdit model.session slug)
 
                     Nothing ->
-                        errored Page.Other "You must be signed in to edit an article."
+                        errored Page.Other "You must be signed in to edit an widget."
 
             Just (Route.Settings) ->
                 case model.session.user of

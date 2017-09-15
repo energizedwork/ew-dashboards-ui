@@ -27,11 +27,11 @@ import Markdown
 import UrlParser
 
 
-{-| An article, optionally with an article body.
+{-| An widget, optionally with an widget body.
 
 To see the difference between { body : body } and { body : Maybe Body },
-consider the difference between the "view individual article" page (which
-renders one article, including its body) and the "article feed" -
+consider the difference between the "view individual widget" page (which
+renders one widget, including its body) and the "widget feed" -
 which displays multiple articles, but without bodies.
 
 This definition for `Widget` means we can write:
@@ -39,7 +39,7 @@ This definition for `Widget` means we can write:
 viewWidget : Widget Body -> Html msg
 viewFeed : List (Widget ()) -> Html msg
 
-This indicates that `viewWidget` requires an article _with a `body` present_,
+This indicates that `viewWidget` requires an widget _with a `body` present_,
 wereas `viewFeed` accepts articles with no bodies. (We could also have written
 it as `List (Widget a)` to specify that feeds can accept either articles that
 have `body` present or not. Either work, given that feeds do not attempt to
@@ -47,7 +47,7 @@ read the `body` field from articles.)
 
 This is an important distinction, because in Request.Widget, the `feed`
 function produces `List (Widget ())` because the API does not return bodies.
-Those articles are useful to the feed, but not to the individual article view.
+Those articles are useful to the feed, but not to the individual widget view.
 
 -}
 type alias Widget a =
