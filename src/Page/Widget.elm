@@ -9,6 +9,7 @@ import Data.Widget.Comment as Comment exposing (Comment, CommentId)
 import Data.Session as Session exposing (Session)
 import Data.User as User exposing (User)
 import Data.UserPhoto as UserPhoto
+import Data.DataSourceMessage as DataSourceMessage exposing (DataSourceMessage, decoder)
 import Date exposing (Date)
 import Date.Format
 import Html exposing (..)
@@ -28,7 +29,7 @@ import Views.Author
 import Views.Errors
 import Views.Page as Page
 import Views.User.Follow as Follow
-import Data.Widget.Table as Table exposing (Data, Cell)
+import Data.Widget.Table as Table exposing (Data, Cell, decoder)
 import Views.Widget.Renderer as Renderer
 import Json.Encode as JE
 import Json.Decode as JD exposing (field)
@@ -43,7 +44,16 @@ import Dict
 
 socketServer : String
 socketServer =
-    "wss://phoenixchat.herokuapp.com/ws"
+    "ws://localhost:4000/socket/websocket"
+
+
+
+-- "wss://phoenixchat.herokuapp.com/ws"
+
+
+channelName : String
+channelName =
+    "dataSource:sheets"
 
 
 
@@ -60,28 +70,19 @@ type alias Model =
     }
 
 
-type alias ChatMessage =
-    { user : String
-    , body : String
-    }
-
-
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    -- Sub.map SetAutoState Autocomplete.subscription
     Phoenix.Socket.listen model.phxSocket PhoenixMsg
 
 
-chatMessageDecoder : JD.Decoder ChatMessage
-chatMessageDecoder =
-    JD.map2 ChatMessage
-        (field "user" JD.string)
-        (field "body" JD.string)
+user : String
+user =
+    "msp"
 
 
 userParams : JE.Value
 userParams =
-    JE.object [ ( "user_id", JE.string "msp" ) ]
+    JE.object [ ( "user_id", JE.string user ) ]
 
 
 init : Session -> Widget.UUID -> Task PageLoadError Model
@@ -109,7 +110,7 @@ initPhxSocket : Phoenix.Socket.Socket Msg
 initPhxSocket =
     Phoenix.Socket.init socketServer
         |> Phoenix.Socket.withDebug
-        |> Phoenix.Socket.on "new:msg" "rooms:lobby" ReceiveChatMessage
+        |> Phoenix.Socket.on "new:msg" channelName ReceiveChatMessage
 
 
 
@@ -274,8 +275,8 @@ viewDataSource model =
         [ h3 [] [ text "Channels:" ]
         , div
             []
-            [ button [ onClick JoinChannel ] [ text "Join channel" ]
-            , button [ onClick LeaveChannel ] [ text "Leave channel" ]
+            [ button [ onClick JoinChannel ] [ text "Subscribe" ]
+            , button [ onClick LeaveChannel ] [ text "Leave" ]
             ]
         , channelsTable (Dict.values model.phxSocket.channels)
         , br [] []
@@ -426,10 +427,10 @@ update session msg model =
             SendMessage ->
                 let
                     payload =
-                        (JE.object [ ( "user", JE.string "user" ), ( "body", JE.string model.newMessage ) ])
+                        (JE.object [ ( "user", JE.string user ), ( "body", JE.string model.newMessage ) ])
 
                     push_ =
-                        Phoenix.Push.init "new:msg" "rooms:lobby"
+                        Phoenix.Push.init "new:msg" channelName
                             |> Phoenix.Push.withPayload payload
 
                     ( phxSocket, phxCmd ) =
@@ -448,22 +449,27 @@ update session msg model =
                 )
 
             ReceiveChatMessage raw ->
-                case JD.decodeValue chatMessageDecoder raw of
+                case JD.decodeValue DataSourceMessage.decoder raw of
                     Ok chatMessage ->
-                        ( { model | messages = (chatMessage.user ++ ": " ++ chatMessage.body) :: model.messages }
+                        ( { model
+                            | messages =
+                                ((chatMessage.user ++ ": " ++ (toString chatMessage.body)) :: model.messages)
+                            , data = chatMessage.body
+                          }
                         , Cmd.none
                         )
 
                     Err error ->
-                        ( model, Cmd.none )
+                        Debug.log ("ERROR decoding  " ++ (toString error) ++ "---> ")
+                            ( model, Cmd.none )
 
             JoinChannel ->
                 let
                     channel =
-                        Phoenix.Channel.init "rooms:lobby"
+                        Phoenix.Channel.init channelName
                             |> Phoenix.Channel.withPayload userParams
-                            |> Phoenix.Channel.onJoin (always (ShowJoinedMessage "rooms:lobby"))
-                            |> Phoenix.Channel.onClose (always (ShowLeftMessage "rooms:lobby"))
+                            |> Phoenix.Channel.onJoin (always (ShowJoinedMessage channelName))
+                            |> Phoenix.Channel.onClose (always (ShowLeftMessage channelName))
 
                     ( phxSocket, phxCmd ) =
                         Phoenix.Socket.join channel socket
@@ -475,7 +481,7 @@ update session msg model =
             LeaveChannel ->
                 let
                     ( phxSocket, phxCmd ) =
-                        Phoenix.Socket.leave "rooms:lobby" socket
+                        Phoenix.Socket.leave channelName socket
                 in
                     ( { model | phxSocket = phxSocket }
                     , Cmd.map PhoenixMsg phxCmd

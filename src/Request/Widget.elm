@@ -48,15 +48,14 @@ get maybeToken slug =
 
 
 
--- TODO This will need to happed after the widget meta has loaded and accept
--- a proper uuid
+-- TODO This will need to be removed as data is loaded via a channel
 
 
 loadData : Maybe AuthToken -> Widget.UUID -> Http.Request Table.Data
 loadData maybeToken slug =
     let
         expect =
-            Widget.tableDecoder
+            Table.decoder
                 |> Http.expectJson
     in
         mockApiUrl ("/data/" ++ "datasource-1234")

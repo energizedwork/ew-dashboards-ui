@@ -7,7 +7,6 @@ module Data.Widget
         , bodyToHtml
         , bodyToMarkdownString
         , decoder
-        , tableDecoder
         , decoderWithBody
         , slugParser
         , slugToString
@@ -134,17 +133,6 @@ rendererDecoder =
                     somethingElse ->
                         Decode.fail <| "Unknown renderer: " ++ somethingElse
             )
-
-
-tableDecoder : Decode.Decoder Table.Data
-tableDecoder =
-    decode Table.Data
-        |> required "data" (Decode.list rowDecoder)
-
-
-rowDecoder : Decode.Decoder (List String)
-rowDecoder =
-    Decode.list Decode.string
 
 
 
