@@ -2,11 +2,12 @@ module Data.Widget
     exposing
         ( Widget
         , Body
-        , Slug
+        , UUID
         , Tag
         , bodyToHtml
         , bodyToMarkdownString
         , decoder
+        , tableDecoder
         , decoderWithBody
         , slugParser
         , slugToString
@@ -15,6 +16,9 @@ module Data.Widget
         )
 
 import Data.Widget.Author as Author exposing (Author)
+import Data.Widget.Table as Table exposing (Data, Cell)
+import Data.Widget.Adapter exposing (Adapter(..))
+import Data.Widget.Renderer exposing (Renderer(..))
 import Data.DataSource as DataSource exposing (DataSource)
 import Date exposing (Date)
 import Html exposing (Attribute, Html)
@@ -49,13 +53,12 @@ Those articles are useful to the feed, but not to the individual article view.
 
 -}
 type alias Widget a =
-    { name : String
+    { uuid : UUID
+    , name : String
     , description : String
-    , slug : Slug
     , dataSources : List DataSource
-    , adapter : String
-    , renderer : String
-    , refreshRate : Int
+    , adapter : Adapter
+    , renderer : Renderer
     , tags : List String
     , createdAt : Date
     , updatedAt : Date
@@ -85,13 +88,12 @@ decoderWithBody =
 baseWidgetDecoder : Decoder (a -> Widget a)
 baseWidgetDecoder =
     decode Widget
+        |> required "uuid" (Decode.map UUID Decode.string)
         |> required "name" Decode.string
         |> required "description" (Decode.map (Maybe.withDefault "") (Decode.nullable Decode.string))
-        |> required "slug" (Decode.map Slug Decode.string)
         |> required "dataSources" (Decode.list DataSource.decoder)
-        |> required "adapter" Decode.string
-        |> required "renderer" Decode.string
-        |> required "refreshRate" Decode.int
+        |> required "adapter" adapterDecoder
+        |> required "renderer" rendererDecoder
         |> required "tagList" (Decode.list Decode.string)
         |> required "createdAt" Json.Decode.Extra.date
         |> required "updatedAt" Json.Decode.Extra.date
@@ -100,21 +102,66 @@ baseWidgetDecoder =
         |> required "author" Author.decoder
 
 
+adapterDecoder : Decoder Adapter
+adapterDecoder =
+    Decode.string
+        |> Decode.andThen
+            (\str ->
+                case str of
+                    "2D" ->
+                        Decode.succeed TWO_D
+
+                    "XY" ->
+                        Decode.succeed XY
+
+                    somethingElse ->
+                        Decode.fail <| "Unknown adapter: " ++ somethingElse
+            )
+
+
+rendererDecoder : Decoder Renderer
+rendererDecoder =
+    Decode.string
+        |> Decode.andThen
+            (\str ->
+                case str of
+                    "TABLE" ->
+                        Decode.succeed TABLE
+
+                    "LINE" ->
+                        Decode.succeed LINE
+
+                    somethingElse ->
+                        Decode.fail <| "Unknown renderer: " ++ somethingElse
+            )
+
+
+tableDecoder : Decode.Decoder Table.Data
+tableDecoder =
+    decode Table.Data
+        |> required "data" (Decode.list rowDecoder)
+
+
+rowDecoder : Decode.Decoder (List String)
+rowDecoder =
+    Decode.list Decode.string
+
+
 
 -- IDENTIFIERS --
 
 
-type Slug
-    = Slug String
+type UUID
+    = UUID String
 
 
-slugParser : UrlParser.Parser (Slug -> a) a
+slugParser : UrlParser.Parser (UUID -> a) a
 slugParser =
-    UrlParser.custom "SLUG" (Ok << Slug)
+    UrlParser.custom "SLUG" (Ok << UUID)
 
 
-slugToString : Slug -> String
-slugToString (Slug slug) =
+slugToString : UUID -> String
+slugToString (UUID slug) =
     slug
 
 

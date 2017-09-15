@@ -17,10 +17,10 @@ type Route
     | Logout
     | Register
     | Settings
-    | Widget Widget.Slug
+    | Widget Widget.UUID
     | Profile Username
     | NewWidget
-    | EditWidget Widget.Slug
+    | EditWidget Widget.UUID
 
 
 route : Parser (Route -> a) a
@@ -32,7 +32,7 @@ route =
         , Url.map Settings (s "settings")
         , Url.map Profile (s "profile" </> User.usernameParser)
         , Url.map Register (s "register")
-        , Url.map Widget (s "article" </> Widget.slugParser)
+        , Url.map Widget (s "widget" </> Widget.slugParser)
         , Url.map NewWidget (s "editor")
         , Url.map EditWidget (s "editor" </> Widget.slugParser)
         ]
@@ -63,7 +63,7 @@ routeToString page =
                     [ "settings" ]
 
                 Widget slug ->
-                    [ "article", Widget.slugToString slug ]
+                    [ "widget", Widget.slugToString slug ]
 
                 Profile username ->
                     [ "profile", User.usernameToString username ]

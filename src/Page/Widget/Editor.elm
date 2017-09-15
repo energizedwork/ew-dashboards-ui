@@ -22,7 +22,7 @@ import Views.Page as Page
 
 type alias Model =
     { errors : List Error
-    , editingWidget : Maybe Widget.Slug
+    , editingWidget : Maybe Widget.UUID
     , name : String
     , body : String
     , description : String
@@ -41,7 +41,7 @@ initNew =
     }
 
 
-initEdit : Session -> Widget.Slug -> Task PageLoadError Model
+initEdit : Session -> Widget.UUID -> Task PageLoadError Model
 initEdit session slug =
     let
         maybeAuthToken =
@@ -176,7 +176,7 @@ update user msg model =
             { model | body = body } => Cmd.none
 
         CreateCompleted (Ok article) ->
-            Route.Widget article.slug
+            Route.Widget article.uuid
                 |> Route.modifyUrl
                 |> pair model
 
@@ -185,7 +185,7 @@ update user msg model =
                 => Cmd.none
 
         EditCompleted (Ok article) ->
-            Route.Widget article.slug
+            Route.Widget article.uuid
                 |> Route.modifyUrl
                 |> pair model
 
@@ -228,6 +228,6 @@ tagsFromString str =
         |> List.filter (not << String.isEmpty)
 
 
-redirectToWidget : Widget.Slug -> Cmd msg
+redirectToWidget : Widget.UUID -> Cmd msg
 redirectToWidget =
     Route.modifyUrl << Route.Widget

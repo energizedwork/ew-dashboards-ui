@@ -8,4 +8,4 @@ apiUrl str =
 
 mockApiUrl : String -> String
 mockApiUrl str =
-    "https://dashboards.mocklab.io/api" ++ str
+    "/api" ++ str ++ ".json"

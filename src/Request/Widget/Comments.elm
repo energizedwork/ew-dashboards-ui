@@ -14,7 +14,7 @@ import Util exposing ((=>))
 -- LIST --
 
 
-list : Maybe AuthToken -> Widget.Slug -> Http.Request (List Comment)
+list : Maybe AuthToken -> Widget.UUID -> Http.Request (List Comment)
 list maybeToken slug =
     mockApiUrl ("/widgets/" ++ Widget.slugToString slug ++ "/comments")
         |> HttpBuilder.get
@@ -27,7 +27,7 @@ list maybeToken slug =
 -- POST --
 
 
-post : Widget.Slug -> String -> AuthToken -> Http.Request Comment
+post : Widget.UUID -> String -> AuthToken -> Http.Request Comment
 post slug body token =
     mockApiUrl ("/widgets/" ++ Widget.slugToString slug ++ "/comments")
         |> HttpBuilder.post
@@ -46,7 +46,7 @@ encodeCommentBody body =
 -- DELETE --
 
 
-delete : Widget.Slug -> CommentId -> AuthToken -> Http.Request ()
+delete : Widget.UUID -> CommentId -> AuthToken -> Http.Request ()
 delete slug commentId token =
     mockApiUrl ("/widgets/" ++ Widget.slugToString slug ++ "/comments/" ++ Comment.idToString commentId)
         |> HttpBuilder.delete

@@ -28,6 +28,8 @@ import Views.Author
 import Views.Errors
 import Views.Page as Page
 import Views.User.Follow as Follow
+import Data.Widget.Table as Table exposing (Data, Cell)
+import Views.Widget.Renderer as Renderer
 
 
 -- MODEL --
@@ -35,14 +37,12 @@ import Views.User.Follow as Follow
 
 type alias Model =
     { errors : List String
-    , commentText : String
-    , commentInFlight : Bool
     , article : Widget Body
-    , comments : List Comment
+    , data : Data
     }
 
 
-init : Session -> Widget.Slug -> Task PageLoadError Model
+init : Session -> Widget.UUID -> Task PageLoadError Model
 init session slug =
     let
         maybeAuthToken =
@@ -52,14 +52,14 @@ init session slug =
             Request.Widget.get maybeAuthToken slug
                 |> Http.toTask
 
-        loadComments =
-            Request.Widget.Comments.list maybeAuthToken slug
+        loadData =
+            Request.Widget.loadData maybeAuthToken slug
                 |> Http.toTask
 
         handleLoadError err =
             pageLoadError Page.Other ("Widget is currently unavailable. " ++ (toString err))
     in
-        Task.map2 (Model [] "" False) loadWidget loadComments
+        Task.map2 (Model []) loadWidget loadData
             |> Task.mapError handleLoadError
 
 
@@ -70,24 +70,24 @@ init session slug =
 view : Session -> Model -> Html Msg
 view session model =
     let
-        article =
+        widget =
             model.article
 
         author =
-            article.author
+            widget.author
 
         buttons =
-            viewButtons article author session.user
-
-        postingDisabled =
-            model.commentInFlight
+            viewButtons widget author session.user
     in
         div [ class "article-page" ]
-            [ viewBanner model.errors article author session.user
+            [ viewBanner model.errors widget author session.user
             , div [ class "container page" ]
                 [ div [ class "row article-content" ]
                     [ div [ class "col-md-12" ]
-                        [ Widget.bodyToHtml article.body [] ]
+                        [ h3 [] [ text widget.name ]
+                        , p [] [ text ((toString widget.adapter) ++ " | " ++ (toString widget.renderer)) ]
+                        , Renderer.run widget model.data
+                        ]
                     ]
                 , hr [] []
                 , div [ class "article-actions" ]
@@ -96,15 +96,15 @@ view session model =
                             [ img [ UserPhoto.src author.image ] [] ]
                         , div [ class "info" ]
                             [ Views.Author.view author.username
-                            , Views.Widget.viewTimestamp article
+                            , Views.Widget.viewTimestamp widget
                             ]
                         ]
                             ++ buttons
                     ]
                 , div [ class "row" ]
-                    [ div [ class "col-xs-12 col-md-8 offset-md-2" ] <|
-                        viewAddComment postingDisabled session.user
-                            :: List.map (viewComment session.user) model.comments
+                    [-- div [ class "col-xs-12 col-md-8 offset-md-2" ] <|
+                     --     viewAddComment False session.user
+                     --         :: List.map (viewComment session.user) model.comments
                     ]
                 ]
             ]
@@ -145,13 +145,12 @@ viewAddComment postingDisabled maybeUser =
                 ]
 
         Just user ->
-            Html.form [ class "card comment-form", onSubmit PostComment ]
+            Html.form [ class "card comment-form" ]
                 [ div [ class "card-block" ]
                     [ textarea
                         [ class "form-control"
                         , placeholder "Write a comment..."
                         , attribute "rows" "3"
-                        , onInput SetCommentText
                         ]
                         []
                     ]
@@ -208,7 +207,6 @@ viewComment user comment =
                 , viewIf isAuthor <|
                     span
                         [ class "mod-options"
-                        , onClick (DeleteComment comment.id)
                         ]
                         [ i [ class "ion-trash-a" ] [] ]
                 ]
@@ -230,11 +228,6 @@ type Msg
     | FavoriteCompleted (Result Http.Error (Widget Body))
     | ToggleFollow
     | FollowCompleted (Result Http.Error Author)
-    | SetCommentText String
-    | DeleteComment CommentId
-    | CommentDeleted CommentId (Result Http.Error ())
-    | PostComment
-    | CommentPosted (Result Http.Error Comment)
     | DeleteWidget
     | WidgetDeleted (Result Http.Error ())
 
@@ -296,62 +289,11 @@ update session msg model =
                 { model | errors = "Unable to follow user." :: model.errors }
                     => Cmd.none
 
-            SetCommentText commentText ->
-                { model | commentText = commentText } => Cmd.none
-
-            PostComment ->
-                let
-                    comment =
-                        model.commentText
-                in
-                    if model.commentInFlight || String.isEmpty comment then
-                        model => Cmd.none
-                    else
-                        let
-                            cmdFromAuth authToken =
-                                authToken
-                                    |> Request.Widget.Comments.post model.article.slug comment
-                                    |> Http.send CommentPosted
-                        in
-                            session
-                                |> Session.attempt "post a comment" cmdFromAuth
-                                |> Tuple.mapFirst (Util.appendErrors { model | commentInFlight = True })
-
-            CommentPosted (Ok comment) ->
-                { model
-                    | commentInFlight = False
-                    , comments = comment :: model.comments
-                }
-                    => Cmd.none
-
-            CommentPosted (Err error) ->
-                { model | errors = model.errors ++ [ "Server error while trying to post comment." ] }
-                    => Cmd.none
-
-            DeleteComment id ->
-                let
-                    cmdFromAuth authToken =
-                        authToken
-                            |> Request.Widget.Comments.delete model.article.slug id
-                            |> Http.send (CommentDeleted id)
-                in
-                    session
-                        |> Session.attempt "delete comments" cmdFromAuth
-                        |> Tuple.mapFirst (Util.appendErrors model)
-
-            CommentDeleted id (Ok ()) ->
-                { model | comments = withoutComment id model.comments }
-                    => Cmd.none
-
-            CommentDeleted id (Err error) ->
-                { model | errors = model.errors ++ [ "Server error while trying to delete comment." ] }
-                    => Cmd.none
-
             DeleteWidget ->
                 let
                     cmdFromAuth authToken =
                         authToken
-                            |> Request.Widget.delete model.article.slug
+                            |> Request.Widget.delete model.article.uuid
                             |> Http.send WidgetDeleted
                 in
                     session
@@ -392,7 +334,7 @@ deleteButton article =
 
 editButton : Widget a -> Html Msg
 editButton article =
-    a [ class "btn btn-outline-secondary btn-sm", Route.href (Route.EditWidget article.slug) ]
+    a [ class "btn btn-outline-secondary btn-sm", Route.href (Route.EditWidget article.uuid) ]
         [ i [ class "ion-edit" ] [], text " Edit Widget" ]
 
 

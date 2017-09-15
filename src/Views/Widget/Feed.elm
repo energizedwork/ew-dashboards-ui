@@ -324,7 +324,7 @@ fetch token page feedSource =
 
 replaceWidget : Widget a -> Widget a -> Widget a
 replaceWidget newWidget oldWidget =
-    if newWidget.slug == oldWidget.slug then
+    if newWidget.uuid == oldWidget.uuid then
         newWidget
     else
         oldWidget

@@ -1,6 +1,6 @@
 module Main exposing (main)
 
-import Data.Widget exposing (Slug)
+import Data.Widget exposing (UUID)
 import Data.Session as Session exposing (Session)
 import Data.User as User exposing (User, Username)
 import Html exposing (..)
@@ -38,7 +38,7 @@ type Page
     | Register Register.Model
     | Profile Username Profile.Model
     | Widget Widget.Model
-    | Editor (Maybe Slug) Editor.Model
+    | Editor (Maybe UUID) Editor.Model
 
 
 type PageState
@@ -228,7 +228,7 @@ type Msg
     | HomeLoaded (Result PageLoadError Home.Model)
     | WidgetLoaded (Result PageLoadError Widget.Model)
     | ProfileLoaded Username (Result PageLoadError Profile.Model)
-    | EditWidgetLoaded Slug (Result PageLoadError Editor.Model)
+    | EditWidgetLoaded UUID (Result PageLoadError Editor.Model)
     | HomeMsg Home.Msg
     | SettingsMsg Settings.Msg
     | SetUser (Maybe User)
