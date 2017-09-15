@@ -15,11 +15,13 @@ import Page.NotFound as NotFound
 import Page.Profile as Profile
 import Page.Register as Register
 import Page.Settings as Settings
+import Page.Widget
 import Ports
 import Route exposing (Route)
 import Task
 import Util exposing ((=>))
 import Views.Page as Page exposing (ActivePage)
+import Phoenix.Socket
 
 
 -- WARNING: Based on discussions around how asset management features
@@ -212,8 +214,8 @@ pageSubscriptions page =
         Profile _ _ ->
             Sub.none
 
-        Widget _ ->
-            Sub.none
+        Widget widgetModel ->
+            Sub.map WidgetMsg (Page.Widget.subscriptions widgetModel)
 
         Editor _ _ ->
             Sub.none

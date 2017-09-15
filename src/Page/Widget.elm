@@ -1,4 +1,4 @@
-module Page.Widget exposing (Model, Msg, init, update, view)
+module Page.Widget exposing (Model, Msg, init, update, view, subscriptions)
 
 {-| Viewing an individual article.
 -}
@@ -12,7 +12,7 @@ import Data.UserPhoto as UserPhoto
 import Date exposing (Date)
 import Date.Format
 import Html exposing (..)
-import Html.Attributes exposing (attribute, class, disabled, href, id, placeholder)
+import Html.Attributes exposing (attribute, class, disabled, href, id, placeholder, value, type_)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Http
 import Page.Errored as Errored exposing (PageLoadError, pageLoadError)
@@ -30,6 +30,21 @@ import Views.Page as Page
 import Views.User.Follow as Follow
 import Data.Widget.Table as Table exposing (Data, Cell)
 import Views.Widget.Renderer as Renderer
+import Json.Encode as JE
+import Json.Decode as JD exposing (field)
+import Phoenix.Socket
+import Phoenix.Channel
+import Phoenix.Push
+import Dict
+
+
+-- CONSTANTS
+
+
+socketServer : String
+socketServer =
+    "wss://phoenixchat.herokuapp.com/ws"
+
 
 
 -- MODEL --
@@ -37,9 +52,36 @@ import Views.Widget.Renderer as Renderer
 
 type alias Model =
     { errors : List String
+    , newMessage : String
+    , messages : List String
+    , phxSocket : Phoenix.Socket.Socket Msg
     , article : Widget Body
     , data : Data
     }
+
+
+type alias ChatMessage =
+    { user : String
+    , body : String
+    }
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    -- Sub.map SetAutoState Autocomplete.subscription
+    Phoenix.Socket.listen model.phxSocket PhoenixMsg
+
+
+chatMessageDecoder : JD.Decoder ChatMessage
+chatMessageDecoder =
+    JD.map2 ChatMessage
+        (field "user" JD.string)
+        (field "body" JD.string)
+
+
+userParams : JE.Value
+userParams =
+    JE.object [ ( "user_id", JE.string "msp" ) ]
 
 
 init : Session -> Widget.UUID -> Task PageLoadError Model
@@ -59,8 +101,15 @@ init session slug =
         handleLoadError err =
             pageLoadError Page.Other ("Widget is currently unavailable. " ++ (toString err))
     in
-        Task.map2 (Model []) loadWidget loadData
+        Task.map2 (Model [] "" [] initPhxSocket) loadWidget loadData
             |> Task.mapError handleLoadError
+
+
+initPhxSocket : Phoenix.Socket.Socket Msg
+initPhxSocket =
+    Phoenix.Socket.init socketServer
+        |> Phoenix.Socket.withDebug
+        |> Phoenix.Socket.on "new:msg" "rooms:lobby" ReceiveChatMessage
 
 
 
@@ -90,6 +139,7 @@ view session model =
                         ]
                     ]
                 , hr [] []
+                , viewDataSource model
                 , div [ class "article-actions" ]
                     [ div [ class "article-meta" ] <|
                         [ a [ Route.href (Route.Profile author.username) ]
@@ -218,6 +268,51 @@ formatCommentTimestamp =
     Date.Format.format "%B %e, %Y"
 
 
+viewDataSource : Model -> Html Msg
+viewDataSource model =
+    div []
+        [ h3 [] [ text "Channels:" ]
+        , div
+            []
+            [ button [ onClick JoinChannel ] [ text "Join channel" ]
+            , button [ onClick LeaveChannel ] [ text "Leave channel" ]
+            ]
+        , channelsTable (Dict.values model.phxSocket.channels)
+        , br [] []
+        , h3 [] [ text "Messages:" ]
+        , newMessageForm model
+        , ul [] ((List.reverse << List.map renderMessage) model.messages)
+        ]
+
+
+channelsTable : List (Phoenix.Channel.Channel Msg) -> Html Msg
+channelsTable channels =
+    table []
+        [ tbody [] (List.map channelRow channels)
+        ]
+
+
+channelRow : Phoenix.Channel.Channel Msg -> Html Msg
+channelRow channel =
+    tr []
+        [ td [] [ text channel.name ]
+        , td [] [ (text << toString) channel.payload ]
+        , td [] [ (text << toString) channel.state ]
+        ]
+
+
+newMessageForm : Model -> Html Msg
+newMessageForm model =
+    form [ onSubmit SendMessage ]
+        [ input [ type_ "text", value model.newMessage, onInput SetNewMessage ] []
+        ]
+
+
+renderMessage : String -> Html Msg
+renderMessage str =
+    li [] [ text str ]
+
+
 
 -- UPDATE --
 
@@ -230,11 +325,23 @@ type Msg
     | FollowCompleted (Result Http.Error Author)
     | DeleteWidget
     | WidgetDeleted (Result Http.Error ())
+    | SendMessage
+    | SetNewMessage String
+    | PhoenixMsg (Phoenix.Socket.Msg Msg)
+    | ReceiveChatMessage JE.Value
+    | JoinChannel
+    | LeaveChannel
+    | ShowJoinedMessage String
+    | ShowLeftMessage String
+    | NoOp
 
 
 update : Session -> Msg -> Model -> ( Model, Cmd Msg )
 update session msg model =
     let
+        socket =
+            model.phxSocket
+
         article =
             model.article
 
@@ -306,6 +413,86 @@ update session msg model =
             WidgetDeleted (Err error) ->
                 { model | errors = model.errors ++ [ "Server error while trying to delete article." ] }
                     => Cmd.none
+
+            PhoenixMsg msg ->
+                let
+                    ( phxSocket, phxCmd ) =
+                        Phoenix.Socket.update msg socket
+                in
+                    ( { model | phxSocket = phxSocket }
+                    , Cmd.map PhoenixMsg phxCmd
+                    )
+
+            SendMessage ->
+                let
+                    payload =
+                        (JE.object [ ( "user", JE.string "user" ), ( "body", JE.string model.newMessage ) ])
+
+                    push_ =
+                        Phoenix.Push.init "new:msg" "rooms:lobby"
+                            |> Phoenix.Push.withPayload payload
+
+                    ( phxSocket, phxCmd ) =
+                        Phoenix.Socket.push push_ socket
+                in
+                    ( { model
+                        | newMessage = ""
+                        , phxSocket = phxSocket
+                      }
+                    , Cmd.map PhoenixMsg phxCmd
+                    )
+
+            SetNewMessage str ->
+                ( { model | newMessage = str }
+                , Cmd.none
+                )
+
+            ReceiveChatMessage raw ->
+                case JD.decodeValue chatMessageDecoder raw of
+                    Ok chatMessage ->
+                        ( { model | messages = (chatMessage.user ++ ": " ++ chatMessage.body) :: model.messages }
+                        , Cmd.none
+                        )
+
+                    Err error ->
+                        ( model, Cmd.none )
+
+            JoinChannel ->
+                let
+                    channel =
+                        Phoenix.Channel.init "rooms:lobby"
+                            |> Phoenix.Channel.withPayload userParams
+                            |> Phoenix.Channel.onJoin (always (ShowJoinedMessage "rooms:lobby"))
+                            |> Phoenix.Channel.onClose (always (ShowLeftMessage "rooms:lobby"))
+
+                    ( phxSocket, phxCmd ) =
+                        Phoenix.Socket.join channel socket
+                in
+                    ( { model | phxSocket = phxSocket }
+                    , Cmd.map PhoenixMsg phxCmd
+                    )
+
+            LeaveChannel ->
+                let
+                    ( phxSocket, phxCmd ) =
+                        Phoenix.Socket.leave "rooms:lobby" socket
+                in
+                    ( { model | phxSocket = phxSocket }
+                    , Cmd.map PhoenixMsg phxCmd
+                    )
+
+            ShowJoinedMessage channelName ->
+                ( { model | messages = ("Joined channel " ++ channelName) :: model.messages }
+                , Cmd.none
+                )
+
+            ShowLeftMessage channelName ->
+                ( { model | messages = ("Left channel " ++ channelName) :: model.messages }
+                , Cmd.none
+                )
+
+            NoOp ->
+                ( model, Cmd.none )
 
 
 
