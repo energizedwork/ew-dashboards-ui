@@ -134,7 +134,6 @@ view session model =
                 [ div [ class "row article-content" ]
                     [ div [ class "col-md-12" ]
                         [ h3 [] [ text widget.name ]
-                        , p [] [ text ((toString widget.adapter) ++ " | " ++ (toString widget.renderer)) ]
                         , Renderer.run widget model.data
                         ]
                     ]
@@ -271,7 +270,7 @@ formatCommentTimestamp =
 viewDataSource : Model -> Html Msg
 viewDataSource model =
     div []
-        [ h3 [] [ text "Channels:" ]
+        [ h3 [] [ text "Data updates:" ]
         , div
             []
             [ button [ onClick JoinChannel ] [ text "Subscribe" ]
