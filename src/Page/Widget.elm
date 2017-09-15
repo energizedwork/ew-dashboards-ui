@@ -5,7 +5,6 @@ module Page.Widget exposing (Model, Msg, init, update, view, subscriptions)
 
 import Data.Widget as Widget exposing (Widget, Body)
 import Data.Widget.Author as Author exposing (Author)
-import Data.Widget.Comment as Comment exposing (Comment, CommentId)
 import Data.Session as Session exposing (Session)
 import Data.User as User exposing (User)
 import Data.UserPhoto as UserPhoto
@@ -151,11 +150,6 @@ view session model =
                         ]
                             ++ buttons
                     ]
-                , div [ class "row" ]
-                    [-- div [ class "col-xs-12 col-md-8 offset-md-2" ] <|
-                     --     viewAddComment False session.user
-                     --         :: List.map (viewComment session.user) model.comments
-                    ]
                 ]
             ]
 
@@ -183,38 +177,6 @@ viewBanner errors widget author maybeUser =
             ]
 
 
-viewAddComment : Bool -> Maybe User -> Html Msg
-viewAddComment postingDisabled maybeUser =
-    case maybeUser of
-        Nothing ->
-            p []
-                [ a [ Route.href Route.Login ] [ text "Sign in" ]
-                , text " or "
-                , a [ Route.href Route.Register ] [ text "sign up" ]
-                , text " to add comments on this widget."
-                ]
-
-        Just user ->
-            Html.form [ class "card comment-form" ]
-                [ div [ class "card-block" ]
-                    [ textarea
-                        [ class "form-control"
-                        , placeholder "Write a comment..."
-                        , attribute "rows" "3"
-                        ]
-                        []
-                    ]
-                , div [ class "card-footer" ]
-                    [ img [ class "comment-author-img", UserPhoto.src user.image ] []
-                    , button
-                        [ class "btn btn-sm btn-primary"
-                        , disabled postingDisabled
-                        ]
-                        [ text "Post Comment" ]
-                    ]
-                ]
-
-
 viewButtons : Widget a -> Author -> Maybe User -> List (Html Msg)
 viewButtons widget author maybeUser =
     let
@@ -233,38 +195,8 @@ viewButtons widget author maybeUser =
             ]
 
 
-viewComment : Maybe User -> Comment -> Html Msg
-viewComment user comment =
-    let
-        author =
-            comment.author
-
-        isAuthor =
-            Maybe.map .username user == Just comment.author.username
-    in
-        div [ class "card" ]
-            [ div [ class "card-block" ]
-                [ p [ class "card-text" ] [ text comment.body ] ]
-            , div [ class "card-footer" ]
-                [ a [ class "comment-author", href "" ]
-                    [ img [ class "comment-author-img", UserPhoto.src author.image ] []
-                    , text " "
-                    ]
-                , text " "
-                , a [ class "comment-author", Route.href (Route.Profile author.username) ]
-                    [ text (User.usernameToString comment.author.username) ]
-                , span [ class "date-posted" ] [ text (formatCommentTimestamp comment.createdAt) ]
-                , viewIf isAuthor <|
-                    span
-                        [ class "mod-options"
-                        ]
-                        [ i [ class "ion-trash-a" ] [] ]
-                ]
-            ]
-
-
-formatCommentTimestamp : Date -> String
-formatCommentTimestamp =
+formatTimestamp : Date -> String
+formatTimestamp =
     Date.Format.format "%B %e, %Y"
 
 
@@ -502,11 +434,6 @@ update session msg model =
 
 
 -- INTERNAL --
-
-
-withoutComment : CommentId -> List Comment -> List Comment
-withoutComment id =
-    List.filter (\comment -> comment.id /= id)
 
 
 favoriteButton : Widget a -> Html Msg
