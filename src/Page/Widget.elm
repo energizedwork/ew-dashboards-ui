@@ -39,15 +39,16 @@ import Dict
 
 
 -- CONSTANTS
+-- TODO Pass in via a Flag
 
 
 socketServer : String
 socketServer =
-    "ws://localhost:4000/socket/websocket"
+    "wss://ew-dashboards-staging.herokuapp.com/socket/websocket"
 
 
 
--- "wss://phoenixchat.herokuapp.com/ws"
+-- "ws://localhost:4000/socket/websocket"
 
 
 channelName : String
