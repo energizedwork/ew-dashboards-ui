@@ -279,9 +279,9 @@ viewDataSource model =
             ]
         , channelsTable (Dict.values model.phxSocket.channels)
         , br [] []
-        , h3 [] [ text "Messages:" ]
+        , h3 [] [ text "Broadcast:" ]
         , newMessageForm model
-        , ul [] ((List.reverse << List.map renderMessage) model.messages)
+          -- , ul [] ((List.reverse << List.map renderMessage) model.messages)
         ]
 
 
