@@ -1,4 +1,4 @@
-module Data.Widget.Adapter exposing (Adapter(..))
+module Data.Widget.Adapters.Adapter exposing (Adapter(..))
 
 -- TODO these are hardcoded for now but will likely have to be a set of
 -- defaults plus optional user defined adapters
@@ -6,5 +6,5 @@ module Data.Widget.Adapter exposing (Adapter(..))
 
 
 type Adapter
-    = TWO_D
-    | XY
+    = TABLE
+    | BAR_CHART

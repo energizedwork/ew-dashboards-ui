@@ -5,10 +5,10 @@
         "body": "12 months Bar Chart",
         "description": "12 months of important data",
         "dataSources": [{
-            "uuid": "datasource-5678",
+            "uuid": "datasource-1234",
             "name": "12 month financials"
         }],
-        "adapter": "2D",
+        "adapter": "BAR_CHART",
         "renderer": "BAR_CHART",
         "createdAt": "2017-09-04T16:03:55.948Z",
         "updatedAt": "2017-09-04T16:03:55.948Z",

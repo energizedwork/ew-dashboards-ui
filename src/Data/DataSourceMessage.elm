@@ -1,7 +1,6 @@
 module Data.DataSourceMessage exposing (DataSourceMessage, decoder)
 
 import Json.Decode as Decode exposing (Decoder, field)
-import Json.Decode.Pipeline as Pipeline exposing (custom, decode, required)
 import Data.Widget.Table as Table exposing (Data, Cell, decoder)
 
 

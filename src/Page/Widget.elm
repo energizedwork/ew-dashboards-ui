@@ -28,7 +28,7 @@ import Views.Errors
 import Views.Page as Page
 import Views.User.Follow as Follow
 import Data.Widget.Table as Table exposing (Data, Cell, decoder)
-import Views.Widget.Renderer as Renderer
+import Views.Widget.Renderers.Renderer as Renderer
 import Json.Encode as JE
 import Json.Decode as JD exposing (field)
 import Phoenix.Socket

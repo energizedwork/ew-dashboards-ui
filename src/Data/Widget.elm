@@ -15,8 +15,8 @@ module Data.Widget
         )
 
 import Data.Widget.Author as Author exposing (Author)
-import Data.Widget.Adapter exposing (Adapter(..))
-import Data.Widget.Renderer exposing (Renderer(..))
+import Data.Widget.Adapters.Adapter as Adapter exposing (Adapter(..))
+import Data.Widget.Renderer as Renderer exposing (Renderer(..))
 import Data.DataSource as DataSource exposing (DataSource)
 import Date exposing (Date)
 import Html exposing (Attribute, Html)
@@ -106,11 +106,11 @@ adapterDecoder =
         |> Decode.andThen
             (\str ->
                 case str of
-                    "2D" ->
-                        Decode.succeed TWO_D
+                    "TABLE" ->
+                        Decode.succeed Adapter.TABLE
 
-                    "XY" ->
-                        Decode.succeed XY
+                    "BAR_CHART" ->
+                        Decode.succeed Adapter.BAR_CHART
 
                     somethingElse ->
                         Decode.fail <| "Unknown adapter: " ++ somethingElse
@@ -124,13 +124,13 @@ rendererDecoder =
             (\str ->
                 case str of
                     "TABLE" ->
-                        Decode.succeed TABLE
+                        Decode.succeed Renderer.TABLE
 
                     "LINE" ->
-                        Decode.succeed LINE
+                        Decode.succeed Renderer.LINE
 
                     "BAR_CHART" ->
-                        Decode.succeed BAR_CHART
+                        Decode.succeed Renderer.BAR_CHART
 
                     somethingElse ->
                         Decode.fail <| "Unknown renderer: " ++ somethingElse
