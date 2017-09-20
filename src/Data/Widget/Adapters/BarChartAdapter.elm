@@ -3,7 +3,7 @@ module Data.Widget.Adapters.BarChartAdapter exposing (adapt)
 import Data.Widget.Table as Table exposing (Data, Row, Cell)
 
 
-adapt : Data -> ( Row, Row )
+adapt : Data -> ( Row, Row, Float )
 adapt data =
     let
         headerRow =
@@ -14,7 +14,7 @@ adapt data =
                 Nothing ->
                     []
 
-        bodyRows =
+        bodyRow =
             case List.tail data.rows of
                 Just body ->
                     case List.head body of
@@ -26,5 +26,24 @@ adapt data =
 
                 Nothing ->
                     []
+
+        -- TODO unhackme! At what point should we assume Floats?
+        bodyRowInts =
+            case List.tail data.rows of
+                Just body ->
+                    case List.head body of
+                        Just firstBodyRow ->
+                            List.map (stringToFloat) firstBodyRow
+
+                        Nothing ->
+                            []
+
+                Nothing ->
+                    []
     in
-        ( headerRow, bodyRows )
+        ( headerRow, bodyRow, (List.maximum bodyRowInts |> Maybe.withDefault 0) )
+
+
+stringToFloat : String -> Float
+stringToFloat string =
+    String.toFloat string |> Result.withDefault 0
