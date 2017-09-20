@@ -13,7 +13,7 @@ If you don't already have `elm` and `elm-live`:
 
 Then, to build everything:
 
-``` $ elm-live --output=elm.js src/Main.elm --pushstate --open --debug ```
+``` $ elm-live --output=elm.js src/Main.elm --pushstate --open --debug --warn ```
 
 (Leave off the `--debug` if you don't want the time-traveling debugger.)
 

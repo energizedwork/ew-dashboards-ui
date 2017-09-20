@@ -10,7 +10,6 @@ import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src)
 import Route exposing (Route)
 import Views.Widget.Favorite as Favorite
-import Views.Author
 
 
 -- VIEWS --

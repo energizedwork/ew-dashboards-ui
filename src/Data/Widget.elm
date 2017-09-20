@@ -7,7 +7,6 @@ module Data.Widget
         , bodyToHtml
         , bodyToMarkdownString
         , decoder
-        , tableDecoder
         , decoderWithBody
         , slugParser
         , slugToString
@@ -16,7 +15,6 @@ module Data.Widget
         )
 
 import Data.Widget.Author as Author exposing (Author)
-import Data.Widget.Table as Table exposing (Data, Cell)
 import Data.Widget.Adapter exposing (Adapter(..))
 import Data.Widget.Renderer exposing (Renderer(..))
 import Data.DataSource as DataSource exposing (DataSource)
@@ -134,17 +132,6 @@ rendererDecoder =
                     somethingElse ->
                         Decode.fail <| "Unknown renderer: " ++ somethingElse
             )
-
-
-tableDecoder : Decode.Decoder Table.Data
-tableDecoder =
-    decode Table.Data
-        |> required "data" (Decode.list rowDecoder)
-
-
-rowDecoder : Decode.Decoder (List String)
-rowDecoder =
-    Decode.list Decode.string
 
 
 

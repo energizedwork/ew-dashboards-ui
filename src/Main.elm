@@ -15,6 +15,7 @@ import Page.NotFound as NotFound
 import Page.Profile as Profile
 import Page.Register as Register
 import Page.Settings as Settings
+import Page.Widget
 import Ports
 import Route exposing (Route)
 import Task
@@ -212,8 +213,8 @@ pageSubscriptions page =
         Profile _ _ ->
             Sub.none
 
-        Widget _ ->
-            Sub.none
+        Widget widgetModel ->
+            Sub.map WidgetMsg (Page.Widget.subscriptions widgetModel)
 
         Editor _ _ ->
             Sub.none

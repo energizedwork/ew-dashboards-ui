@@ -6,7 +6,6 @@ import Data.Widget.Adapter exposing (Adapter(..))
 import Data.Widget.Renderer exposing (Renderer(..))
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src)
-import Html.Events exposing (onClick)
 
 
 run : Widget Body -> Table.Data -> Html msg
