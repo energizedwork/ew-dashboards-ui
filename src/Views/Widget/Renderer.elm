@@ -17,6 +17,9 @@ run widget data =
         LINE ->
             renderLineGraphFrom widget data
 
+        BAR_CHART ->
+            renderBarChartFrom widget data
+
 
 renderTableFrom : Widget Body -> Table.Data -> Html msg
 renderTableFrom widget data =
@@ -53,6 +56,11 @@ renderTableFrom widget data =
 renderLineGraphFrom : Widget Body -> Table.Data -> Html msg
 renderLineGraphFrom widget data =
     p [ class "data" ] [ text <| "TODO INSERT LINE GRAPH HERE" ++ (toString data.rows) ]
+
+
+renderBarChartFrom : Widget Body -> Table.Data -> Html msg
+renderBarChartFrom widget data =
+    p [ class "data" ] [ text <| "TODO INSERT BAR CHART HERE" ++ (toString data.rows) ]
 
 
 renderHeaderFrom : List String -> Html msg

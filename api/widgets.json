@@ -1,12 +1,12 @@
 {
     "widgets": [{
           "uuid": "006f0092-5a11-468d-b822-ea57753f45c4",
-          "name": "Three months",
-          "body": "Three months",
-          "description": "3 months of important data",
+          "name": "12 months",
+          "body": "12 months",
+          "description": "12 months of important data",
           "dataSources": [{
               "uuid": "datasource-1234",
-              "name": "3 month financials"
+              "name": "12 month financials"
           }],
           "adapter": "2D",
           "renderer": "TABLE",
@@ -21,6 +21,28 @@
           },
           "favorited": false,
           "favoritesCount": 0
+    }, {
+          "uuid": "c0b02f5d-8e73-4524-9f0f-f343bfd25493",
+          "name": "12 months Bar Chart",
+          "body": "12 months Bar Chart",
+          "description": "12 months of important data",
+          "dataSources": [{
+              "uuid": "datasource-5678",
+              "name": "12 month financials"
+          }],
+          "adapter": "2D",
+          "renderer": "BAR_CHART",
+          "createdAt": "2017-09-04T16:03:55.948Z",
+          "updatedAt": "2017-09-04T16:03:55.948Z",
+          "tagList": [],
+          "author": {
+              "username": "msp",
+              "bio": "beautifully flawed creation .. \n\n",
+              "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
+              "following": false
+          },
+          "favorited": false,
+          "favoritesCount": 1
     }],
-    "widgetsCount": 1
+    "widgetsCount": 2
 }

@@ -129,6 +129,9 @@ rendererDecoder =
                     "LINE" ->
                         Decode.succeed LINE
 
+                    "BAR_CHART" ->
+                        Decode.succeed BAR_CHART
+
                     somethingElse ->
                         Decode.fail <| "Unknown renderer: " ++ somethingElse
             )
