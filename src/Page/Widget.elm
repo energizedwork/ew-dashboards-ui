@@ -5,7 +5,6 @@ module Page.Widget exposing (Model, Msg, init, update, view, subscriptions)
 
 import Data.Widget as Widget exposing (Widget, Body)
 import Data.Widget.Author as Author exposing (Author)
-import Data.Widget.Comment as Comment exposing (Comment, CommentId)
 import Data.Session as Session exposing (Session)
 import Data.User as User exposing (User)
 import Data.UserPhoto as UserPhoto
@@ -65,7 +64,7 @@ type alias Model =
     , newMessage : String
     , messages : List String
     , phxSocket : Phoenix.Socket.Socket Msg
-    , article : Widget Body
+    , widget : Widget Body
     , data : Data
     }
 
@@ -121,7 +120,7 @@ view : Session -> Model -> Html Msg
 view session model =
     let
         widget =
-            model.article
+            model.widget
 
         author =
             widget.author
@@ -151,30 +150,25 @@ view session model =
                         ]
                             ++ buttons
                     ]
-                , div [ class "row" ]
-                    [-- div [ class "col-xs-12 col-md-8 offset-md-2" ] <|
-                     --     viewAddComment False session.user
-                     --         :: List.map (viewComment session.user) model.comments
-                    ]
                 ]
             ]
 
 
 viewBanner : List String -> Widget a -> Author -> Maybe User -> Html Msg
-viewBanner errors article author maybeUser =
+viewBanner errors widget author maybeUser =
     let
         buttons =
-            viewButtons article author maybeUser
+            viewButtons widget author maybeUser
     in
         div [ class "banner" ]
             [ div [ class "container" ]
-                [ h1 [] [ text article.name ]
+                [ h1 [] [ text widget.name ]
                 , div [ class "article-meta" ] <|
                     [ a [ Route.href (Route.Profile author.username) ]
                         [ img [ UserPhoto.src author.image ] [] ]
                     , div [ class "info" ]
                         [ Views.Author.view author.username
-                        , Views.Widget.viewTimestamp article
+                        , Views.Widget.viewTimestamp widget
                         ]
                     ]
                         ++ buttons
@@ -183,88 +177,26 @@ viewBanner errors article author maybeUser =
             ]
 
 
-viewAddComment : Bool -> Maybe User -> Html Msg
-viewAddComment postingDisabled maybeUser =
-    case maybeUser of
-        Nothing ->
-            p []
-                [ a [ Route.href Route.Login ] [ text "Sign in" ]
-                , text " or "
-                , a [ Route.href Route.Register ] [ text "sign up" ]
-                , text " to add comments on this article."
-                ]
-
-        Just user ->
-            Html.form [ class "card comment-form" ]
-                [ div [ class "card-block" ]
-                    [ textarea
-                        [ class "form-control"
-                        , placeholder "Write a comment..."
-                        , attribute "rows" "3"
-                        ]
-                        []
-                    ]
-                , div [ class "card-footer" ]
-                    [ img [ class "comment-author-img", UserPhoto.src user.image ] []
-                    , button
-                        [ class "btn btn-sm btn-primary"
-                        , disabled postingDisabled
-                        ]
-                        [ text "Post Comment" ]
-                    ]
-                ]
-
-
 viewButtons : Widget a -> Author -> Maybe User -> List (Html Msg)
-viewButtons article author maybeUser =
+viewButtons widget author maybeUser =
     let
         isMyWidget =
             Maybe.map .username maybeUser == Just author.username
     in
         if isMyWidget then
-            [ editButton article
+            [ editButton widget
             , text " "
-            , deleteButton article
+            , deleteButton widget
             ]
         else
             [ followButton author
             , text " "
-            , favoriteButton article
+            , favoriteButton widget
             ]
 
 
-viewComment : Maybe User -> Comment -> Html Msg
-viewComment user comment =
-    let
-        author =
-            comment.author
-
-        isAuthor =
-            Maybe.map .username user == Just comment.author.username
-    in
-        div [ class "card" ]
-            [ div [ class "card-block" ]
-                [ p [ class "card-text" ] [ text comment.body ] ]
-            , div [ class "card-footer" ]
-                [ a [ class "comment-author", href "" ]
-                    [ img [ class "comment-author-img", UserPhoto.src author.image ] []
-                    , text " "
-                    ]
-                , text " "
-                , a [ class "comment-author", Route.href (Route.Profile author.username) ]
-                    [ text (User.usernameToString comment.author.username) ]
-                , span [ class "date-posted" ] [ text (formatCommentTimestamp comment.createdAt) ]
-                , viewIf isAuthor <|
-                    span
-                        [ class "mod-options"
-                        ]
-                        [ i [ class "ion-trash-a" ] [] ]
-                ]
-            ]
-
-
-formatCommentTimestamp : Date -> String
-formatCommentTimestamp =
+formatTimestamp : Date -> String
+formatTimestamp =
     Date.Format.format "%B %e, %Y"
 
 
@@ -342,11 +274,11 @@ update session msg model =
         socket =
             model.phxSocket
 
-        article =
-            model.article
+        widget =
+            model.widget
 
         author =
-            article.author
+            widget.author
     in
         case msg of
             DismissErrors ->
@@ -355,9 +287,9 @@ update session msg model =
             ToggleFavorite ->
                 let
                     cmdFromAuth authToken =
-                        Request.Widget.toggleFavorite model.article authToken
+                        Request.Widget.toggleFavorite model.widget authToken
                             |> Http.toTask
-                            |> Task.map (\newWidget -> { newWidget | body = article.body })
+                            |> Task.map (\newWidget -> { newWidget | body = widget.body })
                             |> Task.attempt FavoriteCompleted
                 in
                     session
@@ -365,7 +297,7 @@ update session msg model =
                         |> Tuple.mapFirst (Util.appendErrors model)
 
             FavoriteCompleted (Ok newWidget) ->
-                { model | article = newWidget } => Cmd.none
+                { model | widget = newWidget } => Cmd.none
 
             FavoriteCompleted (Err error) ->
                 -- In a serious production application, we would log the error to
@@ -388,9 +320,9 @@ update session msg model =
             FollowCompleted (Ok { following }) ->
                 let
                     newWidget =
-                        { article | author = { author | following = following } }
+                        { widget | author = { author | following = following } }
                 in
-                    { model | article = newWidget } => Cmd.none
+                    { model | widget = newWidget } => Cmd.none
 
             FollowCompleted (Err error) ->
                 { model | errors = "Unable to follow user." :: model.errors }
@@ -400,18 +332,18 @@ update session msg model =
                 let
                     cmdFromAuth authToken =
                         authToken
-                            |> Request.Widget.delete model.article.uuid
+                            |> Request.Widget.delete model.widget.uuid
                             |> Http.send WidgetDeleted
                 in
                     session
-                        |> Session.attempt "delete articles" cmdFromAuth
+                        |> Session.attempt "delete widgets" cmdFromAuth
                         |> Tuple.mapFirst (Util.appendErrors model)
 
             WidgetDeleted (Ok ()) ->
                 model => Route.modifyUrl Route.Home
 
             WidgetDeleted (Err error) ->
-                { model | errors = model.errors ++ [ "Server error while trying to delete article." ] }
+                { model | errors = model.errors ++ [ "Server error while trying to delete widget." ] }
                     => Cmd.none
 
             PhoenixMsg msg ->
@@ -504,29 +436,24 @@ update session msg model =
 -- INTERNAL --
 
 
-withoutComment : CommentId -> List Comment -> List Comment
-withoutComment id =
-    List.filter (\comment -> comment.id /= id)
-
-
 favoriteButton : Widget a -> Html Msg
-favoriteButton article =
+favoriteButton widget =
     let
         favoriteText =
-            " Favorite Widget (" ++ toString article.favoritesCount ++ ")"
+            " Favorite Widget (" ++ toString widget.favoritesCount ++ ")"
     in
-        Favorite.button (\_ -> ToggleFavorite) article [] [ text favoriteText ]
+        Favorite.button (\_ -> ToggleFavorite) widget [] [ text favoriteText ]
 
 
 deleteButton : Widget a -> Html Msg
-deleteButton article =
+deleteButton widget =
     button [ class "btn btn-outline-danger btn-sm", onClick DeleteWidget ]
         [ i [ class "ion-trash-a" ] [], text " Delete Widget" ]
 
 
 editButton : Widget a -> Html Msg
-editButton article =
-    a [ class "btn btn-outline-secondary btn-sm", Route.href (Route.EditWidget article.uuid) ]
+editButton widget =
+    a [ class "btn btn-outline-secondary btn-sm", Route.href (Route.EditWidget widget.uuid) ]
         [ i [ class "ion-edit" ] [], text " Edit Widget" ]
 
 

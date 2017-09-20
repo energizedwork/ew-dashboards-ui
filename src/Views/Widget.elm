@@ -1,6 +1,6 @@
 module Views.Widget exposing (view, viewTimestamp)
 
-{-| Viewing a preview of an individual article, excluding its body.
+{-| Viewing a preview of an individual widget, excluding its body.
 -}
 
 import Data.Widget as Widget exposing (Widget)
@@ -15,11 +15,11 @@ import Views.Widget.Favorite as Favorite
 -- VIEWS --
 
 
-{-| Some pages want to view just the timestamp, not the whole article.
+{-| Some pages want to view just the timestamp, not the whole widget.
 -}
 viewTimestamp : Widget a -> Html msg
-viewTimestamp article =
-    span [ class "date" ] [ text (formattedTimestamp article) ]
+viewTimestamp widget =
+    span [ class "date" ] [ text (formattedTimestamp widget) ]
 
 
 view : (Widget a -> msg) -> Widget a -> Html msg
@@ -55,5 +55,5 @@ view toggleFavorite widget =
 
 
 formattedTimestamp : Widget a -> String
-formattedTimestamp article =
-    Date.Format.format "%B %e, %Y" article.createdAt
+formattedTimestamp widget =
+    Date.Format.format "%B %e, %Y" widget.createdAt

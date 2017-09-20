@@ -227,29 +227,29 @@ updateInternal session msg model =
             }
                 => Cmd.none
 
-        ToggleFavorite article ->
+        ToggleFavorite widget ->
             case session.user of
                 Nothing ->
                     { model | errors = model.errors ++ [ "You are currently signed out. You must sign in to favorite articles." ] }
                         => Cmd.none
 
                 Just user ->
-                    Request.Widget.toggleFavorite article user.token
+                    Request.Widget.toggleFavorite widget user.token
                         |> Http.send FavoriteCompleted
                         |> pair model
 
-        FavoriteCompleted (Ok article) ->
+        FavoriteCompleted (Ok widget) ->
             let
                 feed =
                     model.feed
 
                 newFeed =
-                    { feed | widgets = List.map (replaceWidget article) feed.widgets }
+                    { feed | widgets = List.map (replaceWidget widget) feed.widgets }
             in
                 { model | feed = newFeed } => Cmd.none
 
         FavoriteCompleted (Err error) ->
-            { model | errors = model.errors ++ [ "Server error while trying to favorite article." ] }
+            { model | errors = model.errors ++ [ "Server error while trying to favorite widget." ] }
                 => Cmd.none
 
         SelectPage page ->

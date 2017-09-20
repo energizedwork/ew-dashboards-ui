@@ -52,13 +52,13 @@ initEdit session slug =
             |> Http.toTask
             |> Task.mapError (\_ -> pageLoadError Page.Other "Widget is currently unavailable.")
             |> Task.map
-                (\article ->
+                (\widget ->
                     { errors = []
                     , editingWidget = Just slug
-                    , name = article.name
-                    , body = Widget.bodyToMarkdownString article.body
-                    , description = article.description
-                    , tags = article.tags
+                    , name = widget.name
+                    , body = Widget.bodyToMarkdownString widget.body
+                    , description = widget.description
+                    , tags = widget.tags
                     }
                 )
 
@@ -103,13 +103,13 @@ viewForm model =
                     ]
                     []
                 , Form.input
-                    [ placeholder "What's this article about?"
+                    [ placeholder "What's this widget about?"
                     , onInput SetDescription
                     , defaultValue model.description
                     ]
                     []
                 , Form.textarea
-                    [ placeholder "Write your article (in markdown)"
+                    [ placeholder "Write your widget (in markdown)"
                     , attribute "rows" "8"
                     , onInput SetBody
                     , defaultValue model.body
@@ -175,22 +175,22 @@ update user msg model =
         SetBody body ->
             { model | body = body } => Cmd.none
 
-        CreateCompleted (Ok article) ->
-            Route.Widget article.uuid
+        CreateCompleted (Ok widget) ->
+            Route.Widget widget.uuid
                 |> Route.modifyUrl
                 |> pair model
 
         CreateCompleted (Err error) ->
-            { model | errors = model.errors ++ [ Form => "Server error while attempting to publish article" ] }
+            { model | errors = model.errors ++ [ Form => "Server error while attempting to publish widget" ] }
                 => Cmd.none
 
-        EditCompleted (Ok article) ->
-            Route.Widget article.uuid
+        EditCompleted (Ok widget) ->
+            Route.Widget widget.uuid
                 |> Route.modifyUrl
                 |> pair model
 
         EditCompleted (Err error) ->
-            { model | errors = model.errors ++ [ Form => "Server error while attempting to save article" ] }
+            { model | errors = model.errors ++ [ Form => "Server error while attempting to save widget" ] }
                 => Cmd.none
 
 
