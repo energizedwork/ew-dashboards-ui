@@ -1,4 +1,4 @@
-module Page.Widget exposing (Model, Msg, init, update, view, subscriptions)
+module Page.Widget exposing (Model, Msg(..), init, update, view, subscriptions)
 
 {-| Viewing an individual widget.
 -}
@@ -64,8 +64,8 @@ type alias Model =
     , newMessage : String
     , messages : List String
     , phxSocket : Phoenix.Socket.Socket Msg
-    , widget : Widget Body
     , data : Data
+    , widget : Widget Body
     }
 
 
@@ -94,14 +94,10 @@ init session slug =
             Request.Widget.get maybeAuthToken slug
                 |> Http.toTask
 
-        loadData =
-            Request.Widget.loadData maybeAuthToken slug
-                |> Http.toTask
-
         handleLoadError err =
             pageLoadError Page.Other ("Widget is currently unavailable. " ++ (toString err))
     in
-        Task.map2 (Model [] "" [] initPhxSocket) loadWidget loadData
+        Task.map (Model [] "" [] initPhxSocket (Data [])) loadWidget
             |> Task.mapError handleLoadError
 
 
@@ -138,7 +134,7 @@ view session model =
                         ]
                     ]
                 , hr [] []
-                , viewDataSource model
+                  -- , viewDataSource model
                 , div [ class "article-actions" ]
                     [ div [ class "article-meta" ] <|
                         [ a [ Route.href (Route.Profile author.username) ]

@@ -6,7 +6,7 @@ import Data.User as User exposing (User, Username)
 import Html exposing (..)
 import Json.Decode as Decode exposing (Value)
 import Navigation exposing (Location)
-import Page.Widget as Widget
+import Page.Widget as Widget exposing (Msg(..))
 import Page.Widget.Editor as Editor
 import Page.Errored as Errored exposing (PageLoadError)
 import Page.Home as Home
@@ -355,7 +355,12 @@ updatePage page msg model =
                 { model | pageState = Loaded (Errored error) } => Cmd.none
 
             ( WidgetLoaded (Ok subModel), _ ) ->
-                { model | pageState = Loaded (Widget subModel) } => Cmd.none
+                let
+                    ( newModel, newCmd ) =
+                        Page.Widget.update session JoinChannel subModel
+                in
+                    { model | pageState = Loaded (Widget newModel) }
+                        => Cmd.map WidgetMsg newCmd
 
             ( WidgetLoaded (Err error), _ ) ->
                 { model | pageState = Loaded (Errored error) } => Cmd.none

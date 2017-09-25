@@ -8,7 +8,6 @@ module Request.Widget
         , delete
         , feed
         , get
-        , loadData
         , list
         , tags
         , toggleFavorite
@@ -40,24 +39,6 @@ get maybeToken slug =
                 |> Http.expectJson
     in
         mockApiUrl ("/widgets/" ++ Widget.slugToString slug)
-            |> HttpBuilder.get
-            |> HttpBuilder.withExpect expect
-            |> withAuthorization maybeToken
-            |> HttpBuilder.toRequest
-
-
-
--- TODO This will need to be removed as data is loaded via a channel
-
-
-loadData : Maybe AuthToken -> Widget.UUID -> Http.Request Table.Data
-loadData maybeToken slug =
-    let
-        expect =
-            Table.decoder
-                |> Http.expectJson
-    in
-        mockApiUrl ("/data/" ++ "datasource-1234")
             |> HttpBuilder.get
             |> HttpBuilder.withExpect expect
             |> withAuthorization maybeToken

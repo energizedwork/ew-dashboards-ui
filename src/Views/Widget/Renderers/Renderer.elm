@@ -5,21 +5,27 @@ import Data.Widget.Table as Table exposing (Data, Cell)
 import Data.Widget.Renderer exposing (Renderer(..))
 import Views.Widget.Renderers.Table as Table
 import Views.Widget.Renderers.BarChart as BarChart
+import Views.Spinner
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src)
 
 
 run : Widget Body -> Table.Data -> Html msg
 run widget data =
-    case widget.renderer of
-        TABLE ->
-            Table.render widget data
+    case List.isEmpty data.rows of
+        True ->
+            div [ class "spinner-wrapper" ] [ Views.Spinner.spinnerSVG ]
 
-        LINE ->
-            renderLineGraphFrom widget data
+        False ->
+            case widget.renderer of
+                TABLE ->
+                    Table.render widget data
 
-        BAR_CHART ->
-            BarChart.render widget data
+                LINE ->
+                    renderLineGraphFrom widget data
+
+                BAR_CHART ->
+                    BarChart.render widget data
 
 
 renderLineGraphFrom : Widget Body -> Table.Data -> Html msg
