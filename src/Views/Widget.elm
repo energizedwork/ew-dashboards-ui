@@ -9,6 +9,7 @@ import Date.Format
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src)
 import Route exposing (Route)
+import Views.DataSource as DataSource exposing (view)
 import Views.Widget.Favorite as Favorite
 
 
@@ -44,7 +45,7 @@ view toggleFavorite widget =
             , a [ class "preview-link", Route.href (Route.Widget widget.uuid) ]
                 [ h1 [] [ text widget.name ]
                 , p [] [ text widget.description ]
-                , p [] [ text ("Data Sources: " ++ (widget.dataSources |> toString)) ]
+                , ul [] <| List.map DataSource.view widget.dataSources
                 , span [] [ text "Click to run widget.." ]
                 ]
             ]
