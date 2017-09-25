@@ -7,29 +7,28 @@ Elm front end for the [energizedwork/ew-dashboards](https://github.com/energized
 
 Assuming you have a [Node](https://nodejs.org/en/download/) install.
 
-If you don't already have `elm` and `elm-live`:
+```$ npm install```
 
-``` $ npm install -g elm elm-live ```
-
-Then, to build everything:
-
-``` $ elm-live --output=elm.js src/Main.elm --pushstate --open --debug --warn ```
-
-(Leave off the `--debug` if you don't want the time-traveling debugger.)
+(Leave off the `--debug` in package.json if you don't want the time-traveling debugger.)
 
 
 ## Develop / Test
 
-[elm-live](https://github.com/tomekwi/elm-live) has you covered for auto compile on Elm src & live reload of changes.
+[elm-live](https://github.com/tomekwi/elm-live) has you covered for auto compilation of Elm src & live reload of changes. It's wrapped via NPM to allow easy install and to allow tests to run concurrently:
 
-### TDD
 
-TODO: bolt in elm-test and run in elm-live
+```bash
+# run the dev server + local CI
+$ npm run start:test:watch
+
+# run the tests only
+$ npm run test:watch
+```
+
 
 ### Formatting
 
 Elm is whitespace sensitive so elm-live uses [elm-format](https://atom.io/packages/elm-format) for consistency. Please follow this convention.
-
 
 
 ## Deploy

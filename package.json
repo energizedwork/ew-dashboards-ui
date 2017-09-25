@@ -1,0 +1,27 @@
+{
+  "name": "ew-dashboards-ui",
+  "version": "1.0.0",
+  "description": "Show me the money!",
+  "main": "elm.js",
+  "devDependencies": {
+    "concurrently": "^3.5.0",
+    "elm": "^0.18.0",
+    "elm-live": "^2.7.4",
+    "elm-test": "^0.18.7"
+  },
+  "scripts": {
+    "start": "elm-live --output=elm.js src/Main.elm --pushstate --open --debug --warn",
+    "start:test:watch": "concurrently \"npm run start\" \"npm run test:watch\"",
+    "test:watch": "elm-test --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/energizedwork/ew-dashboards-ui.git"
+  },
+  "author": "msp",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/energizedwork/ew-dashboards-ui/issues"
+  },
+  "homepage": "https://github.com/energizedwork/ew-dashboards-ui#readme"
+}
