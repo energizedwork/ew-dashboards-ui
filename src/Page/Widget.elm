@@ -135,17 +135,17 @@ view session model =
                     ]
                 , hr [] []
                   -- , viewDataSource model
-                , div [ class "article-actions" ]
-                    [ div [ class "article-meta" ] <|
-                        [ a [ Route.href (Route.Profile author.username) ]
-                            [ img [ UserPhoto.src author.image ] [] ]
-                        , div [ class "info" ]
-                            [ Views.Author.view author.username
-                            , Views.Widget.viewTimestamp widget
-                            ]
-                        ]
-                            ++ buttons
-                    ]
+                  -- , div [ class "article-actions" ]
+                  --     [ div [ class "article-meta" ] <|
+                  --         [ a [ Route.href (Route.Profile author.username) ]
+                  --             [ img [ UserPhoto.src author.image ] [] ]
+                  --           , div [ class "info" ]
+                  --               [ Views.Author.view author.username
+                  --               , Views.Widget.viewTimestamp widget
+                  --               ]
+                  --         ]
+                  --             ++ buttons
+                  --     ]
                 ]
             ]
 
