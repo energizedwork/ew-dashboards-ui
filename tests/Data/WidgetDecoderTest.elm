@@ -25,7 +25,6 @@ widgetDecoderTest =
                         "widget": {
                             "uuid": "006f0092-5a11-468d-b822-ea57753f45c4",
                             "name": "12 months Table",
-                            "body": "12 months Table",
                             "description": "12 months of important data",
                             "dataSources": [{
                                 "uuid": "datasource-1234",
@@ -72,7 +71,7 @@ widgetDecoderTest =
                     }
 
                 decodedOutput =
-                    Decode.decodeString (Widget.decoderWithBody |> Decode.field "widget") input
+                    Decode.decodeString (Widget.decoder |> Decode.field "widget") input
             in
                 -- TODO - hmm, why do I need the toString :/
                 Expect.equal (toString decodedOutput)
@@ -91,7 +90,6 @@ widgetDecoderTest =
                             , favoritesCount = 0
                             , author = expectedAuthor
                             , data = { rows = [] }
-                            , body = Body "12 months Table"
                             }
                         )
                     )

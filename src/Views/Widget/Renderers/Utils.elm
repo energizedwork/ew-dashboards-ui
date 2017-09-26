@@ -47,7 +47,7 @@ largePadding =
     50
 
 
-renderDataSourceInfoFrom : Widget a -> Html msg
+renderDataSourceInfoFrom : Widget -> Html msg
 renderDataSourceInfoFrom widget =
     p [ class "small data-source-info" ] [ text <| DataSource.toChannel <| Widget.primaryDataSource widget ]
 

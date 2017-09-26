@@ -20,7 +20,7 @@ decoder =
         |> required "author" Author.decoder
         |> required "favorited" Decode.bool
         |> required "favoritesCount" Decode.int
-        |> required "widgets" (Decode.list Widget.decoderWithBody)
+        |> required "widgets" (Decode.list Widget.decoder)
 
 
 type alias Dashboard =
@@ -33,5 +33,5 @@ type alias Dashboard =
     , author : Author
     , favorited : Bool
     , favoritesCount : Int
-    , widgets : List (Widget Body)
+    , widgets : List Widget
     }

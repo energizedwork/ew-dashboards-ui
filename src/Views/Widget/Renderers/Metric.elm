@@ -23,7 +23,7 @@ viewMetric label metric =
         ]
 
 
-render : Int -> Int -> Widget Body -> Table.Data -> Html msg
+render : Int -> Int -> Widget -> Table.Data -> Html msg
 render width height widget data =
     case widget.adapter of
         METRIC config ->

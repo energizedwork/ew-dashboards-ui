@@ -9,7 +9,7 @@ import Html.Attributes exposing (attribute, class, classList, href, id, placehol
 import Views.Widget.Renderers.Utils as Utils
 
 
-render : Int -> Int -> Widget Body -> Table.Data -> Html msg
+render : Int -> Int -> Widget -> Table.Data -> Html msg
 render width height widget data =
     case widget.adapter of
         TABLE optionalConfig ->
