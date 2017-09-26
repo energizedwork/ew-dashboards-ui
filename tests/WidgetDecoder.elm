@@ -5,8 +5,9 @@ import Fuzz exposing (Fuzzer, int, list, string)
 import Test exposing (..)
 import Json.Encode as Encode exposing (object)
 import Json.Decode as Decode exposing (..)
+import JsonApi.Types exposing (Document, Resource)
 import String
-import Data.DataSource exposing (DataSource)
+import Data.DataSource as DataSource exposing (DataSource)
 import Data.Widget.Author as Author
 import Data.Widget as Widget exposing (UUID(..), Body(..), decoder)
 import Data.Widget.Adapters.Adapter as Adapter exposing (Adapter(..))
@@ -14,75 +15,201 @@ import Data.Widget.Renderer as Renderer exposing (Renderer(..))
 import Data.User as User exposing (Username(..))
 import Data.UserPhoto as UserPhoto exposing (UserPhoto(..))
 import Date
+import JsonApi.Decode
+import JsonApi.Documents
+import JsonApi.Resources
+import List.Extra
 
 
 widgetDecoderTest : Test
 widgetDecoderTest =
-    test "Widget.decoder" <|
-        \() ->
-            let
-                input =
-                    """
+    let
+        input =
+            """
                     {
-                        "widget": {
-                            "uuid": "006f0092-5a11-468d-b822-ea57753f45c4",
-                            "name": "12 months Table",
-                            "body": "12 months Table",
-                            "description": "12 months of important data",
-                            "dataSources": [{
-                                "uuid": "datasource-1234",
-                                "name": "12 month financials"
-                            }],
-                            "adapter": "TABLE",
-                            "renderer": "TABLE",
-                            "createdAt": "2017-09-04T16:03:55.948Z",
-                            "updatedAt": "2017-09-04T16:03:55.948Z",
-                            "tagList": [],
-                            "author": {
-                                "username": "msp",
-                                "bio": "beautifully flawed creation ..",
-                                "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
-                                "following": false
+                        "jsonapi": {
+                            "version": "1.0"
+                        },
+                        "included": [
+                            {
+                                "type": "author",
+                                "id": "da4ec009-7dd9-4036-9e82-2073fad03fd8",
+                                "attributes": {
+                                    "username": "msp",
+                                    "image-src": null
+                                }
                             },
-                            "favorited": false,
-                            "favoritesCount": 0
-                        }
+                            {
+                                "type": "data-source",
+                                "meta": {
+                                    "url": "http://google.com/my-spread-sheet"
+                                },
+                                "id": "de2c5277-1a63-4196-a8e5-c2ed62bf89da",
+                                "attributes": {
+                                    "name": "google spreadsheet Q2",
+                                    "meta": {
+                                        "url": "http://google.com/my-spread-sheet"
+                                    }
+                                }
+                            }
+                        ],
+                        "data": [
+                            {
+                                "type": "widget",
+                                "relationships": {
+                                    "data-sources": {
+                                        "data": [
+                                            {
+                                                "type": "data-source",
+                                                "id": "de2c5277-1a63-4196-a8e5-c2ed62bf89da"
+                                            }
+                                        ]
+                                    },
+                                    "author": {
+                                        "data": {
+                                            "type": "author",
+                                            "id": "da4ec009-7dd9-4036-9e82-2073fad03fd8"
+                                        }
+                                    }
+                                },
+                                "id": "948f0330-235c-462f-a8a5-192b924e445b",
+                                "attributes": {
+                                    "renderer": "TABLE",
+                                    "name": "12 months Table",
+                                    "meta": null,
+                                    "description": "12 months of important data",
+                                    "adapter": "TABLE",
+                                    "inserted-at": "2017-09-26T11:07:13.485940Z",
+                                    "updated-at": "2017-09-26T11:07:13.485940Z"
+                                }
+                            }
+                        ]
                     }
                     """
 
-                expectedDate =
-                    Date.fromString "Mon Sep 04 2017 17:03:55 GMT+0100 (BST)" |> Result.withDefault (Date.fromTime 0)
+        decodedWidgetResource =
+            case JsonApi.Documents.primaryResourceCollection (documentFrom input) of
+                Err string ->
+                    Debug.crash string
 
-                expectedAuthor =
-                    Author.Author
-                        (User.Username "msp")
-                        (Just "beautifully flawed creation ..")
-                        (UserPhoto.UserPhoto <| Just "https://static.productionready.io/images/smiley-cyrus.jpg")
-                        False
+                Ok resourceList ->
+                    case List.head resourceList of
+                        Nothing ->
+                            Debug.crash "Expected non-empty collection"
 
-                expectedDatasources =
-                    [ DataSource "datasource-1234" "12 month financials" ]
+                        Just resource ->
+                            resource
 
-                decodedOutput =
-                    Decode.decodeString (Widget.decoderWithBody |> Decode.field "widget") input
-            in
-                -- TODO - hmm, why do I need the toString :/
-                Expect.equal (toString decodedOutput)
-                    (toString
-                        (Ok
-                            { uuid = Widget.UUID "006f0092-5a11-468d-b822-ea57753f45c4"
-                            , name = "12 months Table"
-                            , description = "12 months of important data"
-                            , dataSources = expectedDatasources
-                            , adapter = Adapter.TABLE
-                            , renderer = Renderer.TABLE
-                            , tags = []
-                            , createdAt = expectedDate
-                            , updatedAt = expectedDate
-                            , favorited = False
-                            , favoritesCount = 0
-                            , author = expectedAuthor
-                            , body = Body "12 months Table"
-                            }
-                        )
-                    )
+        -- Hmm, Id rather the decoder blew up than us have to pass a default type ?
+        decodedPrimaryResourceAttribute =
+            JsonApi.Resources.attributes Widget.decoder decodedWidgetResource
+                |> Result.toMaybe
+                |> Maybe.withDefault defaultWidget
+
+        relatedDataSourceResource =
+            case JsonApi.Resources.relatedResourceCollection "data-sources" decodedWidgetResource of
+                Err string ->
+                    Debug.crash string
+
+                Ok dataSourceResources ->
+                    case (List.Extra.find (\resource -> (JsonApi.Resources.id resource) == "de2c5277-1a63-4196-a8e5-c2ed62bf89da") dataSourceResources) of
+                        Nothing ->
+                            Debug.crash "Expected to find related data source with id: de2c5277-1a63-4196-a8e5-c2ed62bf89da"
+
+                        Just resource ->
+                            resource
+
+        -- TODO MSP - are we missing the links attributes in the JSON ?
+        relatedDataSourceResourceAttribute =
+            JsonApi.Resources.attributes DataSource.decoder relatedDataSourceResource
+                |> Result.toMaybe
+                |> Maybe.withDefault defaultDataSource
+
+        primaryAttributesAreDecoded =
+            \_ -> Expect.equal decodedPrimaryResourceAttribute expectedWidget
+
+        relationshipAttributesAreDecoded =
+            \_ -> Expect.equal (Debug.log "RELATED: " relatedDataSourceResourceAttribute) expectedDataSource
+
+        msp =
+            \_ -> Expect.equal "1" "2"
+    in
+        Test.describe "decoding and relationships"
+            -- [ Test.test "it extracts the primary data attributes from the document" msp
+            [ Test.test "it extracts the primary data attributes from the document" primaryAttributesAreDecoded
+            , Test.test "it extracts the relationship attributes" relationshipAttributesAreDecoded
+            ]
+
+
+documentFrom : String -> Document
+documentFrom input =
+    case decodeString JsonApi.Decode.document input of
+        Ok doc ->
+            doc
+
+        Err string ->
+            Debug.crash string
+
+
+defaultWidget : Widget.Widget
+defaultWidget =
+    Widget.Widget
+        (Widget.UUID "006f0092-5a11-468d-b822-ea57753f45c4")
+        "defaultWidget"
+        "defaultWidget"
+        []
+        Adapter.TABLE
+        Renderer.TABLE
+        []
+        expectedDate
+        expectedDate
+        False
+        0
+        expectedAuthor
+
+
+defaultDataSource : DataSource.DataSource
+defaultDataSource =
+    DataSource.DataSource
+        "1234567890"
+        "defaultDataSource"
+
+
+expectedWidget : Widget.Widget
+expectedWidget =
+    Widget.Widget
+        (Widget.UUID "006f0092-5a11-468d-b822-ea57753f45c4")
+        "12 months Table"
+        "12 months of important data"
+        []
+        Adapter.TABLE
+        Renderer.TABLE
+        []
+        expectedDate
+        expectedDate
+        False
+        0
+        expectedAuthor
+
+
+expectedDataSource : DataSource.DataSource
+expectedDataSource =
+    DataSource.DataSource
+        "de2c5277-1a63-4196-a8e5-c2ed62bf89da"
+        "google spreadsheet Q2"
+
+
+expectedDatasources =
+    [ expectedDataSource ]
+
+
+expectedDate =
+    Date.fromString "2017-09-26T11:07:13.485940Z" |> Result.withDefault (Date.fromTime 0)
+
+
+expectedAuthor =
+    Author.Author
+        (User.Username "msp")
+        (Just "beautifully flawed creation ..")
+        (UserPhoto.UserPhoto <| Just "https://static.productionready.io/images/smiley-cyrus.jpg")
+        False
