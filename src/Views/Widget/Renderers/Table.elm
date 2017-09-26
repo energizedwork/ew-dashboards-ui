@@ -8,7 +8,7 @@ import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src)
 
 
-render : Widget Body -> Table.Data -> Html msg
+render : Widget -> Table.Data -> Html msg
 render widget data =
     case widget.adapter of
         TABLE ->

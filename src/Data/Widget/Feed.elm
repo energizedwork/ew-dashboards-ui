@@ -6,7 +6,7 @@ import Json.Decode.Pipeline as Pipeline exposing (decode, required)
 
 
 type alias Feed =
-    { widgets : List (Widget ())
+    { widgets : List Widget
     , widgetsCount : Int
     }
 
