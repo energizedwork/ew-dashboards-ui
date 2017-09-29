@@ -87,8 +87,8 @@ widgetDecoderTest =
                     }
                     """
 
-        decodedWidgetResource =
-            case JsonApi.Documents.primaryResourceCollection (documentFrom input) of
+        decodedResource =
+            case JsonApi.Documents.primaryResourceCollection (getDocumentFrom input) of
                 Err string ->
                     Debug.crash string
 
@@ -101,13 +101,13 @@ widgetDecoderTest =
                             resource
 
         -- Hmm, Id rather the decoder blew up than us have to pass a default type ?
-        decodedPrimaryResourceAttribute =
-            JsonApi.Resources.attributes Widget.decoder decodedWidgetResource
+        decodedWidget =
+            JsonApi.Resources.attributes Widget.decoder decodedResource
                 |> Result.toMaybe
                 |> Maybe.withDefault defaultWidget
 
-        relatedDataSourceResource =
-            case JsonApi.Resources.relatedResourceCollection "data-sources" decodedWidgetResource of
+        decodedDataSource =
+            case JsonApi.Resources.relatedResourceCollection "data-sources" decodedResource of
                 Err string ->
                     Debug.crash string
 
@@ -120,29 +120,29 @@ widgetDecoderTest =
                             resource
 
         -- TODO MSP - are we missing the links attributes in the JSON ?
-        relatedDataSourceResourceAttribute =
-            JsonApi.Resources.attributes DataSource.decoder relatedDataSourceResource
+        decodedDataSourceResourceAttributes =
+            JsonApi.Resources.attributes DataSource.decoder decodedDataSource
                 |> Result.toMaybe
                 |> Maybe.withDefault defaultDataSource
 
+        primaryIdIsDecoded =
+            \_ -> Expect.equal (JsonApi.Resources.id decodedResource) "948f0330-235c-462f-a8a5-192b924e445b"
+
         primaryAttributesAreDecoded =
-            \_ -> Expect.equal decodedPrimaryResourceAttribute expectedWidget
+            \_ -> Expect.equal decodedWidget expectedWidget
 
         relationshipAttributesAreDecoded =
-            \_ -> Expect.equal (Debug.log "RELATED: " relatedDataSourceResourceAttribute) expectedDataSource
-
-        msp =
-            \_ -> Expect.equal "1" "2"
+            \_ -> Expect.equal decodedDataSourceResourceAttributes expectedDataSource
     in
         Test.describe "decoding and relationships"
-            -- [ Test.test "it extracts the primary data attributes from the document" msp
-            [ Test.test "it extracts the primary data attributes from the document" primaryAttributesAreDecoded
+            [ Test.test "it extracts the primary resource id" primaryIdIsDecoded
+            , Test.test "it extracts the primary resource attributes" primaryAttributesAreDecoded
             , Test.test "it extracts the relationship attributes" relationshipAttributesAreDecoded
             ]
 
 
-documentFrom : String -> Document
-documentFrom input =
+getDocumentFrom : String -> Document
+getDocumentFrom input =
     case decodeString JsonApi.Decode.document input of
         Ok doc ->
             doc
@@ -154,7 +154,7 @@ documentFrom input =
 defaultWidget : Widget.Widget
 defaultWidget =
     Widget.Widget
-        (Widget.UUID "006f0092-5a11-468d-b822-ea57753f45c4")
+        (Widget.UUID "a08ad2d0-7743-4eaf-906c-bdf11352cfcd")
         "defaultWidget"
         "defaultWidget"
         []
