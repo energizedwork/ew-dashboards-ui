@@ -7,13 +7,14 @@ import Json.Encode as Encode exposing (object)
 import Json.Decode as Decode exposing (..)
 import JsonApi.Types exposing (Document, Resource)
 import String
-import Data.DataSource as DataSource exposing (DataSource)
-import Data.Widget.Author as Author
-import Data.Widget as Widget exposing (UUID(..), Body(..), decoder)
+import Data.DataSource as DataSource exposing (..)
+import Data.Widget.Author as Author exposing (..)
+import Data.Widget as Widget exposing (Body(..), decoder, defaultAttributes)
 import Data.Widget.Adapters.Adapter as Adapter exposing (Adapter(..))
 import Data.Widget.Renderer as Renderer exposing (Renderer(..))
 import Data.User as User exposing (Username(..))
 import Data.UserPhoto as UserPhoto exposing (UserPhoto(..))
+import Data.UUID as UUID exposing (UUID)
 import Date
 import JsonApi.Decode
 import JsonApi.Documents
@@ -36,7 +37,7 @@ widgetDecoderTest =
                                 "id": "da4ec009-7dd9-4036-9e82-2073fad03fd8",
                                 "attributes": {
                                     "username": "msp",
-                                    "image-src": null
+                                    "image-src": "https://cenatus.org/images/msp.jpg"
                                 }
                             },
                             {
@@ -74,7 +75,7 @@ widgetDecoderTest =
                                 },
                                 "id": "948f0330-235c-462f-a8a5-192b924e445b",
                                 "attributes": {
-                                    "renderer": "TABLE",
+                                    "renderer": "BAR_CHART",
                                     "name": "12 months Table",
                                     "meta": null,
                                     "description": "12 months of important data",
@@ -100,13 +101,13 @@ widgetDecoderTest =
                         Just resource ->
                             resource
 
-        -- Hmm, Id rather the decoder blew up than us have to pass a default type ?
-        decodedWidget =
+        -- TODO: Hmm, Id rather the decoder blew up than us have to pass a default type ?
+        decodedWidgetAttributes =
             JsonApi.Resources.attributes Widget.decoder decodedResource
                 |> Result.toMaybe
-                |> Maybe.withDefault defaultWidget
+                |> Maybe.withDefault Widget.defaultAttributes
 
-        decodedDataSource =
+        decodedDataSourceRelation =
             case JsonApi.Resources.relatedResourceCollection "data-sources" decodedResource of
                 Err string ->
                     Debug.crash string
@@ -119,25 +120,64 @@ widgetDecoderTest =
                         Just resource ->
                             resource
 
-        -- TODO MSP - are we missing the links attributes in the JSON ?
-        decodedDataSourceResourceAttributes =
-            JsonApi.Resources.attributes DataSource.decoder decodedDataSource
+        decodedAuthorRelation =
+            case JsonApi.Resources.relatedResource "author" decodedResource of
+                Err string ->
+                    Debug.crash string
+
+                Ok author ->
+                    author
+
+        decodedDataSourceAttributes =
+            JsonApi.Resources.attributes DataSource.decoder decodedDataSourceRelation
                 |> Result.toMaybe
-                |> Maybe.withDefault defaultDataSource
+                |> Maybe.withDefault DataSource.defaultAttributes
 
-        primaryIdIsDecoded =
-            \_ -> Expect.equal (JsonApi.Resources.id decodedResource) "948f0330-235c-462f-a8a5-192b924e445b"
+        decodedAuthorAttributes =
+            JsonApi.Resources.attributes Author.decoder decodedAuthorRelation
+                |> Result.toMaybe
+                |> Maybe.withDefault Author.defaultAttributes
 
-        primaryAttributesAreDecoded =
-            \_ -> Expect.equal decodedWidget expectedWidget
+        widgetIdIsDecoded =
+            \_ -> Expect.equal (JsonApi.Resources.id decodedResource) (UUID.slugToString expectedWidgetUUID)
 
-        relationshipAttributesAreDecoded =
-            \_ -> Expect.equal decodedDataSourceResourceAttributes expectedDataSource
+        widgetAttributesAreDecoded =
+            \_ -> Expect.equal decodedWidgetAttributes expectedWidgetAttributes
+
+        dataSourceAttributesAreDecoded =
+            \_ -> Expect.equal decodedDataSourceAttributes expectedDataSourceAttributes
+
+        authorAttributesAreDecoded =
+            \_ -> Expect.equal decodedAuthorAttributes expectedAuthorAttributes
+
+        widgetConstructed =
+            let
+                widgetUUID =
+                    UUID.UUID (JsonApi.Resources.id decodedResource)
+
+                dataSourceUUID =
+                    UUID.UUID (JsonApi.Resources.id decodedDataSourceRelation)
+
+                dataSources =
+                    DataSource.factory dataSourceUUID decodedDataSourceAttributes
+
+                author =
+                    Author.factory decodedAuthorAttributes
+
+                tags =
+                    []
+
+                widget =
+                    Widget.factory widgetUUID decodedWidgetAttributes [ dataSources ] tags author
+            in
+                \_ -> Expect.equal widget expectedWidget
     in
         Test.describe "decoding and relationships"
-            [ Test.test "it extracts the primary resource id" primaryIdIsDecoded
-            , Test.test "it extracts the primary resource attributes" primaryAttributesAreDecoded
-            , Test.test "it extracts the relationship attributes" relationshipAttributesAreDecoded
+            [ Test.test "it extracts the widget id" widgetIdIsDecoded
+            , Test.test "it extracts the widget attributes" widgetAttributesAreDecoded
+            , Test.test "it extracts the data source attributes" dataSourceAttributesAreDecoded
+            , Test.test "it extracts the author attributes" authorAttributesAreDecoded
+            , Test.test "we construct the expected Widget" widgetConstructed
             ]
 
 
@@ -151,65 +191,58 @@ getDocumentFrom input =
             Debug.crash string
 
 
-defaultWidget : Widget.Widget
-defaultWidget =
-    Widget.Widget
-        (Widget.UUID "a08ad2d0-7743-4eaf-906c-bdf11352cfcd")
-        "defaultWidget"
-        "defaultWidget"
-        []
-        Adapter.TABLE
-        Renderer.TABLE
-        []
-        expectedDate
-        expectedDate
-        False
-        0
-        expectedAuthor
+expectedWidgetUUID =
+    UUID.UUID "948f0330-235c-462f-a8a5-192b924e445b"
 
 
-defaultDataSource : DataSource.DataSource
-defaultDataSource =
-    DataSource.DataSource
-        "1234567890"
-        "defaultDataSource"
-
-
-expectedWidget : Widget.Widget
-expectedWidget =
-    Widget.Widget
-        (Widget.UUID "006f0092-5a11-468d-b822-ea57753f45c4")
+expectedWidgetAttributes : Widget.WidgetAttributes
+expectedWidgetAttributes =
+    Widget.WidgetAttributes
         "12 months Table"
         "12 months of important data"
-        []
         Adapter.TABLE
-        Renderer.TABLE
-        []
+        Renderer.BAR_CHART
         expectedDate
         expectedDate
         False
         0
-        expectedAuthor
 
 
-expectedDataSource : DataSource.DataSource
-expectedDataSource =
-    DataSource.DataSource
-        "de2c5277-1a63-4196-a8e5-c2ed62bf89da"
+expectedDataSourceUUID =
+    UUID.UUID "de2c5277-1a63-4196-a8e5-c2ed62bf89da"
+
+
+expectedDataSourceAttributes : DataSource.DataSourceAttributes
+expectedDataSourceAttributes =
+    DataSource.DataSourceAttributes
         "google spreadsheet Q2"
-
-
-expectedDatasources =
-    [ expectedDataSource ]
 
 
 expectedDate =
     Date.fromString "2017-09-26T11:07:13.485940Z" |> Result.withDefault (Date.fromTime 0)
 
 
-expectedAuthor =
-    Author.Author
+expectedAuthorAttributes =
+    Author.AuthorAttributes
         (User.Username "msp")
-        (Just "beautifully flawed creation ..")
-        (UserPhoto.UserPhoto <| Just "https://static.productionready.io/images/smiley-cyrus.jpg")
-        False
+        (UserPhoto.UserPhoto <| Just "https://cenatus.org/images/msp.jpg")
+
+
+expectedWidget =
+    let
+        widgetUUID =
+            expectedWidgetUUID
+
+        dataSourceUUID =
+            expectedDataSourceUUID
+
+        dataSources =
+            DataSource.factory dataSourceUUID expectedDataSourceAttributes
+
+        author =
+            Author.factory expectedAuthorAttributes
+
+        tags =
+            []
+    in
+        Widget.factory widgetUUID expectedWidgetAttributes [ dataSources ] tags author

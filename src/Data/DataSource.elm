@@ -1,22 +1,38 @@
-module Data.DataSource exposing (DataSource, decoder, init, toChannel)
+module Data.DataSource exposing (DataSource, DataSourceAttributes, decoder, defaultAttributes, factory, init, toChannel)
 
 import Json.Decode as Decode exposing (Decoder, field)
 import Json.Decode.Pipeline as Pipeline exposing (custom, decode, required, hardcoded)
+import Data.UUID as UUID exposing (UUID)
 
 
 type alias DataSource =
-    { uuid : String
+    { uuid : UUID
     , name : String
     }
 
 
-decoder : Decoder DataSource
+type alias DataSourceAttributes =
+    { name : String
+    }
+
+
+factory : UUID -> DataSourceAttributes -> DataSource
+factory uuid atts =
+    DataSource
+        uuid
+        atts.name
+
+
+decoder : Decoder DataSourceAttributes
 decoder =
-    decode DataSource
-        |> hardcoded "de2c5277-1a63-4196-a8e5-c2ed62bf89da"
-        -- TODO!
-        |>
-            required "name" Decode.string
+    decode DataSourceAttributes
+        |> required "name" Decode.string
+
+
+defaultAttributes : DataSourceAttributes
+defaultAttributes =
+    DataSourceAttributes
+        "default datasource"
 
 
 init : DataSource

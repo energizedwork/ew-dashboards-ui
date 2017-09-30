@@ -1,17 +1,17 @@
 module Data.Widget
     exposing
         ( Widget
+        , WidgetAttributes
         , Body(..)
-        , UUID(..)
         , Tag
         , bodyToHtml
         , bodyToMarkdownString
         , decoder
         , primaryDataSource
-        , slugParser
-        , slugToString
         , tagDecoder
         , tagToString
+        , defaultAttributes
+        , factory
         )
 
 import Data.Widget.Author as Author exposing (Author)
@@ -20,6 +20,7 @@ import Data.Widget.Renderer as Renderer exposing (Renderer(..))
 import Data.DataSource as DataSource exposing (DataSource)
 import Data.User as User exposing (Username(..))
 import Data.UserPhoto as UserPhoto exposing (UserPhoto(..))
+import Data.UUID as UUID exposing (UUID)
 import Date exposing (Date)
 import Html exposing (Attribute, Html)
 import Json.Decode as Decode exposing (Decoder)
@@ -45,44 +46,46 @@ type alias Widget =
     }
 
 
+type alias WidgetAttributes =
+    { name : String
+    , description : String
+    , adapter : Adapter
+    , renderer : Renderer
+    , createdAt : Date
+    , updatedAt : Date
+    , favorited : Bool
+    , favoritesCount : Int
+    }
 
--- SERIALIZATION --
+
+factory : UUID -> WidgetAttributes -> List DataSource -> List String -> Author -> Widget
+factory uuid atts dataSources tags author =
+    Widget
+        uuid
+        atts.name
+        atts.description
+        dataSources
+        atts.adapter
+        atts.renderer
+        tags
+        atts.createdAt
+        atts.updatedAt
+        atts.favorited
+        atts.favoritesCount
+        author
 
 
-decoder : Decoder Widget
+decoder : Decoder WidgetAttributes
 decoder =
-    baseWidgetDecoder
-
-
-baseWidgetDecoder : Decoder Widget
-baseWidgetDecoder =
-    decode Widget
-        |> hardcoded (UUID "006f0092-5a11-468d-b822-ea57753f45c4")
-        -- TODO!
-        |>
-            required "name" Decode.string
+    decode WidgetAttributes
+        |> required "name" Decode.string
         |> required "description" (Decode.map (Maybe.withDefault "") (Decode.nullable Decode.string))
-        |> hardcoded []
         |> required "adapter" adapterDecoder
         |> required "renderer" rendererDecoder
-        |> hardcoded []
         |> required "inserted-at" Json.Decode.Extra.date
         |> required "updated-at" Json.Decode.Extra.date
         |> hardcoded False
         |> hardcoded 0
-        |> hardcoded defaultAuthor
-
-
-defaultDate =
-    Date.fromString "Mon Jan 01 1976 17:03:55 GMT+0100 (BST)" |> Result.withDefault (Date.fromTime 0)
-
-
-defaultAuthor =
-    Author.Author
-        (User.Username "msp")
-        (Just "beautifully flawed creation ..")
-        (UserPhoto.UserPhoto <| Just "https://static.productionready.io/images/smiley-cyrus.jpg")
-        False
 
 
 adapterDecoder : Decoder Adapter
@@ -128,22 +131,20 @@ rendererDecoder =
             )
 
 
+defaultAttributes =
+    WidgetAttributes
+        "initialised widget attributes"
+        "initialised widget attributes"
+        Adapter.TABLE
+        Renderer.TABLE
+        defaultDate
+        defaultDate
+        False
+        0
 
--- IDENTIFIERS --
 
-
-type UUID
-    = UUID String
-
-
-slugParser : UrlParser.Parser (UUID -> a) a
-slugParser =
-    UrlParser.custom "SLUG" (Ok << UUID)
-
-
-slugToString : UUID -> String
-slugToString (UUID slug) =
-    slug
+defaultDate =
+    Date.fromString "Mon Jan 01 1976 17:03:55 GMT+0100 (BST)" |> Result.withDefault (Date.fromTime 0)
 
 
 
