@@ -3,6 +3,7 @@ module Page.Widget.Editor exposing (Model, Msg, initEdit, initNew, update, view)
 import Data.Widget as Widget exposing (Widget, Body)
 import Data.Session as Session exposing (Session)
 import Data.User as User exposing (User)
+import Data.UUID as UUID
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, defaultValue, disabled, href, id, placeholder, type_)
 import Html.Events exposing (onInput, onSubmit)
@@ -22,7 +23,7 @@ import Views.Page as Page
 
 type alias Model =
     { errors : List Error
-    , editingWidget : Maybe Widget.UUID
+    , editingWidget : Maybe UUID.UUID
     , name : String
     , description : String
     , tags : List String
@@ -39,7 +40,7 @@ initNew =
     }
 
 
-initEdit : Session -> Widget.UUID -> Task PageLoadError Model
+initEdit : Session -> UUID.UUID -> Task PageLoadError Model
 initEdit session slug =
     let
         maybeAuthToken =
@@ -217,6 +218,6 @@ tagsFromString str =
         |> List.filter (not << String.isEmpty)
 
 
-redirectToWidget : Widget.UUID -> Cmd msg
+redirectToWidget : UUID.UUID -> Cmd msg
 redirectToWidget =
     Route.modifyUrl << Route.Widget

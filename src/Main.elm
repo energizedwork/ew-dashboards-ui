@@ -1,8 +1,8 @@
 module Main exposing (main)
 
-import Data.Widget exposing (UUID)
 import Data.Session as Session exposing (Session)
 import Data.User as User exposing (User, Username)
+import Data.UUID as UUID
 import Html exposing (..)
 import Json.Decode as Decode exposing (Value)
 import Navigation exposing (Location)
@@ -42,7 +42,7 @@ type Page
     | Profile Username Profile.Model
     | Dashboard Dashboard.Model
     | Widget Widget.Model
-    | Editor (Maybe UUID) Editor.Model
+    | Editor (Maybe UUID.UUID) Editor.Model
 
 
 type PageState
@@ -241,7 +241,7 @@ type Msg
     | DashboardLoaded (Result PageLoadError Dashboard.Model)
     | WidgetLoaded (Result PageLoadError Widget.Model)
     | ProfileLoaded Username (Result PageLoadError Profile.Model)
-    | EditWidgetLoaded UUID (Result PageLoadError Editor.Model)
+    | EditWidgetLoaded UUID.UUID (Result PageLoadError Editor.Model)
     | HomeMsg Home.Msg
     | SettingsMsg Settings.Msg
     | SetUser (Maybe User)

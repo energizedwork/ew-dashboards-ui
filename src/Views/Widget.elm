@@ -3,8 +3,8 @@ module Views.Widget exposing (view, viewTimestamp)
 {-| Viewing a preview of an individual widget, excluding its body.
 -}
 
-import Data.Widget as Widget exposing (Widget)
 import Data.UserPhoto as UserPhoto exposing (UserPhoto)
+import Data.Widget as Widget exposing (Widget)
 import Date.Format
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src)

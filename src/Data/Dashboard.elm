@@ -1,7 +1,8 @@
 module Data.Dashboard exposing (Dashboard, decoder)
 
-import Data.Widget.Author as Author exposing (Author)
+import Data.UUID as UUID
 import Data.Widget as Widget exposing (..)
+import Data.Widget.Author as Author exposing (Author)
 import Date exposing (Date)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Extra
@@ -11,7 +12,7 @@ import Json.Decode.Pipeline as Pipeline exposing (custom, decode, required)
 decoder : Decoder Dashboard
 decoder =
     decode Dashboard
-        |> required "uuid" (Decode.map UUID Decode.string)
+        |> required "uuid" (Decode.map UUID.UUID Decode.string)
         |> required "name" Decode.string
         |> required "slug" Decode.string
         |> required "description" Decode.string
@@ -24,7 +25,7 @@ decoder =
 
 
 type alias Dashboard =
-    { uuid : Widget.UUID
+    { uuid : UUID.UUID
     , name : String
     , slug : String
     , description : String

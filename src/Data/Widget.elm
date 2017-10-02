@@ -2,20 +2,18 @@ module Data.Widget
     exposing
         ( Widget
         , Body(..)
-        , UUID(..)
         , Tag
         , bodyToHtml
         , bodyToMarkdownString
         , decoder
         , init
         , primaryDataSource
-        , slugParser
-        , slugToString
         , tagDecoder
         , tagToString
         )
 
 import Data.DataSource as DataSource exposing (DataSource)
+import Data.UUID as UUID
 import Data.Widget.Adapters.Adapter as Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.TableAdapter as TableAdapter
 import Data.Widget.Author as Author exposing (Author)
@@ -31,7 +29,7 @@ import UrlParser
 
 
 type alias Widget =
-    { uuid : UUID
+    { uuid : UUID.UUID
     , name : String
     , description : String
     , dataSources : List DataSource
@@ -51,7 +49,7 @@ init : Widget
 init =
     let
         uuid =
-            UUID "not-so-unique"
+            UUID.UUID "not-so-unique"
 
         name =
             "Init Widget"
@@ -99,7 +97,7 @@ init =
 decoder : Decoder Widget
 decoder =
     decode Widget
-        |> required "uuid" (Decode.map UUID Decode.string)
+        |> required "uuid" (Decode.map UUID.UUID Decode.string)
         |> required "name" Decode.string
         |> required "description" (Decode.map (Maybe.withDefault "") (Decode.nullable Decode.string))
         |> required "dataSources" (Decode.list DataSource.decoder)
@@ -144,24 +142,6 @@ rendererDecoder =
                     somethingElse ->
                         Decode.fail <| "Unknown renderer: " ++ somethingElse
             )
-
-
-
--- IDENTIFIERS --
-
-
-type UUID
-    = UUID String
-
-
-slugParser : UrlParser.Parser (UUID -> a) a
-slugParser =
-    UrlParser.custom "SLUG" (Ok << UUID)
-
-
-slugToString : UUID -> String
-slugToString (UUID slug) =
-    slug
 
 
 

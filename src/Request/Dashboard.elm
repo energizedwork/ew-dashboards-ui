@@ -11,11 +11,12 @@ module Request.Dashboard
         , toggleFavorite
         )
 
-import Data.Dashboard as Dashboard exposing (..)
-import Data.Widget as Widget exposing (Widget, Body, Tag, slugToString)
-import Data.Widget.Feed as Feed exposing (Feed)
 import Data.AuthToken as AuthToken exposing (AuthToken, withAuthorization)
+import Data.Dashboard as Dashboard exposing (..)
+import Data.UUID as UUID
 import Data.User as User exposing (Username)
+import Data.Widget as Widget exposing (Body, Tag, Widget)
+import Data.Widget.Feed as Feed exposing (Feed)
 import Http
 import HttpBuilder exposing (RequestBuilder, withBody, withExpect, withQueryParams)
 import Json.Decode as Decode
@@ -26,7 +27,7 @@ import Util exposing ((=>))
 -- SINGLE --
 
 
-get : Maybe AuthToken -> Widget.UUID -> Http.Request Dashboard
+get : Maybe AuthToken -> UUID.UUID -> Http.Request Dashboard
 get maybeToken slug =
     let
         expect =
@@ -34,7 +35,7 @@ get maybeToken slug =
                 |> Decode.field "dashboard"
                 |> Http.expectJson
     in
-        mockApiUrl ("/dashboards/" ++ Widget.slugToString slug)
+        mockApiUrl ("/dashboards/" ++ UUID.slugToString slug)
             |> HttpBuilder.get
             |> HttpBuilder.withExpect expect
             |> withAuthorization maybeToken
@@ -128,19 +129,19 @@ toggleFavorite dashboard authToken =
         favorite dashboard.uuid authToken
 
 
-favorite : Widget.UUID -> AuthToken -> Http.Request Dashboard
+favorite : UUID.UUID -> AuthToken -> Http.Request Dashboard
 favorite =
     buildFavorite HttpBuilder.post
 
 
-unfavorite : Widget.UUID -> AuthToken -> Http.Request Dashboard
+unfavorite : UUID.UUID -> AuthToken -> Http.Request Dashboard
 unfavorite =
     buildFavorite HttpBuilder.delete
 
 
 buildFavorite :
     (String -> RequestBuilder a)
-    -> Widget.UUID
+    -> UUID.UUID
     -> AuthToken
     -> Http.Request Dashboard
 buildFavorite builderFromUrl slug token =
@@ -150,7 +151,7 @@ buildFavorite builderFromUrl slug token =
                 |> Decode.field "dashboard"
                 |> Http.expectJson
     in
-        [ mockApiUrl "/dashboards", slugToString slug, "favorite" ]
+        [ mockApiUrl "/dashboards", UUID.slugToString slug, "favorite" ]
             |> String.join "/"
             |> builderFromUrl
             |> withAuthorization (Just token)
