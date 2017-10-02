@@ -1,11 +1,11 @@
 module Route exposing (Route(..), fromLocation, href, modifyUrl)
 
-import Data.Widget as Widget
 import Data.User as User exposing (Username)
 import Html exposing (Attribute)
 import Html.Attributes as Attr
 import Navigation exposing (Location)
 import UrlParser as Url exposing ((</>), Parser, oneOf, parseHash, s, string)
+import Data.UUID as UUID
 
 
 -- ROUTING --
@@ -17,10 +17,10 @@ type Route
     | Logout
     | Register
     | Settings
-    | Widget Widget.UUID
+    | Widget UUID.UUID
     | Profile Username
     | NewWidget
-    | EditWidget Widget.UUID
+    | EditWidget UUID.UUID
 
 
 route : Parser (Route -> a) a
@@ -32,9 +32,9 @@ route =
         , Url.map Settings (s "settings")
         , Url.map Profile (s "profile" </> User.usernameParser)
         , Url.map Register (s "register")
-        , Url.map Widget (s "widget" </> Widget.slugParser)
+        , Url.map Widget (s "widget" </> UUID.slugParser)
         , Url.map NewWidget (s "editor")
-        , Url.map EditWidget (s "editor" </> Widget.slugParser)
+        , Url.map EditWidget (s "editor" </> UUID.slugParser)
         ]
 
 
@@ -63,7 +63,7 @@ routeToString page =
                     [ "settings" ]
 
                 Widget slug ->
-                    [ "widget", Widget.slugToString slug ]
+                    [ "widget", UUID.slugToString slug ]
 
                 Profile username ->
                     [ "profile", User.usernameToString username ]
@@ -72,7 +72,7 @@ routeToString page =
                     [ "editor" ]
 
                 EditWidget slug ->
-                    [ "editor", Widget.slugToString slug ]
+                    [ "editor", UUID.slugToString slug ]
     in
         "#/" ++ String.join "/" pieces
 
