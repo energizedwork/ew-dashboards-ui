@@ -14,7 +14,7 @@ module Request.Widget
         , update
         )
 
-import Data.Widget as Widget exposing (Widget, Body, Tag, slugToString)
+import Data.Widget as Widget exposing (Widget, Body, Tag)
 import Data.Widget.Feed as Feed exposing (Feed)
 import Data.AuthToken as AuthToken exposing (AuthToken, withAuthorization)
 import Data.User as User exposing (Username)
@@ -24,12 +24,13 @@ import Json.Decode as Decode
 import Json.Encode as Encode
 import Request.Helpers exposing (mockApiUrl)
 import Util exposing ((=>))
+import Data.UUID as UUID
 
 
 -- SINGLE --
 
 
-get : Maybe AuthToken -> Widget.UUID -> Http.Request Widget
+get : Maybe AuthToken -> UUID.UUID -> Http.Request Widget
 get maybeToken slug =
     let
         expect =
@@ -37,7 +38,7 @@ get maybeToken slug =
                 |> Decode.field "widget"
                 |> Http.expectJson
     in
-        mockApiUrl ("/widgets/" ++ Widget.slugToString slug)
+        mockApiUrl ("/widgets/" ++ UUID.slugToString slug)
             |> HttpBuilder.get
             |> HttpBuilder.withExpect expect
             |> withAuthorization maybeToken
@@ -131,19 +132,19 @@ toggleFavorite widget authToken =
         favorite widget.uuid authToken
 
 
-favorite : Widget.UUID -> AuthToken -> Http.Request Widget
+favorite : UUID.UUID -> AuthToken -> Http.Request Widget
 favorite =
     buildFavorite HttpBuilder.post
 
 
-unfavorite : Widget.UUID -> AuthToken -> Http.Request Widget
+unfavorite : UUID.UUID -> AuthToken -> Http.Request Widget
 unfavorite =
     buildFavorite HttpBuilder.delete
 
 
 buildFavorite :
     (String -> RequestBuilder a)
-    -> Widget.UUID
+    -> UUID.UUID
     -> AuthToken
     -> Http.Request Widget
 buildFavorite builderFromUrl slug token =
@@ -153,7 +154,7 @@ buildFavorite builderFromUrl slug token =
                 |> Decode.field "widget"
                 |> Http.expectJson
     in
-        [ mockApiUrl "/widgets", slugToString slug, "favorite" ]
+        [ mockApiUrl "/widgets", UUID.slugToString slug, "favorite" ]
             |> String.join "/"
             |> builderFromUrl
             |> withAuthorization (Just token)
@@ -207,7 +208,7 @@ create config token =
             |> HttpBuilder.toRequest
 
 
-update : Widget.UUID -> EditConfig record -> AuthToken -> Http.Request Widget
+update : UUID.UUID -> EditConfig record -> AuthToken -> Http.Request Widget
 update slug config token =
     let
         expect =
@@ -225,7 +226,7 @@ update slug config token =
             Encode.object [ "widget" => widget ]
                 |> Http.jsonBody
     in
-        mockApiUrl ("/widgets/" ++ slugToString slug)
+        mockApiUrl ("/widgets/" ++ UUID.slugToString slug)
             |> HttpBuilder.put
             |> withAuthorization (Just token)
             |> withBody body
@@ -237,9 +238,9 @@ update slug config token =
 -- DELETE --
 
 
-delete : Widget.UUID -> AuthToken -> Http.Request ()
+delete : UUID.UUID -> AuthToken -> Http.Request ()
 delete slug token =
-    mockApiUrl ("/widgets/" ++ Widget.slugToString slug)
+    mockApiUrl ("/widgets/" ++ UUID.slugToString slug)
         |> HttpBuilder.delete
         |> withAuthorization (Just token)
         |> HttpBuilder.toRequest
