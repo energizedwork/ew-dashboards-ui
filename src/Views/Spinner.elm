@@ -16,6 +16,7 @@ spinner =
         ]
 
 
+spinnerSVG : Html msg
 spinnerSVG =
     svg [ SVGa.class "spinner", attribute "height" "65px", attribute "preserveAspectRatio" "xMidYMid", viewBox "0 0 100 100", attribute "width" "65px", attribute "xmlns" "http://www.w3.org/2000/svg" ]
         [ node "rect"

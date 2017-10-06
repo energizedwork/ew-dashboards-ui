@@ -1,0 +1,25 @@
+{
+    "widget": {
+          "uuid": "c9527bc4-166d-4012-9ff4-5ac04d2f2ee4",
+          "name": "12 months Line Chart",
+          "body": "12 months Line Chart",
+          "description": "12 months of important data",
+          "dataSources": [{
+              "uuid": "datasource-1234",
+              "name": "12 month financials"
+          }],
+          "adapter": "TABLE",
+          "renderer": "LINE_CHART",
+          "createdAt": "2017-09-04T16:03:55.948Z",
+          "updatedAt": "2017-09-04T16:03:55.948Z",
+          "tagList": [],
+          "author": {
+              "username": "msp",
+              "bio": "beautifully flawed creation .. \n\n",
+              "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
+              "following": false
+          },
+          "favorited": false,
+          "favoritesCount": 0
+    }
+}

@@ -126,8 +126,8 @@ rendererDecoder =
                     "TABLE" ->
                         Decode.succeed Renderer.TABLE
 
-                    "LINE" ->
-                        Decode.succeed Renderer.LINE
+                    "LINE_CHART" ->
+                        Decode.succeed Renderer.LINE_CHART
 
                     "BAR_CHART" ->
                         Decode.succeed Renderer.BAR_CHART

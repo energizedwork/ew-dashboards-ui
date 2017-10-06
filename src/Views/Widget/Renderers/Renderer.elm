@@ -5,6 +5,7 @@ import Data.Widget.Table as Table exposing (Data, Cell)
 import Data.Widget.Renderer exposing (Renderer(..))
 import Views.Widget.Renderers.Table as Table
 import Views.Widget.Renderers.BarChart as BarChart
+import Views.Widget.Renderers.LineChart as LineChart
 import Views.Spinner
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src)
@@ -21,18 +22,8 @@ run widget data =
                 TABLE ->
                     Table.render widget data
 
-                LINE ->
-                    renderLineGraphFrom widget data
+                LINE_CHART ->
+                    LineChart.render widget data
 
                 BAR_CHART ->
                     BarChart.render widget data
-
-
-renderLineGraphFrom : Widget Body -> Table.Data -> Html msg
-renderLineGraphFrom widget data =
-    p [ class "data" ] [ text <| "TODO INSERT LINE GRAPH HERE" ++ (toString data.rows) ]
-
-
-renderBarChartFrom : Widget Body -> Table.Data -> Html msg
-renderBarChartFrom widget data =
-    p [ class "data" ] [ text <| "TODO INSERT BAR CHART HERE" ++ (toString data.rows) ]

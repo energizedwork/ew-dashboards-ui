@@ -13,7 +13,7 @@ render widget data =
     case widget.adapter of
         TABLE ->
             let
-                ( headerRow, bodyRows ) =
+                ( headerRow, bodyRows, maxValue ) =
                     TableAdapter.adapt data
             in
                 table [ class "table" ]

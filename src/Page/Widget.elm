@@ -123,6 +123,16 @@ view session model =
 
         buttons =
             viewButtons widget author session.user
+
+        -- below is for dev only! saves having to wait for a websocket if you're working on UI..
+        headerRow =
+            [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
+
+        firstRow =
+            [ "1000", "200", "300", "400", "500", "1500", "700", "800", "900", "1000", "1100", "200" ]
+
+        devData =
+            Data [ headerRow, firstRow ]
     in
         div [ class "article-page" ]
             [ viewBanner model.errors widget author session.user
@@ -131,6 +141,7 @@ view session model =
                     [ div [ class "col-md-12" ]
                         [ h3 [] [ text widget.name ]
                         , Renderer.run widget model.data
+                          -- , Renderer.run widget devData
                         ]
                     ]
                 , hr [] []

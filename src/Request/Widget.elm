@@ -24,7 +24,6 @@ import Json.Decode as Decode
 import Json.Encode as Encode
 import Request.Helpers exposing (mockApiUrl)
 import Util exposing ((=>))
-import Data.Widget.Table as Table exposing (Data, Cell)
 
 
 -- SINGLE --

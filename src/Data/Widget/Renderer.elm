@@ -3,5 +3,5 @@ module Data.Widget.Renderer exposing (Renderer(..))
 
 type Renderer
     = TABLE
-    | LINE
+    | LINE_CHART
     | BAR_CHART
