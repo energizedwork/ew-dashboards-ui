@@ -20,14 +20,10 @@ render widget data =
                 ( headerRow, bodyRows, maxValue ) =
                     TableAdapter.adapt data
 
-                valuesRow =
-                    List.head bodyRows |> Maybe.withDefault []
-
-                -- TODO: iterate to create a collection of these tuple rows?
-                tupleData =
-                    (List.map2 (,) headerRow valuesRow)
+                dataAsHeaderValueTuples =
+                    List.map (List.map2 (,) headerRow) bodyRows
             in
-                view tupleData maxValue
+                view dataAsHeaderValueTuples maxValue
 
         _ ->
             p [ class "data" ] [ Html.text "Sorry, I can only render line charts from a TABLE adapter right now" ]
@@ -48,12 +44,15 @@ padding =
     50
 
 
-view : List ( String, String ) -> Float -> Svg msg
+view : List (List ( String, String )) -> Float -> Svg msg
 view data maxValue =
     let
+        firstDataTuple =
+            List.head data |> Maybe.withDefault []
+
         xScale : BandScale String
         xScale =
-            Scale.band { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 } (List.map Tuple.first data) ( 0, w - 2 * padding )
+            Scale.band { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 } (List.map Tuple.first firstDataTuple) ( 0, w - 2 * padding )
 
         yScale : ContinuousScale
         yScale =
@@ -65,7 +64,7 @@ view data maxValue =
 
         xAxis : Svg msg
         xAxis =
-            Axis.axis { opts | orientation = Axis.Bottom, tickCount = List.length data } (Scale.toRenderable xScale)
+            Axis.axis { opts | orientation = Axis.Bottom, tickCount = List.length firstDataTuple } (Scale.toRenderable xScale)
 
         yAxis : Svg msg
         yAxis =
@@ -79,23 +78,32 @@ view data maxValue =
         lineGenerator ( x, y ) =
             Just ( Scale.convert xScale x, Scale.convert yScale (String.toFloat y |> Result.withDefault 0) )
 
-        area : String
-        area =
-            List.map areaGenerator data
+        generateAreaData : List ( String, String ) -> String
+        generateAreaData dataTuple =
+            List.map areaGenerator dataTuple
                 |> Shape.area Shape.linearCurve
 
-        line : String
-        line =
-            List.map lineGenerator data
+        generateLineData : List ( String, String ) -> String
+        generateLineData dataTuple =
+            List.map lineGenerator dataTuple
                 |> Shape.line Shape.linearCurve
-    in
-        svg [ width (toString w ++ "px"), height (toString h ++ "px") ]
-            [ g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (h - padding) ++ ")") ]
-                [ xAxis ]
-            , g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString padding ++ ")") ]
-                [ yAxis ]
-            , g [ transform ("translate(78" ++ ", " ++ toString padding ++ ")"), class "series" ]
-                [ Svg.path [ d line, stroke "red", strokeWidth "3px", fill "none" ] []
+
+        renderLine lineData =
+            g [ transform ("translate(78" ++ ", " ++ toString padding ++ ")"), class "series" ]
+                [ Svg.path [ d lineData, stroke "red", strokeWidth "3px", fill "none" ] []
                   -- , Svg.path [ d area, stroke "none", strokeWidth "3px", fill "rgba(255, 0, 0, 0.54)" ] []
                 ]
-            ]
+
+        renderLines =
+            List.map (\dataTuple -> generateLineData (dataTuple) |> renderLine) data
+    in
+        svg [ width (toString w ++ "px"), height (toString h ++ "px") ]
+            (List.concat
+                [ [ g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (h - padding) ++ ")") ]
+                        [ xAxis ]
+                  , g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString padding ++ ")") ]
+                        [ yAxis ]
+                  ]
+                , renderLines
+                ]
+            )

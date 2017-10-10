@@ -129,10 +129,13 @@ view session model =
             [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
 
         firstRow =
-            [ "1000", "200", "300", "400", "500", "1500", "700", "800", "900", "1000", "1100", "200" ]
+            [ "100", "200", "300", "400", "500", "600", "700", "800", "900", "1000", "1100", "2000" ]
+
+        secondRow =
+            [ "4500", "4200", "4000", "3000", "2000", "1700", "1600", "1500", "1400", "1300", "1200", "1000" ]
 
         devData =
-            Data [ headerRow, firstRow ]
+            Data [ headerRow, firstRow, secondRow ]
     in
         div [ class "article-page" ]
             [ viewBanner model.errors widget author session.user
