@@ -59,7 +59,7 @@ getLineColour index =
         |> Color.Convert.colorToHex
 
 
-view : List (List ( String, String )) -> Float -> Svg msg
+view : List (List ( Cell, Cell )) -> Float -> Svg msg
 view data maxValue =
     let
         firstDataTuple =

@@ -137,8 +137,11 @@ view session model =
         thirdRow =
             [ "6000", "5200", "4000", "4100", "4900", "4000", "3900", "3500", "4100", "4200", "4200", "4100" ]
 
+        fourthRow =
+            [ "3000", "3000", "3200", "3100", "3700", "3000", "2900", "2500", "3100", "4200", "3200", "3100" ]
+
         devData =
-            Data [ headerRow, firstRow, secondRow, thirdRow ]
+            Data [ headerRow, firstRow, secondRow, thirdRow, fourthRow ]
     in
         div [ class "article-page" ]
             [ viewBanner model.errors widget author session.user

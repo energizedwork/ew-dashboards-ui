@@ -1,9 +1,12 @@
 module Views.Widget.Renderers.BarChart exposing (render)
 
+import Array exposing (..)
+import Color
+import Color.Convert
 import Data.Widget as Widget exposing (Widget, Body)
 import Data.Widget.Table as Table exposing (Data, Cell)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
-import Data.Widget.Adapters.BarChartAdapter as BarChartAdapter
+import Data.Widget.Adapters.TableAdapter as TableAdapter
 import Html exposing (..)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -14,15 +17,18 @@ import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousS
 render : Widget Body -> Table.Data -> Html msg
 render widget data =
     case widget.adapter of
-        BAR_CHART ->
+        TABLE ->
             let
-                ( headerRow, valuesRow, maxValue ) =
-                    BarChartAdapter.adapt data
+                ( headerRow, bodyRows, maxValue ) =
+                    TableAdapter.adapt data
+
+                dataAsHeaderValueTuples =
+                    List.map (List.map2 (,) headerRow) bodyRows
             in
-                view (List.map2 (,) headerRow valuesRow) maxValue
+                view dataAsHeaderValueTuples maxValue
 
         _ ->
-            p [ class "data" ] [ Html.text "Sorry, I can only render bar charts from a BAR_CHART adapter right now" ]
+            p [ class "data" ] [ Html.text "Sorry, I can only render bar charts from a TABLE adapter right now" ]
 
 
 w : Float
@@ -40,9 +46,24 @@ padding =
     50
 
 
+barColours : Array Color.Color
+barColours =
+    Array.fromList Scale.category10
+
+
+getBarColour : Int -> String
+getBarColour index =
+    get index barColours
+        |> Maybe.withDefault Color.black
+        |> Color.Convert.colorToHex
+
+
 xScale : List ( String, String ) -> BandScale String
 xScale data =
-    Scale.band { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 } (List.map Tuple.first data) ( 0, w - 2 * padding )
+    Scale.band
+        { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 }
+        (List.map Tuple.first data)
+        ( 0, w - 2 * padding )
 
 
 yScale : Float -> ContinuousScale
@@ -60,38 +81,82 @@ yAxis maxValue =
     Axis.axis { defaultOptions | orientation = Axis.Left, tickCount = 5 } (yScale maxValue)
 
 
-column : BandScale String -> Float -> ( String, String ) -> Svg msg
-column xScale maxValue ( header, value ) =
-    g [ class "column" ]
-        [ rect
-            [ x <| toString <| Scale.convert xScale header
-            , y <| toString <| Scale.convert (yScale maxValue) (String.toFloat value |> Result.withDefault 0)
-            , width <| toString <| Scale.bandwidth xScale
-            , height <| toString <| h - Scale.convert (yScale maxValue) (String.toFloat value |> Result.withDefault 0) - 2 * padding
+column : Int -> Int -> String -> BandScale String -> Float -> ( String, String ) -> Svg msg
+column index totalRows colour xScaleBand maxValue ( header, value ) =
+    let
+        xpos =
+            (Scale.convert xScaleBand header) + (colWidth * (toFloat index))
+
+        xposText =
+            (Scale.convert (Scale.toRenderable xScaleBand) header) + (colWidth * (toFloat index))
+
+        ypos =
+            Scale.convert (yScale maxValue) (String.toFloat value |> Result.withDefault 0)
+
+        yposText =
+            Scale.convert (yScale maxValue) (String.toFloat value |> Result.withDefault 0) - 5
+
+        colWidth =
+            Scale.bandwidth xScaleBand / toFloat (totalRows)
+
+        colHeight =
+            h - Scale.convert (yScale maxValue) (String.toFloat value |> Result.withDefault 0) - 2 * padding
+    in
+        g [ class "column" ]
+            [ rect
+                [ x <| toString xpos
+                , y <| toString ypos
+                , width <| toString colWidth
+                , height <| toString colHeight
+                , fill colour
+                ]
+                []
+              -- TODO: Fix layering
+              -- , text_
+              --     [ x <| toString <| xposText
+              --     , y <| toString <| yposText
+              --     , textAnchor "middle"
+              --     ]
+              --     [ Svg.text <| toString value ]
             ]
-            []
-        , text_
-            [ x <| toString <| Scale.convert (Scale.toRenderable xScale) header
-            , y <| toString <| Scale.convert (yScale maxValue) (String.toFloat value |> Result.withDefault 0) - 5
-            , textAnchor "middle"
-            ]
-            [ Svg.text <| toString value ]
-        ]
 
 
-view : List ( String, String ) -> Float -> Svg msg
+view : List (List ( Cell, Cell )) -> Float -> Svg msg
 view data maxValue =
-    svg [ width (toString w ++ "px"), height (toString h ++ "px") ]
-        [ Svg.style [] [ Svg.text """
-            .column rect { fill: rgba(118, 214, 78, 0.8); }
-            .column text { display: none; }
-            .column:hover rect { fill: rgb(118, 214, 78); }
-            .column:hover text { display: inline; }
-          """ ]
-        , g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (h - padding) ++ ")") ]
-            [ xAxis data ]
-        , g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString padding ++ ")") ]
-            [ (yAxis maxValue) ]
-        , g [ transform ("translate(" ++ toString padding ++ ", " ++ toString padding ++ ")"), class "series" ] <|
-            List.map (column (xScale data) maxValue) data
-        ]
+    let
+        firstDataTuple =
+            List.head data |> Maybe.withDefault []
+
+        indexedData =
+            Array.toIndexedList (Array.fromList data)
+
+        totalRows =
+            List.length indexedData
+
+        renderColumns num =
+            List.map
+                (\( index, row ) ->
+                    renderColumn index totalRows row
+                )
+                indexedData
+
+        renderColumn index totalRows row =
+            g [ transform ("translate(" ++ toString padding ++ ", " ++ toString padding ++ ")"), class "series" ] <|
+                List.map (column index totalRows (getBarColour index) (xScale row) maxValue) row
+    in
+        svg [ width (toString w ++ "px"), height (toString h ++ "px") ]
+            (List.concat
+                [ [ Svg.style []
+                        [ Svg.text """
+                            .column text { display: none; }
+                            .column:hover rect { opacity: 0.7; }
+                            .column:hover text { display: inline; z-index: 9999; }
+                          """ ]
+                  , g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (h - padding) ++ ")") ]
+                        [ xAxis firstDataTuple ]
+                  , g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString padding ++ ")") ]
+                        [ (yAxis maxValue) ]
+                  ]
+                , renderColumns <| List.length data
+                ]
+            )
