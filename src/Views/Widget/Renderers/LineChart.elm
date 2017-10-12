@@ -1,6 +1,8 @@
 module Views.Widget.Renderers.LineChart exposing (render)
 
 import Array exposing (..)
+import Color
+import Color.Convert
 import Data.Widget as Widget exposing (Widget, Body)
 import Data.Widget.Table as Table exposing (Data, Cell)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
@@ -45,14 +47,16 @@ padding =
     50
 
 
-lineColours : Array String
+lineColours : Array Color.Color
 lineColours =
-    Array.fromList ([ "red", "blue", "green", "purple", "orange" ])
+    Array.fromList Scale.category10
 
 
 getLineColour : Int -> String
 getLineColour index =
-    get index lineColours |> Maybe.withDefault "black"
+    get index lineColours
+        |> Maybe.withDefault Color.black
+        |> Color.Convert.colorToHex
 
 
 view : List (List ( String, String )) -> Float -> Svg msg
