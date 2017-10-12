@@ -1,5 +1,6 @@
 module Views.Widget.Renderers.LineChart exposing (render)
 
+import Array exposing (..)
 import Data.Widget as Widget exposing (Widget, Body)
 import Data.Widget.Table as Table exposing (Data, Cell)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
@@ -44,11 +45,24 @@ padding =
     50
 
 
+lineColours : Array String
+lineColours =
+    Array.fromList ([ "red", "blue", "green", "purple", "orange" ])
+
+
+getLineColour : Int -> String
+getLineColour index =
+    get index lineColours |> Maybe.withDefault "black"
+
+
 view : List (List ( String, String )) -> Float -> Svg msg
 view data maxValue =
     let
         firstDataTuple =
             List.head data |> Maybe.withDefault []
+
+        indexedData =
+            Array.toIndexedList (Array.fromList data)
 
         xScale : BandScale String
         xScale =
@@ -88,14 +102,19 @@ view data maxValue =
             List.map lineGenerator dataTuple
                 |> Shape.line Shape.linearCurve
 
-        renderLine lineData =
+        renderLine colour lineData =
             g [ transform ("translate(78" ++ ", " ++ toString padding ++ ")"), class "series" ]
-                [ Svg.path [ d lineData, stroke "red", strokeWidth "3px", fill "none" ] []
+                [ Svg.path [ d lineData, stroke colour, strokeWidth "3px", fill "none" ] []
                   -- , Svg.path [ d area, stroke "none", strokeWidth "3px", fill "rgba(255, 0, 0, 0.54)" ] []
                 ]
 
         renderLines =
-            List.map (\dataTuple -> generateLineData (dataTuple) |> renderLine) data
+            List.map
+                (\( index, dataTuple ) ->
+                    generateLineData dataTuple
+                        |> renderLine (getLineColour (index))
+                )
+                indexedData
     in
         svg [ width (toString w ++ "px"), height (toString h ++ "px") ]
             (List.concat
