@@ -132,6 +132,9 @@ rendererDecoder =
                     "BAR_CHART" ->
                         Decode.succeed Renderer.BAR_CHART
 
+                    "HEAT_MAP" ->
+                        Decode.succeed Renderer.HEAT_MAP
+
                     somethingElse ->
                         Decode.fail <| "Unknown renderer: " ++ somethingElse
             )

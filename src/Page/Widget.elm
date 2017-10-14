@@ -125,23 +125,22 @@ view session model =
             viewButtons widget author session.user
 
         -- below is for dev only! saves having to wait for a websocket if you're working on UI..
-        headerRow =
-            [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
-
-        firstRow =
-            [ "100", "200", "300", "400", "500", "600", "700", "800", "900", "1000", "1100", "2000" ]
-
-        secondRow =
-            [ "5000", "4200", "4000", "3000", "2000", "1700", "1600", "1500", "1400", "1300", "1200", "1000" ]
-
-        thirdRow =
-            [ "6000", "5200", "4000", "4100", "4900", "4000", "3900", "3500", "4100", "4200", "4200", "4100" ]
-
-        fourthRow =
-            [ "3000", "3000", "3200", "3100", "3700", "3000", "2900", "2500", "3100", "4200", "3200", "3100" ]
-
         devData =
-            Data [ headerRow, firstRow, secondRow, thirdRow, fourthRow ]
+            Data
+                [ List.range 0 12 |> List.map toString
+                , List.range 100 111 |> List.map toString |> (::) "00:00"
+                , List.range 200 211 |> List.map toString |> (::) "00:30"
+                , List.range 300 311 |> List.map toString |> (::) "01:00"
+                , List.range 400 411 |> List.map toString |> (::) "01:30"
+                , List.range 500 511 |> List.map toString |> (::) "02:00"
+                , List.range 600 611 |> List.map toString |> (::) "02:30"
+                , List.range 700 711 |> List.map toString |> (::) "03:00"
+                , List.range 800 811 |> List.map toString |> (::) "03:30"
+                , List.range 900 911 |> List.map toString |> (::) "04:00"
+                , List.range 1000 1011 |> List.map toString |> (::) "04:30"
+                , List.range 1100 1111 |> List.map toString |> (::) "05:00"
+                , List.range 1200 1211 |> List.map toString |> (::) "05:30"
+                ]
     in
         div [ class "article-page" ]
             [ viewBanner model.errors widget author session.user
@@ -149,8 +148,8 @@ view session model =
                 [ div [ class "row article-content" ]
                     [ div [ class "col-md-12" ]
                         [ h3 [] [ text widget.name ]
-                        , Renderer.run widget model.data
-                          -- , Renderer.run widget devData
+                          -- , Renderer.run widget model.data
+                        , Renderer.run widget devData
                         ]
                     ]
                 , hr [] []

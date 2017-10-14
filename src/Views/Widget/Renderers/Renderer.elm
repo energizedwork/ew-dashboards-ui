@@ -6,6 +6,7 @@ import Data.Widget.Renderer exposing (Renderer(..))
 import Views.Widget.Renderers.Table as Table
 import Views.Widget.Renderers.BarChart as BarChart
 import Views.Widget.Renderers.LineChart as LineChart
+import Views.Widget.Renderers.HeatMap as HeatMap
 import Views.Spinner
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src)
@@ -27,3 +28,6 @@ run widget data =
 
                 BAR_CHART ->
                     BarChart.render widget data
+
+                HEAT_MAP ->
+                    HeatMap.render widget data

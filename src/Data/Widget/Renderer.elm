@@ -5,3 +5,4 @@ type Renderer
     = TABLE
     | LINE_CHART
     | BAR_CHART
+    | HEAT_MAP

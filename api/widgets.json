@@ -65,6 +65,28 @@
           },
           "favorited": false,
           "favoritesCount": 0
+    }, {
+          "uuid": "9c2b3896-c957-47ad-893a-446f9ffa9012",
+          "name": "Haven Power Heat Map",
+          "body": "Haven Power Heat Map",
+          "description": "One year of MPAN data",
+          "dataSources": [{
+              "uuid": "datasource-1234",
+              "name": "12 month financials"
+          }],
+          "adapter": "TABLE",
+          "renderer": "HEAT_MAP",
+          "createdAt": "2017-09-04T16:03:55.948Z",
+          "updatedAt": "2017-09-04T16:03:55.948Z",
+          "tagList": [],
+          "author": {
+              "username": "msp",
+              "bio": "beautifully flawed creation .. \n\n",
+              "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
+              "following": false
+          },
+          "favorited": false,
+          "favoritesCount": 0
     }],
-    "widgetsCount": 3
+    "widgetsCount": 4
 }
