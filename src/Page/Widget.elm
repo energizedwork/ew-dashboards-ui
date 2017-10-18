@@ -52,7 +52,7 @@ socketServer =
 
 channelName : String
 channelName =
-    "dataSource:sheets"
+    "dataSource:haven:foo"
 
 
 
@@ -148,8 +148,8 @@ view session model =
                 [ div [ class "row article-content" ]
                     [ div [ class "col-md-12" ]
                         [ h3 [] [ text widget.name ]
-                          -- , Renderer.run widget model.data
-                        , Renderer.run widget devData
+                        , Renderer.run widget model.data
+                          -- , Renderer.run widget devData
                         ]
                     ]
                 , hr [] []

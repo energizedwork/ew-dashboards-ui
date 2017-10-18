@@ -8,3 +8,4 @@ module Data.Widget.Adapters.Adapter exposing (Adapter(..))
 type Adapter
     = TABLE
     | BAR_CHART
+    | HEAT_MAP

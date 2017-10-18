@@ -8,6 +8,7 @@ module Data.Widget
         , bodyToMarkdownString
         , decoder
         , decoderWithBody
+        , primaryDataSource
         , slugParser
         , slugToString
         , tagDecoder
@@ -112,6 +113,9 @@ adapterDecoder =
                     "BAR_CHART" ->
                         Decode.succeed Adapter.BAR_CHART
 
+                    "HEAT_MAP" ->
+                        Decode.succeed Adapter.HEAT_MAP
+
                     somethingElse ->
                         Decode.fail <| "Unknown adapter: " ++ somethingElse
             )
@@ -201,3 +205,8 @@ bodyToMarkdownString (Body markdown) =
 bodyDecoder : Decoder Body
 bodyDecoder =
     Decode.map Body Decode.string
+
+
+primaryDataSource : Widget a -> DataSource
+primaryDataSource widget =
+    List.head widget.dataSources |> Maybe.withDefault DataSource.init

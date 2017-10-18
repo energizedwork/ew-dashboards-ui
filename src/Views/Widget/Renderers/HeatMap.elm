@@ -5,7 +5,7 @@ import Color.Convert
 import Data.Widget as Widget exposing (Widget, Body)
 import Data.Widget.Table as Table exposing (Data, Cell)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
-import Data.Widget.Adapters.TableAdapter as TableAdapter
+import Data.Widget.Adapters.HeatMapAdapter as HeatMapAdapter
 import Html exposing (..)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -17,35 +17,28 @@ import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousS
 render : Widget Body -> Table.Data -> Html msg
 render widget data =
     case widget.adapter of
-        TABLE ->
+        HEAT_MAP ->
             let
-                -- TODO: Own adapter? This is a bit leaky..
-                ( headerRow, bodyRows, maxValue ) =
-                    TableAdapter.adapt data
+                ( headerRow, bodyRows, maxValue, xLabels, yLabels ) =
+                    HeatMapAdapter.adapt data
 
                 dataAsHeaderValueTuples =
                     List.map (List.map2 (,) headerRow) bodyRows
-
-                firstCellPerRow row =
-                    List.head row |> Maybe.withDefault ""
-
-                yLabels =
-                    List.map firstCellPerRow bodyRows
             in
-                view dataAsHeaderValueTuples yLabels maxValue
+                view dataAsHeaderValueTuples xLabels yLabels maxValue
 
         _ ->
-            p [ class "data" ] [ Html.text "Sorry, I can only render line charts from a TABLE adapter right now" ]
+            p [ class "data" ] [ Html.text "Sorry, I can only render line charts from a HEAT_MAP adapter right now" ]
 
 
 w : Float
 w =
-    900
+    1500
 
 
 h : Float
 h =
-    450
+    1000
 
 
 padding : Float
@@ -81,8 +74,8 @@ colourScaleFrom amount maxValue =
         (String.toFloat amount |> Result.withDefault 0)
 
 
-view : List (List ( Cell, Cell )) -> List String -> Float -> Svg msg
-view data yLabels maxValue =
+view : List (List ( Cell, Cell )) -> List String -> List String -> Float -> Svg msg
+view data xLabels yLabels maxValue =
     let
         firstDataTuple =
             List.head data |> Maybe.withDefault []
@@ -105,14 +98,14 @@ view data yLabels maxValue =
         xScale : BandScale String
         xScale =
             Scale.band
-                { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 }
-                (List.map Tuple.first firstDataTuple)
+                { defaultBandConfig | paddingInner = 0, paddingOuter = 0 }
+                xLabels
                 ( 0, viewPortWidth )
 
         yScale : BandScale String
         yScale =
             (Scale.band
-                { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 }
+                { defaultBandConfig | paddingInner = 0, paddingOuter = 0 }
                 yLabels
                 ( 0, viewPortHeight )
             )
@@ -129,14 +122,6 @@ view data yLabels maxValue =
         yAxis =
             Axis.axis { opts | orientation = Axis.Left, tickCount = totalRows } (Scale.toRenderable yScale)
 
-        squareClassAt rowIndex =
-            case rowIndex of
-                0 ->
-                    "label"
-
-                _ ->
-                    "square"
-
         fillAt colIndex cell =
             case colIndex of
                 -- 0 ->
@@ -144,23 +129,15 @@ view data yLabels maxValue =
                 _ ->
                     (getCellColour (colourScaleFrom cell maxValue))
 
-        fontAt colIndex =
-            case colIndex of
-                0 ->
-                    "#000"
-
-                _ ->
-                    "#fff"
-
         renderSquare rowIndex colIndex cell =
-            g [ class <| squareClassAt colIndex ]
+            g [ class "square" ]
                 [ rect
                     [ x <| toString (padding + toFloat colIndex * cellWidth)
                     , y <| toString (toFloat rowIndex * cellHeight)
                     , width <| toString cellWidth
                     , height <| toString cellHeight
                     , fill <| fillAt colIndex cell
-                    , stroke "#fff"
+                      -- , stroke "#fff"
                     , attribute "data-amount" cell
                     ]
                     []
@@ -170,7 +147,8 @@ view data yLabels maxValue =
                     , textAnchor "middle"
                     , alignmentBaseline "central"
                     , stroke "none"
-                    , fill <| fontAt colIndex
+                    , fill "#fff"
+                    , fontSize "8px"
                     ]
                     [ Svg.text <| cell ]
                 ]
@@ -196,8 +174,8 @@ view data yLabels maxValue =
                             .square:hover rect { opacity: 0.7; }
                             .square:hover text { display: inline; }
                           """ ]
-                  , g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (h - padding) ++ ")") ]
-                        [ xAxis ]
+                    --   , g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (h - padding) ++ ")") ]
+                    --         [ xAxis ]
                   , g [ transform ("translate(" ++ toString (padding - 1) ++ ",0)") ]
                         [ yAxis ]
                   ]

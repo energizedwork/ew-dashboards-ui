@@ -8,7 +8,7 @@
               "uuid": "datasource-1234",
               "name": "12 month financials"
           }],
-          "adapter": "TABLE",
+          "adapter": "HEAT_MAP",
           "renderer": "HEAT_MAP",
           "createdAt": "2017-09-04T16:03:55.948Z",
           "updatedAt": "2017-09-04T16:03:55.948Z",
