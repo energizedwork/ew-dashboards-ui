@@ -5,8 +5,8 @@
           "body": "12 months Table",
           "description": "12 months of important data",
           "dataSources": [{
-              "uuid": "datasource-1234",
-              "name": "12 month financials"
+              "uuid": "2",
+              "name": "haven"
           }],
           "adapter": "TABLE",
           "renderer": "TABLE",
@@ -27,8 +27,8 @@
           "body": "12 months Bar Chart",
           "description": "12 months of important data",
           "dataSources": [{
-              "uuid": "datasource-1234",
-              "name": "12 month financials"
+              "uuid": "1P0okW7oVus2KR423Ob1DgbVNCbR_QNg3OjNPj04zcsI",
+              "name": "sheets"
           }],
           "adapter": "TABLE",
           "renderer": "BAR_CHART",
@@ -49,8 +49,8 @@
           "body": "12 months Line Chart",
           "description": "12 months of important data",
           "dataSources": [{
-              "uuid": "datasource-1234",
-              "name": "12 month financials"
+              "uuid": "1P0okW7oVus2KR423Ob1DgbVNCbR_QNg3OjNPj04zcsI",
+              "name": "sheets"
           }],
           "adapter": "TABLE",
           "renderer": "LINE_CHART",
@@ -71,8 +71,8 @@
           "body": "Haven Power Heat Map",
           "description": "One year of MPAN data",
           "dataSources": [{
-              "uuid": "datasource-1234",
-              "name": "12 month financials"
+              "uuid": "998877",
+              "name": "haven"
           }],
           "adapter": "HEAT_MAP",
           "renderer": "HEAT_MAP",

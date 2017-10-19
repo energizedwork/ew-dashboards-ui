@@ -8,4 +8,4 @@ import Html.Attributes exposing (class, id)
 view : DataSource -> Html msg
 view dataSource =
     li [ class "data-source" ]
-        [ text <| "[" ++ dataSource.uuid ++ "] -> " ++ dataSource.name ]
+        [ text <| DataSource.toChannel (dataSource) ]

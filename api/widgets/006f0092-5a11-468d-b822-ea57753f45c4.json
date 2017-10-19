@@ -5,8 +5,8 @@
         "body": "12 months Table",
         "description": "12 months of important data",
         "dataSources": [{
-            "uuid": "datasource-1234",
-            "name": "12 month financials"
+            "uuid": "2",
+            "name": "haven"
         }],
         "adapter": "TABLE",
         "renderer": "TABLE",

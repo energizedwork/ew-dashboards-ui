@@ -8,6 +8,7 @@ import Data.Widget.Author as Author exposing (Author)
 import Data.Session as Session exposing (Session)
 import Data.User as User exposing (User)
 import Data.UserPhoto as UserPhoto
+import Data.DataSource as DataSource exposing (..)
 import Data.DataSourceMessage as DataSourceMessage exposing (DataSourceMessage, decoder)
 import Date exposing (Date)
 import Date.Format
@@ -50,9 +51,10 @@ socketServer =
 -- "ws://localhost:4000/socket/websocket"
 
 
-channelName : String
-channelName =
-    "dataSource:haven:foo"
+channelName : DataSource -> String
+channelName dataSource =
+    dataSource
+        |> DataSource.toChannel
 
 
 
@@ -96,8 +98,11 @@ init session slug =
 
         handleLoadError err =
             pageLoadError Page.Other ("Widget is currently unavailable. " ++ (toString err))
+
+        initModel =
+            (Model [] "" [] initPhxSocket (Data []))
     in
-        Task.map (Model [] "" [] initPhxSocket (Data [])) loadWidget
+        Task.map initModel loadWidget
             |> Task.mapError handleLoadError
 
 
@@ -105,7 +110,6 @@ initPhxSocket : Phoenix.Socket.Socket Msg
 initPhxSocket =
     Phoenix.Socket.init socketServer
         |> Phoenix.Socket.withDebug
-        |> Phoenix.Socket.on "new:msg" channelName ReceiveChatMessage
 
 
 
@@ -147,13 +151,16 @@ view session model =
             , div [ class "container page" ]
                 [ div [ class "row article-content" ]
                     [ div [ class "col-md-12" ]
-                        [ h3 [] [ text widget.name ]
+                        [ h3 [] [ text <| (widget.name) ]
                         , Renderer.run widget model.data
                           -- , Renderer.run widget devData
+                        , br [] []
+                        , br [] []
+                        , p [ class "small" ] [ text <| channelName <| Widget.primaryDataSource widget ]
                         ]
                     ]
                 , hr [] []
-                  -- , viewDataSource model
+                  -- , viewAndDebugDataSource model
                   -- , div [ class "article-actions" ]
                   --     [ div [ class "article-meta" ] <|
                   --         [ a [ Route.href (Route.Profile author.username) ]
@@ -215,8 +222,8 @@ formatTimestamp =
     Date.Format.format "%B %e, %Y"
 
 
-viewDataSource : Model -> Html Msg
-viewDataSource model =
+viewAndDebugDataSource : Model -> Html Msg
+viewAndDebugDataSource model =
     div []
         [ h3 [] [ text "Data updates:" ]
         , div
@@ -228,7 +235,7 @@ viewDataSource model =
         , br [] []
         , h3 [] [ text "Broadcast:" ]
         , newMessageForm model
-          -- , ul [] ((List.reverse << List.map renderMessage) model.messages)
+        , ul [] ((List.reverse << List.map renderMessage) model.messages)
         ]
 
 
@@ -376,7 +383,7 @@ update session msg model =
                         (JE.object [ ( "user", JE.string user ), ( "body", JE.string model.newMessage ) ])
 
                     push_ =
-                        Phoenix.Push.init "new:msg" channelName
+                        Phoenix.Push.init "new:msg" (channelName <| Widget.primaryDataSource model.widget)
                             |> Phoenix.Push.withPayload payload
 
                     ( phxSocket, phxCmd ) =
@@ -411,23 +418,29 @@ update session msg model =
 
             JoinChannel ->
                 let
+                    fullChannelName =
+                        channelName <| Widget.primaryDataSource model.widget
+
                     channel =
-                        Phoenix.Channel.init channelName
+                        Phoenix.Channel.init fullChannelName
                             |> Phoenix.Channel.withPayload userParams
-                            |> Phoenix.Channel.onJoin (always (ShowJoinedMessage channelName))
-                            |> Phoenix.Channel.onClose (always (ShowLeftMessage channelName))
+                            |> Phoenix.Channel.onJoin (always (ShowJoinedMessage fullChannelName))
+                            |> Phoenix.Channel.onClose (always (ShowLeftMessage fullChannelName))
 
                     ( phxSocket, phxCmd ) =
                         Phoenix.Socket.join channel socket
+
+                    listeningSocket =
+                        phxSocket |> Phoenix.Socket.on "new:msg" fullChannelName ReceiveChatMessage
                 in
-                    ( { model | phxSocket = phxSocket }
+                    ( { model | phxSocket = listeningSocket }
                     , Cmd.map PhoenixMsg phxCmd
                     )
 
             LeaveChannel ->
                 let
                     ( phxSocket, phxCmd ) =
-                        Phoenix.Socket.leave channelName socket
+                        Phoenix.Socket.leave (channelName <| Widget.primaryDataSource model.widget) socket
                 in
                     ( { model | phxSocket = phxSocket }
                     , Cmd.map PhoenixMsg phxCmd

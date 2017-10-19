@@ -1,4 +1,4 @@
-module Data.DataSource exposing (DataSource, decoder, init)
+module Data.DataSource exposing (DataSource, decoder, init, toChannel)
 
 import Json.Decode as Decode exposing (Decoder, field)
 import Json.Decode.Pipeline as Pipeline exposing (custom, decode, required)
@@ -20,3 +20,8 @@ decoder =
 init : DataSource
 init =
     DataSource "?" "unknown"
+
+
+toChannel : DataSource -> String
+toChannel dataSource =
+    "dataSource:" ++ dataSource.name ++ ":" ++ dataSource.uuid

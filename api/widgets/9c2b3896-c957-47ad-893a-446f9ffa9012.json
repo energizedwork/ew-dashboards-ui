@@ -5,8 +5,8 @@
           "body": "Haven Power Heat Map",
           "description": "One year of MPAN data",
           "dataSources": [{
-              "uuid": "datasource-1234",
-              "name": "12 month financials"
+              "uuid": "998877",
+              "name": "haven"
           }],
           "adapter": "HEAT_MAP",
           "renderer": "HEAT_MAP",
