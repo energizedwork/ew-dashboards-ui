@@ -192,6 +192,6 @@ bodyDecoder =
     Decode.map Body Decode.string
 
 
-primaryDataSource : Widget a -> DataSource
+primaryDataSource : Widget -> DataSource
 primaryDataSource widget =
     List.head widget.dataSources |> Maybe.withDefault DataSource.init

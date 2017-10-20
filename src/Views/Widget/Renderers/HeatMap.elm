@@ -14,7 +14,7 @@ import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
 
 
-render : Widget Body -> Table.Data -> Html msg
+render : Widget -> Table.Data -> Html msg
 render widget data =
     case widget.adapter of
         HEAT_MAP ->

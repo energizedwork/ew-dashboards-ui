@@ -37,9 +37,9 @@ defaultAttributes =
 
 init : DataSource
 init =
-    DataSource "?" "unknown"
+    DataSource (UUID.UUID "?") "unknown"
 
 
 toChannel : DataSource -> String
 toChannel dataSource =
-    "dataSource:" ++ dataSource.name ++ ":" ++ dataSource.uuid
+    "dataSource:" ++ dataSource.name ++ ":" ++ (UUID.slugToString <| dataSource.uuid)
