@@ -18,12 +18,12 @@ import Views.Widget.Favorite as Favorite
 
 {-| Some pages want to view just the timestamp, not the whole widget.
 -}
-viewTimestamp : Widget a -> Html msg
+viewTimestamp : Widget -> Html msg
 viewTimestamp widget =
     span [ class "date" ] [ text (formattedTimestamp widget) ]
 
 
-view : (Widget a -> msg) -> Widget a -> Html msg
+view : (Widget -> msg) -> Widget -> Html msg
 view toggleFavorite widget =
     let
         author =
@@ -55,6 +55,6 @@ view toggleFavorite widget =
 -- INTERNAL --
 
 
-formattedTimestamp : Widget a -> String
+formattedTimestamp : Widget -> String
 formattedTimestamp widget =
     Date.Format.format "%B %e, %Y" widget.createdAt

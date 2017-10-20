@@ -1,24 +1,26 @@
 module Data.Widget
     exposing
         ( Widget
+        , WidgetAttributes
         , Body(..)
-        , UUID(..)
         , Tag
         , bodyToHtml
         , bodyToMarkdownString
         , decoder
-        , decoderWithBody
         , primaryDataSource
-        , slugParser
-        , slugToString
         , tagDecoder
         , tagToString
+        , defaultAttributes
+        , factory
         )
 
 import Data.Widget.Author as Author exposing (Author)
 import Data.Widget.Adapters.Adapter as Adapter exposing (Adapter(..))
 import Data.Widget.Renderer as Renderer exposing (Renderer(..))
 import Data.DataSource as DataSource exposing (DataSource)
+import Data.User as User exposing (Username(..))
+import Data.UserPhoto as UserPhoto exposing (UserPhoto(..))
+import Data.UUID as UUID exposing (UUID)
 import Date exposing (Date)
 import Html exposing (Attribute, Html)
 import Json.Decode as Decode exposing (Decoder)
@@ -28,30 +30,7 @@ import Markdown
 import UrlParser
 
 
-{-| An widget, optionally with an widget body.
-
-To see the difference between { body : body } and { body : Maybe Body },
-consider the difference between the "view individual widget" page (which
-renders one widget, including its body) and the "widget feed" -
-which displays multiple articles, but without bodies.
-
-This definition for `Widget` means we can write:
-
-viewWidget : Widget Body -> Html msg
-viewFeed : List (Widget ()) -> Html msg
-
-This indicates that `viewWidget` requires an widget _with a `body` present_,
-wereas `viewFeed` accepts articles with no bodies. (We could also have written
-it as `List (Widget a)` to specify that feeds can accept either articles that
-have `body` present or not. Either work, given that feeds do not attempt to
-read the `body` field from articles.)
-
-This is an important distinction, because in Request.Widget, the `feed`
-function produces `List (Widget ())` because the API does not return bodies.
-Those articles are useful to the feed, but not to the individual widget view.
-
--}
-type alias Widget a =
+type alias Widget =
     { uuid : UUID
     , name : String
     , description : String
@@ -64,41 +43,49 @@ type alias Widget a =
     , favorited : Bool
     , favoritesCount : Int
     , author : Author
-    , body : a
     }
 
 
+type alias WidgetAttributes =
+    { name : String
+    , description : String
+    , adapter : Adapter
+    , renderer : Renderer
+    , createdAt : Date
+    , updatedAt : Date
+    , favorited : Bool
+    , favoritesCount : Int
+    }
 
--- SERIALIZATION --
+
+factory : UUID -> WidgetAttributes -> List DataSource -> List String -> Author -> Widget
+factory uuid atts dataSources tags author =
+    Widget
+        uuid
+        atts.name
+        atts.description
+        dataSources
+        atts.adapter
+        atts.renderer
+        tags
+        atts.createdAt
+        atts.updatedAt
+        atts.favorited
+        atts.favoritesCount
+        author
 
 
-decoder : Decoder (Widget ())
+decoder : Decoder WidgetAttributes
 decoder =
-    baseWidgetDecoder
-        |> hardcoded ()
-
-
-decoderWithBody : Decoder (Widget Body)
-decoderWithBody =
-    baseWidgetDecoder
-        |> required "body" bodyDecoder
-
-
-baseWidgetDecoder : Decoder (a -> Widget a)
-baseWidgetDecoder =
-    decode Widget
-        |> required "uuid" (Decode.map UUID Decode.string)
+    decode WidgetAttributes
         |> required "name" Decode.string
         |> required "description" (Decode.map (Maybe.withDefault "") (Decode.nullable Decode.string))
-        |> required "dataSources" (Decode.list DataSource.decoder)
         |> required "adapter" adapterDecoder
         |> required "renderer" rendererDecoder
-        |> required "tagList" (Decode.list Decode.string)
-        |> required "createdAt" Json.Decode.Extra.date
-        |> required "updatedAt" Json.Decode.Extra.date
-        |> required "favorited" Decode.bool
-        |> required "favoritesCount" Decode.int
-        |> required "author" Author.decoder
+        |> required "inserted-at" Json.Decode.Extra.date
+        |> required "updated-at" Json.Decode.Extra.date
+        |> hardcoded False
+        |> hardcoded 0
 
 
 adapterDecoder : Decoder Adapter
@@ -144,22 +131,20 @@ rendererDecoder =
             )
 
 
+defaultAttributes =
+    WidgetAttributes
+        "initialised widget attributes"
+        "initialised widget attributes"
+        Adapter.TABLE
+        Renderer.TABLE
+        defaultDate
+        defaultDate
+        False
+        0
 
--- IDENTIFIERS --
 
-
-type UUID
-    = UUID String
-
-
-slugParser : UrlParser.Parser (UUID -> a) a
-slugParser =
-    UrlParser.custom "SLUG" (Ok << UUID)
-
-
-slugToString : UUID -> String
-slugToString (UUID slug) =
-    slug
+defaultDate =
+    Date.fromString "Mon Jan 01 1976 17:03:55 GMT+0100 (BST)" |> Result.withDefault (Date.fromTime 0)
 
 
 
@@ -207,6 +192,6 @@ bodyDecoder =
     Decode.map Body Decode.string
 
 
-primaryDataSource : Widget a -> DataSource
+primaryDataSource : Widget -> DataSource
 primaryDataSource widget =
     List.head widget.dataSources |> Maybe.withDefault DataSource.init

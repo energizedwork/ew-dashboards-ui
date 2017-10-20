@@ -67,7 +67,7 @@ type alias Model =
     , messages : List String
     , phxSocket : Phoenix.Socket.Socket Msg
     , data : Data
-    , widget : Widget Body
+    , widget : Widget
     }
 
 
@@ -176,7 +176,7 @@ view session model =
             ]
 
 
-viewBanner : List String -> Widget a -> Author -> Maybe User -> Html Msg
+viewBanner : List String -> Widget -> Author -> Maybe User -> Html Msg
 viewBanner errors widget author maybeUser =
     let
         buttons =
@@ -199,7 +199,7 @@ viewBanner errors widget author maybeUser =
             ]
 
 
-viewButtons : Widget a -> Author -> Maybe User -> List (Html Msg)
+viewButtons : Widget -> Author -> Maybe User -> List (Html Msg)
 viewButtons widget author maybeUser =
     let
         isMyWidget =
@@ -274,7 +274,7 @@ renderMessage str =
 type Msg
     = DismissErrors
     | ToggleFavorite
-    | FavoriteCompleted (Result Http.Error (Widget Body))
+    | FavoriteCompleted (Result Http.Error Widget)
     | ToggleFollow
     | FollowCompleted (Result Http.Error Author)
     | DeleteWidget
@@ -311,7 +311,7 @@ update session msg model =
                     cmdFromAuth authToken =
                         Request.Widget.toggleFavorite model.widget authToken
                             |> Http.toTask
-                            |> Task.map (\newWidget -> { newWidget | body = widget.body })
+                            |> Task.map (\newWidget -> newWidget)
                             |> Task.attempt FavoriteCompleted
                 in
                     session
@@ -464,7 +464,7 @@ update session msg model =
 -- INTERNAL --
 
 
-favoriteButton : Widget a -> Html Msg
+favoriteButton : Widget -> Html Msg
 favoriteButton widget =
     let
         favoriteText =
@@ -473,13 +473,13 @@ favoriteButton widget =
         Favorite.button (\_ -> ToggleFavorite) widget [] [ text favoriteText ]
 
 
-deleteButton : Widget a -> Html Msg
+deleteButton : Widget -> Html Msg
 deleteButton widget =
     button [ class "btn btn-outline-danger btn-sm", onClick DeleteWidget ]
         [ i [ class "ion-trash-a" ] [], text " Delete Widget" ]
 
 
-editButton : Widget a -> Html Msg
+editButton : Widget -> Html Msg
 editButton widget =
     a [ class "btn btn-outline-secondary btn-sm", Route.href (Route.EditWidget widget.uuid) ]
         [ i [ class "ion-edit" ] [], text " Edit Widget" ]

@@ -14,7 +14,7 @@ module Request.Widget
         , update
         )
 
-import Data.Widget as Widget exposing (Widget, Body, Tag, slugToString)
+import Data.Widget as Widget exposing (Widget, Body, Tag)
 import Data.Widget.Feed as Feed exposing (Feed)
 import Data.AuthToken as AuthToken exposing (AuthToken, withAuthorization)
 import Data.User as User exposing (Username)
@@ -24,20 +24,21 @@ import Json.Decode as Decode
 import Json.Encode as Encode
 import Request.Helpers exposing (mockApiUrl)
 import Util exposing ((=>))
+import Data.UUID as UUID
 
 
 -- SINGLE --
 
 
-get : Maybe AuthToken -> Widget.UUID -> Http.Request (Widget Body)
+get : Maybe AuthToken -> UUID.UUID -> Http.Request Widget
 get maybeToken slug =
     let
         expect =
-            Widget.decoderWithBody
+            Widget.decoder
                 |> Decode.field "widget"
                 |> Http.expectJson
     in
-        mockApiUrl ("/widgets/" ++ Widget.slugToString slug)
+        mockApiUrl ("/widgets/" ++ UUID.slugToString slug)
             |> HttpBuilder.get
             |> HttpBuilder.withExpect expect
             |> withAuthorization maybeToken
@@ -123,7 +124,7 @@ tags =
 -- FAVORITE --
 
 
-toggleFavorite : Widget a -> AuthToken -> Http.Request (Widget ())
+toggleFavorite : Widget -> AuthToken -> Http.Request Widget
 toggleFavorite widget authToken =
     if widget.favorited then
         unfavorite widget.uuid authToken
@@ -131,21 +132,21 @@ toggleFavorite widget authToken =
         favorite widget.uuid authToken
 
 
-favorite : Widget.UUID -> AuthToken -> Http.Request (Widget ())
+favorite : UUID.UUID -> AuthToken -> Http.Request Widget
 favorite =
     buildFavorite HttpBuilder.post
 
 
-unfavorite : Widget.UUID -> AuthToken -> Http.Request (Widget ())
+unfavorite : UUID.UUID -> AuthToken -> Http.Request Widget
 unfavorite =
     buildFavorite HttpBuilder.delete
 
 
 buildFavorite :
     (String -> RequestBuilder a)
-    -> Widget.UUID
+    -> UUID.UUID
     -> AuthToken
-    -> Http.Request (Widget ())
+    -> Http.Request Widget
 buildFavorite builderFromUrl slug token =
     let
         expect =
@@ -153,7 +154,7 @@ buildFavorite builderFromUrl slug token =
                 |> Decode.field "widget"
                 |> Http.expectJson
     in
-        [ mockApiUrl "/widgets", slugToString slug, "favorite" ]
+        [ mockApiUrl "/widgets", UUID.slugToString slug, "favorite" ]
             |> String.join "/"
             |> builderFromUrl
             |> withAuthorization (Just token)
@@ -169,7 +170,6 @@ type alias CreateConfig record =
     { record
         | name : String
         , description : String
-        , body : String
         , tags : List String
     }
 
@@ -178,15 +178,14 @@ type alias EditConfig record =
     { record
         | name : String
         , description : String
-        , body : String
     }
 
 
-create : CreateConfig record -> AuthToken -> Http.Request (Widget Body)
+create : CreateConfig record -> AuthToken -> Http.Request Widget
 create config token =
     let
         expect =
-            Widget.decoderWithBody
+            Widget.decoder
                 |> Decode.field "widget"
                 |> Http.expectJson
 
@@ -194,7 +193,6 @@ create config token =
             Encode.object
                 [ "name" => Encode.string config.name
                 , "description" => Encode.string config.description
-                , "body" => Encode.string config.body
                 , "tagList" => Encode.list (List.map Encode.string config.tags)
                 ]
 
@@ -210,11 +208,11 @@ create config token =
             |> HttpBuilder.toRequest
 
 
-update : Widget.UUID -> EditConfig record -> AuthToken -> Http.Request (Widget Body)
+update : UUID.UUID -> EditConfig record -> AuthToken -> Http.Request Widget
 update slug config token =
     let
         expect =
-            Widget.decoderWithBody
+            Widget.decoder
                 |> Decode.field "widget"
                 |> Http.expectJson
 
@@ -222,14 +220,13 @@ update slug config token =
             Encode.object
                 [ "name" => Encode.string config.name
                 , "description" => Encode.string config.description
-                , "body" => Encode.string config.body
                 ]
 
         body =
             Encode.object [ "widget" => widget ]
                 |> Http.jsonBody
     in
-        mockApiUrl ("/widgets/" ++ slugToString slug)
+        mockApiUrl ("/widgets/" ++ UUID.slugToString slug)
             |> HttpBuilder.put
             |> withAuthorization (Just token)
             |> withBody body
@@ -241,9 +238,9 @@ update slug config token =
 -- DELETE --
 
 
-delete : Widget.UUID -> AuthToken -> Http.Request ()
+delete : UUID.UUID -> AuthToken -> Http.Request ()
 delete slug token =
-    mockApiUrl ("/widgets/" ++ Widget.slugToString slug)
+    mockApiUrl ("/widgets/" ++ UUID.slugToString slug)
         |> HttpBuilder.delete
         |> withAuthorization (Just token)
         |> HttpBuilder.toRequest

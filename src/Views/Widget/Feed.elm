@@ -188,8 +188,8 @@ type Msg
     = DismissErrors
     | SelectFeedSource FeedSource
     | FeedLoadCompleted FeedSource (Result Http.Error ( Int, Feed ))
-    | ToggleFavorite (Widget ())
-    | FavoriteCompleted (Result Http.Error (Widget ()))
+    | ToggleFavorite Widget
+    | FavoriteCompleted (Result Http.Error Widget)
     | SelectPage Int
 
 
@@ -322,7 +322,7 @@ fetch token page feedSource =
             |> Task.map (\feed -> ( page, feed ))
 
 
-replaceWidget : Widget a -> Widget a -> Widget a
+replaceWidget : Widget -> Widget -> Widget
 replaceWidget newWidget oldWidget =
     if newWidget.uuid == oldWidget.uuid then
         newWidget

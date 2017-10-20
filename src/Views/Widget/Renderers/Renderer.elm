@@ -12,7 +12,7 @@ import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src)
 
 
-run : Widget Body -> Table.Data -> Html msg
+run : Widget -> Table.Data -> Html msg
 run widget data =
     case List.isEmpty data.rows of
         True ->
