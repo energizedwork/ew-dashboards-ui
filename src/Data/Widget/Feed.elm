@@ -1,13 +1,13 @@
 module Data.Widget.Feed exposing (Feed, decoder)
 
-import Data.Widget as Widget exposing (Widget)
+import Data.Dashboard as Dashboard exposing (Dashboard)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline as Pipeline exposing (decode, required)
 
 
 type alias Feed =
-    { widgets : List (Widget ())
-    , widgetsCount : Int
+    { dashboards : List Dashboard
+    , dashboardsCount : Int
     }
 
 
@@ -18,5 +18,5 @@ type alias Feed =
 decoder : Decoder Feed
 decoder =
     decode Feed
-        |> required "widgets" (Decode.list Widget.decoder)
-        |> required "widgetsCount" Decode.int
+        |> required "dashboards" (Decode.list Dashboard.decoder)
+        |> required "dashboardsCount" Decode.int

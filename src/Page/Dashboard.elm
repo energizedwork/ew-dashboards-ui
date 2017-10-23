@@ -1,9 +1,7 @@
-module Page.Widget exposing (Model, Msg(..), init, update, view, subscriptions)
+module Page.Dashboard exposing (Model, Msg(..), init, update, view, subscriptions)
 
-{-| Viewing an individual widget.
--}
-
-import Data.Widget as Widget exposing (Widget, Body)
+import Data.Dashboard as Dashboard exposing (Dashboard)
+import Data.Widget as Widget exposing (..)
 import Data.Widget.Author as Author exposing (Author)
 import Data.Session as Session exposing (Session)
 import Data.User as User exposing (User)
@@ -18,13 +16,15 @@ import Html.Events exposing (onClick, onInput, onSubmit)
 import Http
 import Page.Errored as Errored exposing (PageLoadError, pageLoadError)
 import Request.Widget
+import Request.Dashboard
 import Request.Profile
 import Route
 import Task exposing (Task)
 import Util exposing ((=>), pair, viewIf)
 import Views.Widget
-import Views.Widget.Favorite as Favorite
+import Views.Dashboard.Favorite as Favorite
 import Views.Author
+import Views.Dashboard
 import Views.Errors
 import Views.Page as Page
 import Views.User.Follow as Follow
@@ -66,8 +66,7 @@ type alias Model =
     , newMessage : String
     , messages : List String
     , phxSocket : Phoenix.Socket.Socket Msg
-    , data : Data
-    , widget : Widget Body
+    , dashboard : Dashboard
     }
 
 
@@ -93,14 +92,14 @@ init session slug =
             Maybe.map .token session.user
 
         loadWidget =
-            Request.Widget.get maybeAuthToken slug
+            Request.Dashboard.get maybeAuthToken slug
                 |> Http.toTask
 
         handleLoadError err =
-            pageLoadError Page.Other ("Widget is currently unavailable. " ++ (toString err))
+            pageLoadError Page.Other ("Dashboard is currently unavailable. " ++ (toString err))
 
         initModel =
-            (Model [] "" [] initPhxSocket (Data []))
+            Model [] "" [] initPhxSocket
     in
         Task.map initModel loadWidget
             |> Task.mapError handleLoadError
@@ -119,101 +118,69 @@ initPhxSocket =
 view : Session -> Model -> Html Msg
 view session model =
     let
-        widget =
-            model.widget
+        dashboard =
+            model.dashboard
 
         author =
-            widget.author
+            dashboard.author
 
         buttons =
-            viewButtons widget author session.user
-
-        -- below is for dev only! saves having to wait for a websocket if you're working on UI..
-        devData =
-            Data
-                [ List.range 0 12 |> List.map toString
-                , List.range 100 111 |> List.map toString |> (::) "00:00"
-                , List.range 200 211 |> List.map toString |> (::) "00:30"
-                , List.range 300 311 |> List.map toString |> (::) "01:00"
-                , List.range 400 411 |> List.map toString |> (::) "01:30"
-                , List.range 500 511 |> List.map toString |> (::) "02:00"
-                , List.range 600 611 |> List.map toString |> (::) "02:30"
-                , List.range 700 711 |> List.map toString |> (::) "03:00"
-                , List.range 800 811 |> List.map toString |> (::) "03:30"
-                , List.range 900 911 |> List.map toString |> (::) "04:00"
-                , List.range 1000 1011 |> List.map toString |> (::) "04:30"
-                , List.range 1100 1111 |> List.map toString |> (::) "05:00"
-                , List.range 1200 1211 |> List.map toString |> (::) "05:30"
-                ]
+            viewButtons dashboard author session.user
     in
         div [ class "article-page" ]
-            [ viewBanner model.errors widget author session.user
-            , div [ class "container page" ]
-                [ div [ class "row article-content" ]
-                    [ div [ class "col-md-12" ]
-                        [ h3 [] [ text <| (widget.name) ]
-                        , Renderer.run widget model.data
-                          -- , Renderer.run widget devData
-                        , br [] []
-                        , br [] []
-                        , p [ class "small" ] [ text <| channelName <| Widget.primaryDataSource widget ]
-                        ]
-                    ]
+            [ viewBanner model.errors dashboard author session.user
+            , div [ class "container-fluid page" ]
+                [ div [ class "row article-content" ] <|
+                    List.map
+                        (\widget ->
+                            Renderer.run widget widget.data
+                        )
+                        model.dashboard.widgets
                 , hr [] []
-                  -- , viewAndDebugDataSource model
-                  -- , div [ class "article-actions" ]
-                  --     [ div [ class "article-meta" ] <|
-                  --         [ a [ Route.href (Route.Profile author.username) ]
-                  --             [ img [ UserPhoto.src author.image ] [] ]
-                  --           , div [ class "info" ]
-                  --               [ Views.Author.view author.username
-                  --               , Views.Widget.viewTimestamp widget
-                  --               ]
-                  --         ]
-                  --             ++ buttons
-                  --     ]
                 ]
             ]
 
 
-viewBanner : List String -> Widget a -> Author -> Maybe User -> Html Msg
-viewBanner errors widget author maybeUser =
+viewBanner : List String -> Dashboard -> Author -> Maybe User -> Html Msg
+viewBanner errors dashboard author maybeUser =
     let
         buttons =
-            viewButtons widget author maybeUser
+            viewButtons dashboard author maybeUser
     in
         div [ class "banner" ]
-            [ div [ class "container" ]
-                [ h1 [] [ text widget.name ]
-                , div [ class "article-meta" ] <|
-                    [ a [ Route.href (Route.Profile author.username) ]
-                        [ img [ UserPhoto.src author.image ] [] ]
-                    , div [ class "info" ]
-                        [ Views.Author.view author.username
-                        , Views.Widget.viewTimestamp widget
+            [ div [ class "container-fluid" ]
+                [ div [ class "row" ]
+                    [ div [ class "col-md-4" ] [ h2 [] [ text dashboard.name ] ]
+                    , div [ class "col-md-4 col-md-offset-4" ]
+                        [ div [ class "article-meta article-meta-dashboard" ] <|
+                            [ a [ Route.href (Route.Profile author.username) ]
+                                [ img [ UserPhoto.src author.image ] [] ]
+                            , div [ class "info" ]
+                                [ Views.Author.view author.username
+                                , Views.Dashboard.viewTimestamp dashboard
+                                ]
+                            ]
+                                ++ buttons
+                        , Views.Errors.view DismissErrors errors
                         ]
                     ]
-                        ++ buttons
-                , Views.Errors.view DismissErrors errors
                 ]
             ]
 
 
-viewButtons : Widget a -> Author -> Maybe User -> List (Html Msg)
-viewButtons widget author maybeUser =
+viewButtons : Dashboard -> Author -> Maybe User -> List (Html Msg)
+viewButtons dashboard author maybeUser =
     let
-        isMyWidget =
+        isMyDashboard =
             Maybe.map .username maybeUser == Just author.username
     in
-        if isMyWidget then
-            [ editButton widget
-            , text " "
-            , deleteButton widget
+        if isMyDashboard then
+            [ text " "
             ]
         else
             [ followButton author
             , text " "
-            , favoriteButton widget
+            , favoriteButton dashboard
             ]
 
 
@@ -274,11 +241,9 @@ renderMessage str =
 type Msg
     = DismissErrors
     | ToggleFavorite
-    | FavoriteCompleted (Result Http.Error (Widget Body))
+    | FavoriteCompleted (Result Http.Error Dashboard)
     | ToggleFollow
     | FollowCompleted (Result Http.Error Author)
-    | DeleteWidget
-    | WidgetDeleted (Result Http.Error ())
     | SendMessage
     | SetNewMessage String
     | PhoenixMsg (Phoenix.Socket.Msg Msg)
@@ -296,31 +261,33 @@ update session msg model =
         socket =
             model.phxSocket
 
-        widget =
-            model.widget
+        dashboard =
+            model.dashboard
 
         author =
-            widget.author
+            dashboard.author
     in
-        case msg of
-            -- case Debug.log "------------------- > Widget.update: " msg of
+        case Debug.log "-------------- > Dashboard.update: " msg of
+            -- case msg of
             DismissErrors ->
                 { model | errors = [] } => Cmd.none
 
             ToggleFavorite ->
                 let
                     cmdFromAuth authToken =
-                        Request.Widget.toggleFavorite model.widget authToken
+                        Request.Dashboard.toggleFavorite model.dashboard authToken
                             |> Http.toTask
-                            |> Task.map (\newWidget -> { newWidget | body = widget.body })
+                            -- |> Task.map (\newDashboard -> { newDashboard | body = widget.body })
+                            |>
+                                Task.map (\newDashboard -> newDashboard)
                             |> Task.attempt FavoriteCompleted
                 in
                     session
                         |> Session.attempt "favorite" cmdFromAuth
                         |> Tuple.mapFirst (Util.appendErrors model)
 
-            FavoriteCompleted (Ok newWidget) ->
-                { model | widget = newWidget } => Cmd.none
+            FavoriteCompleted (Ok newDashboard) ->
+                { model | dashboard = newDashboard } => Cmd.none
 
             FavoriteCompleted (Err error) ->
                 -- In a serious production application, we would log the error to
@@ -342,31 +309,13 @@ update session msg model =
 
             FollowCompleted (Ok { following }) ->
                 let
-                    newWidget =
-                        { widget | author = { author | following = following } }
+                    newDashboard =
+                        { dashboard | author = { author | following = following } }
                 in
-                    { model | widget = newWidget } => Cmd.none
+                    { model | dashboard = newDashboard } => Cmd.none
 
             FollowCompleted (Err error) ->
                 { model | errors = "Unable to follow user." :: model.errors }
-                    => Cmd.none
-
-            DeleteWidget ->
-                let
-                    cmdFromAuth authToken =
-                        authToken
-                            |> Request.Widget.delete model.widget.uuid
-                            |> Http.send WidgetDeleted
-                in
-                    session
-                        |> Session.attempt "delete widgets" cmdFromAuth
-                        |> Tuple.mapFirst (Util.appendErrors model)
-
-            WidgetDeleted (Ok ()) ->
-                model => Route.modifyUrl Route.Home
-
-            WidgetDeleted (Err error) ->
-                { model | errors = model.errors ++ [ "Server error while trying to delete widget." ] }
                     => Cmd.none
 
             PhoenixMsg msg ->
@@ -384,8 +333,10 @@ update session msg model =
                         (JE.object [ ( "user", JE.string user ), ( "body", JE.string model.newMessage ) ])
 
                     push_ =
-                        Phoenix.Push.init "new:msg" (channelName <| Widget.primaryDataSource model.widget)
-                            |> Phoenix.Push.withPayload payload
+                        Phoenix.Push.init "new:msg" "foo:bar"
+                            -- Phoenix.Push.init "new:msg" (channelName <| Widget.primaryDataSource model.widget)
+                            |>
+                                Phoenix.Push.withPayload payload
 
                     ( phxSocket, phxCmd ) =
                         Phoenix.Socket.push push_ socket
@@ -405,13 +356,42 @@ update session msg model =
             ReceiveChatMessage raw ->
                 case JD.decodeValue DataSourceMessage.decoder raw of
                     Ok chatMessage ->
-                        ( { model
-                            | messages =
-                                ((chatMessage.user ++ ": " ++ (toString chatMessage.body)) :: model.messages)
-                            , data = chatMessage.body
-                          }
-                        , Cmd.none
-                        )
+                        let
+                            originalDashboard =
+                                model.dashboard
+
+                            updateWidget newData widget =
+                                { widget | data = newData }
+
+                            updatedDashboard =
+                                { originalDashboard
+                                    | widgets =
+                                        List.map
+                                            (\widget ->
+                                                case matchingDataSource widget chatMessage.uuid of
+                                                    True ->
+                                                        updateWidget chatMessage.body widget
+
+                                                    False ->
+                                                        widget
+                                            )
+                                            model.dashboard.widgets
+                                }
+
+                            matchingDataSource widget uuid =
+                                let
+                                    primaryDataSource =
+                                        Widget.primaryDataSource widget
+                                in
+                                    Debug.log ("MATCH? primaryDataSource.uuid: " ++ primaryDataSource.uuid ++ " chatMessage.uuid: " ++ chatMessage.uuid) (primaryDataSource.uuid == chatMessage.uuid)
+                        in
+                            ( { model
+                                | messages =
+                                    ((chatMessage.user ++ ": " ++ (toString chatMessage.body)) :: model.messages)
+                                , dashboard = updatedDashboard
+                              }
+                            , Cmd.none
+                            )
 
                     Err error ->
                         Debug.log ("ERROR decoding  " ++ (toString error) ++ "---> ")
@@ -419,29 +399,67 @@ update session msg model =
 
             JoinChannel ->
                 let
-                    fullChannelName =
-                        channelName <| Widget.primaryDataSource model.widget
+                    initChannel widget =
+                        let
+                            fullChannelName =
+                                channelName <| Widget.primaryDataSource widget
 
-                    channel =
-                        Phoenix.Channel.init fullChannelName
-                            |> Phoenix.Channel.withPayload userParams
-                            |> Phoenix.Channel.onJoin (always (ShowJoinedMessage fullChannelName))
-                            |> Phoenix.Channel.onClose (always (ShowLeftMessage fullChannelName))
+                            channel =
+                                Phoenix.Channel.init fullChannelName
+                                    |> Phoenix.Channel.withPayload userParams
+                                    |> Phoenix.Channel.onJoin (always (ShowJoinedMessage fullChannelName))
+                                    |> Phoenix.Channel.onClose (always (ShowLeftMessage fullChannelName))
+                        in
+                            ( fullChannelName, channel )
 
-                    ( phxSocket, phxCmd ) =
-                        Phoenix.Socket.join channel socket
+                    channels =
+                        List.map initChannel model.dashboard.widgets
 
-                    listeningSocket =
-                        phxSocket |> Phoenix.Socket.on "new:msg" fullChannelName ReceiveChatMessage
+                    initCmds =
+                        []
+
+                    joinChannel phxSocket channels commands =
+                        case Debug.log "joinChannel" <| List.head channels of
+                            Just ( fullChannelName, channel ) ->
+                                let
+                                    ( updatedPhxSocket, phxCmd ) =
+                                        Phoenix.Socket.join channel phxSocket
+
+                                    remainingChannels =
+                                        case List.tail channels of
+                                            Just someChannels ->
+                                                someChannels
+
+                                            Nothing ->
+                                                []
+
+                                    listeningSocket =
+                                        updatedPhxSocket |> Phoenix.Socket.on "new:msg" fullChannelName ReceiveChatMessage
+                                in
+                                    joinChannel listeningSocket remainingChannels (phxCmd :: commands)
+
+                            Nothing ->
+                                ( phxSocket, commands )
+
+                    ( updatedSocket, phxCmds ) =
+                        joinChannel socket channels initCmds
                 in
-                    ( { model | phxSocket = listeningSocket }
-                    , Cmd.map PhoenixMsg phxCmd
+                    ( { model | phxSocket = updatedSocket }
+                      -- , Debug.log "Cmds: " <|
+                    , Cmd.batch <|
+                        List.map
+                            (\cmd ->
+                                Cmd.map PhoenixMsg cmd
+                            )
+                            phxCmds
                     )
 
             LeaveChannel ->
                 let
                     ( phxSocket, phxCmd ) =
-                        Phoenix.Socket.leave (channelName <| Widget.primaryDataSource model.widget) socket
+                        Phoenix.Socket.leave "foo:bar" socket
+
+                    -- Phoenix.Socket.leave (channelName <| Widget.primaryDataSource model.widget) socket
                 in
                     ( { model | phxSocket = phxSocket }
                     , Cmd.map PhoenixMsg phxCmd
@@ -465,25 +483,13 @@ update session msg model =
 -- INTERNAL --
 
 
-favoriteButton : Widget a -> Html Msg
-favoriteButton widget =
+favoriteButton : Dashboard -> Html Msg
+favoriteButton dashboard =
     let
         favoriteText =
-            " Favorite Widget (" ++ toString widget.favoritesCount ++ ")"
+            " Favorite Dashboard (" ++ toString dashboard.favoritesCount ++ ")"
     in
-        Favorite.button (\_ -> ToggleFavorite) widget [] [ text favoriteText ]
-
-
-deleteButton : Widget a -> Html Msg
-deleteButton widget =
-    button [ class "btn btn-outline-danger btn-sm", onClick DeleteWidget ]
-        [ i [ class "ion-trash-a" ] [], text " Delete Widget" ]
-
-
-editButton : Widget a -> Html Msg
-editButton widget =
-    a [ class "btn btn-outline-secondary btn-sm", Route.href (Route.EditWidget widget.uuid) ]
-        [ i [ class "ion-edit" ] [], text " Edit Widget" ]
+        Favorite.button (\_ -> ToggleFavorite) dashboard [] [ text favoriteText ]
 
 
 followButton : Follow.State record -> Html Msg

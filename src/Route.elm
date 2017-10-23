@@ -18,6 +18,7 @@ type Route
     | Register
     | Settings
     | Widget Widget.UUID
+    | Dashboard Widget.UUID
     | Profile Username
     | NewWidget
     | EditWidget Widget.UUID
@@ -32,6 +33,7 @@ route =
         , Url.map Settings (s "settings")
         , Url.map Profile (s "profile" </> User.usernameParser)
         , Url.map Register (s "register")
+        , Url.map Dashboard (s "dashboard" </> Widget.slugParser)
         , Url.map Widget (s "widget" </> Widget.slugParser)
         , Url.map NewWidget (s "editor")
         , Url.map EditWidget (s "editor" </> Widget.slugParser)
@@ -64,6 +66,9 @@ routeToString page =
 
                 Widget slug ->
                     [ "widget", Widget.slugToString slug ]
+
+                Dashboard slug ->
+                    [ "dashboard", Widget.slugToString slug ]
 
                 Profile username ->
                     [ "profile", User.usernameToString username ]

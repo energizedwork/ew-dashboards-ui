@@ -6,6 +6,9 @@ import Data.User as User exposing (User, Username)
 import Html exposing (..)
 import Json.Decode as Decode exposing (Value)
 import Navigation exposing (Location)
+import Page.Dashboard
+import Page.Dashboard as Dashboard exposing (Msg(..))
+import Page.Widget
 import Page.Widget as Widget exposing (Msg(..))
 import Page.Widget.Editor as Editor
 import Page.Errored as Errored exposing (PageLoadError)
@@ -15,7 +18,6 @@ import Page.NotFound as NotFound
 import Page.Profile as Profile
 import Page.Register as Register
 import Page.Settings as Settings
-import Page.Widget
 import Ports
 import Route exposing (Route)
 import Task
@@ -38,6 +40,7 @@ type Page
     | Login Login.Model
     | Register Register.Model
     | Profile Username Profile.Model
+    | Dashboard Dashboard.Model
     | Widget Widget.Model
     | Editor (Maybe UUID) Editor.Model
 
@@ -138,6 +141,11 @@ viewPage session isLoading page =
                     |> frame (Page.Profile username)
                     |> Html.map ProfileMsg
 
+            Dashboard subModel ->
+                Dashboard.view session subModel
+                    |> frame Page.Other
+                    |> Html.map DashboardMsg
+
             Widget subModel ->
                 Widget.view session subModel
                     |> frame Page.Other
@@ -213,6 +221,9 @@ pageSubscriptions page =
         Profile _ _ ->
             Sub.none
 
+        Dashboard dashboardModel ->
+            Sub.map DashboardMsg (Page.Dashboard.subscriptions dashboardModel)
+
         Widget widgetModel ->
             Sub.map WidgetMsg (Page.Widget.subscriptions widgetModel)
 
@@ -227,6 +238,7 @@ pageSubscriptions page =
 type Msg
     = SetRoute (Maybe Route)
     | HomeLoaded (Result PageLoadError Home.Model)
+    | DashboardLoaded (Result PageLoadError Dashboard.Model)
     | WidgetLoaded (Result PageLoadError Widget.Model)
     | ProfileLoaded Username (Result PageLoadError Profile.Model)
     | EditWidgetLoaded UUID (Result PageLoadError Editor.Model)
@@ -236,6 +248,7 @@ type Msg
     | LoginMsg Login.Msg
     | RegisterMsg Register.Msg
     | ProfileMsg Profile.Msg
+    | DashboardMsg Dashboard.Msg
     | WidgetMsg Widget.Msg
     | EditorMsg Editor.Msg
 
@@ -306,6 +319,9 @@ setRoute maybeRoute model =
             Just (Route.Widget slug) ->
                 transition WidgetLoaded (Widget.init model.session slug)
 
+            Just (Route.Dashboard slug) ->
+                transition DashboardLoaded (Dashboard.init model.session slug)
+
 
 pageErrored : Model -> ActivePage -> String -> ( Model, Cmd msg )
 pageErrored model activePage errorMessage =
@@ -337,7 +353,7 @@ updatePage page msg model =
         errored =
             pageErrored model
     in
-        -- case Debug.log "updatePage ----> " ( msg, page ) of
+        -- case Debug.log "Main.updatePage ----> " ( msg, page ) of
         case ( msg, page ) of
             ( SetRoute route, _ ) ->
                 setRoute route model
@@ -354,10 +370,21 @@ updatePage page msg model =
             ( ProfileLoaded username (Err error), _ ) ->
                 { model | pageState = Loaded (Errored error) } => Cmd.none
 
+            ( DashboardLoaded (Ok subModel), _ ) ->
+                let
+                    ( newModel, newCmd ) =
+                        Page.Dashboard.update session Page.Dashboard.JoinChannel subModel
+                in
+                    { model | pageState = Loaded (Dashboard newModel) }
+                        => Cmd.map DashboardMsg newCmd
+
+            ( DashboardLoaded (Err error), _ ) ->
+                { model | pageState = Loaded (Errored error) } => Cmd.none
+
             ( WidgetLoaded (Ok subModel), _ ) ->
                 let
                     ( newModel, newCmd ) =
-                        Page.Widget.update session JoinChannel subModel
+                        Page.Widget.update session Page.Widget.JoinChannel subModel
                 in
                     { model | pageState = Loaded (Widget newModel) }
                         => Cmd.map WidgetMsg newCmd
@@ -451,6 +478,9 @@ updatePage page msg model =
 
             ( ProfileMsg subMsg, Profile username subModel ) ->
                 toPage (Profile username) ProfileMsg (Profile.update model.session) subMsg subModel
+
+            ( DashboardMsg subMsg, Dashboard subModel ) ->
+                toPage Dashboard DashboardMsg (Dashboard.update model.session) subMsg subModel
 
             ( WidgetMsg subMsg, Widget subModel ) ->
                 toPage Widget WidgetMsg (Widget.update model.session) subMsg subModel

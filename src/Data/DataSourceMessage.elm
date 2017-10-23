@@ -7,11 +7,13 @@ import Data.Widget.Table as Table exposing (Data, Cell, decoder)
 type alias DataSourceMessage =
     { user : String
     , body : Data
+    , uuid : String
     }
 
 
 decoder : Decode.Decoder DataSourceMessage
 decoder =
-    Decode.map2 DataSourceMessage
+    Decode.map3 DataSourceMessage
         (field "user" Decode.string)
         (field "body" Table.decoder)
+        (field "uuid" Decode.string)

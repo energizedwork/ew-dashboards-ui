@@ -1,4 +1,4 @@
-module Data.Widget.Author exposing (Author, decoder)
+module Data.Widget.Author exposing (Author, decoder, init)
 
 import Data.User as User exposing (Username)
 import Data.UserPhoto as UserPhoto exposing (UserPhoto)
@@ -21,3 +21,11 @@ type alias Author =
     , image : UserPhoto
     , following : Bool
     }
+
+
+init : Author
+init =
+    Author (User.Username "msp")
+        Nothing
+        (UserPhoto.UserPhoto <| Just "https://static.productionready.io/images/smiley-cyrus.jpg")
+        False

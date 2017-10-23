@@ -51,7 +51,7 @@ frame isLoading user page content =
 viewHeader : ActivePage -> Maybe User -> Bool -> Html msg
 viewHeader page user isLoading =
     nav [ class "navbar navbar-light" ]
-        [ div [ class "container" ]
+        [ div [ class "container-fluid" ]
             [ a [ class "navbar-brand", Route.href Route.Home ]
                 [ text "EW Dashboards" ]
             , ul [ class "nav navbar-nav pull-xs-right" ] <|

@@ -16,7 +16,7 @@ import Request.Profile
 import SelectList exposing (SelectList)
 import Task exposing (Task)
 import Util exposing ((=>), pair, viewIf)
-import Views.Widget.Feed as Feed exposing (FeedSource, authorFeed, favoritedFeed)
+import Views.Dashboard.Feed as Feed exposing (FeedSource, authorFeed, favoritedFeed)
 import Views.Errors as Errors
 import Views.Page as Page
 import Views.User.Follow as Follow
@@ -101,7 +101,7 @@ viewFeed feed =
     div [ class "col-xs-12 col-md-10 offset-md-1" ] <|
         div [ class "articles-toggle" ]
             [ Feed.viewFeedSources feed |> Html.map FeedMsg ]
-            :: (Feed.viewWidgets feed |> List.map (Html.map FeedMsg))
+            :: (Feed.viewDashboards feed |> List.map (Html.map FeedMsg))
 
 
 

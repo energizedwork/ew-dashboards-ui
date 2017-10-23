@@ -1,6 +1,6 @@
-module Views.Widget.Feed exposing (FeedSource, Model, Msg, authorFeed, favoritedFeed, globalFeed, init, selectTag, tagFeed, update, viewWidgets, viewFeedSources, yourFeed)
+module Views.Dashboard.Feed exposing (FeedSource, Model, Msg, authorFeed, favoritedFeed, globalFeed, init, selectTag, tagFeed, update, viewDashboards, viewFeedSources, yourFeed)
 
-{-| The reusable Widget Feed that appears on both the Home page as well as on
+{-| The reusable Dashboard Feed that appears on both the Home page as well as on
 the Profile page. There's a lot of logic here, so it's more convenient to use
 the heavyweight approach of giving this its own Model, view, and update.
 
@@ -14,6 +14,7 @@ overkill, so we use simpler APIs instead.
 -}
 
 import Data.Widget as Widget exposing (Widget, Tag)
+import Data.Dashboard as Dashboard exposing (Dashboard)
 import Data.Widget.Feed exposing (Feed)
 import Data.AuthToken as AuthToken exposing (AuthToken)
 import Data.Session as Session exposing (Session)
@@ -23,11 +24,11 @@ import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src)
 import Html.Events exposing (onClick)
 import Http
-import Request.Widget
+import Request.Dashboard
 import SelectList exposing (Position(..), SelectList)
 import Task exposing (Task)
 import Util exposing ((=>), onClickStopPropagation, pair, viewIf)
-import Views.Widget
+import Views.Dashboard
 import Views.Errors as Errors
 import Views.Page exposing (bodyId)
 import Views.Spinner exposing (spinner)
@@ -77,9 +78,9 @@ init session feedSources =
 -- VIEW --
 
 
-viewWidgets : Model -> List (Html Msg)
-viewWidgets (Model { activePage, feed, feedSources }) =
-    List.map (Views.Widget.view ToggleFavorite) feed.widgets
+viewDashboards : Model -> List (Html Msg)
+viewDashboards (Model { activePage, feed, feedSources }) =
+    List.map (Views.Dashboard.view ToggleFavorite) feed.dashboards
         ++ [ pagination activePage feed (SelectList.selected feedSources) ]
 
 
@@ -158,7 +159,7 @@ pagination activePage feed feedSource =
             limit feedSource
 
         totalPages =
-            ceiling (toFloat feed.widgetsCount / toFloat articlesPerPage)
+            ceiling (toFloat feed.dashboardsCount / toFloat articlesPerPage)
     in
         if totalPages > 1 then
             List.range 1 totalPages
@@ -188,8 +189,8 @@ type Msg
     = DismissErrors
     | SelectFeedSource FeedSource
     | FeedLoadCompleted FeedSource (Result Http.Error ( Int, Feed ))
-    | ToggleFavorite (Widget ())
-    | FavoriteCompleted (Result Http.Error (Widget ()))
+    | ToggleFavorite Dashboard
+    | FavoriteCompleted (Result Http.Error Dashboard)
     | SelectPage Int
 
 
@@ -227,29 +228,29 @@ updateInternal session msg model =
             }
                 => Cmd.none
 
-        ToggleFavorite widget ->
+        ToggleFavorite dashboard ->
             case session.user of
                 Nothing ->
                     { model | errors = model.errors ++ [ "You are currently signed out. You must sign in to favorite articles." ] }
                         => Cmd.none
 
                 Just user ->
-                    Request.Widget.toggleFavorite widget user.token
+                    Request.Dashboard.toggleFavorite dashboard user.token
                         |> Http.send FavoriteCompleted
                         |> pair model
 
-        FavoriteCompleted (Ok widget) ->
+        FavoriteCompleted (Ok dashboard) ->
             let
                 feed =
                     model.feed
 
                 newFeed =
-                    { feed | widgets = List.map (replaceWidget widget) feed.widgets }
+                    { feed | dashboards = List.map (replaceDashboard dashboard) feed.dashboards }
             in
                 { model | feed = newFeed } => Cmd.none
 
         FavoriteCompleted (Err error) ->
-            { model | errors = model.errors ++ [ "Server error while trying to favorite widget." ] }
+            { model | errors = model.errors ++ [ "Server error while trying to favorite dashboard." ] }
                 => Cmd.none
 
         SelectPage page ->
@@ -277,7 +278,7 @@ fetch : Maybe AuthToken -> Int -> FeedSource -> Task Http.Error ( Int, Feed )
 fetch token page feedSource =
     let
         defaultListConfig =
-            Request.Widget.defaultListConfig
+            Request.Dashboard.defaultListConfig
 
         articlesPerPage =
             limit feedSource
@@ -293,41 +294,41 @@ fetch token page feedSource =
                 YourFeed ->
                     let
                         defaultFeedConfig =
-                            Request.Widget.defaultFeedConfig
+                            Request.Dashboard.defaultFeedConfig
 
                         feedConfig =
                             { defaultFeedConfig | offset = offset, limit = articlesPerPage }
                     in
                         token
-                            |> Maybe.map (Request.Widget.feed feedConfig >> Http.toTask)
+                            |> Maybe.map (Request.Dashboard.feed feedConfig >> Http.toTask)
                             |> Maybe.withDefault (Task.fail (Http.BadUrl "You need to be signed in to view your feed."))
 
                 GlobalFeed ->
-                    Request.Widget.list listConfig token
+                    Request.Dashboard.list listConfig token
                         |> Http.toTask
 
                 TagFeed tagName ->
-                    Request.Widget.list { listConfig | tag = Just tagName } token
+                    Request.Dashboard.list { listConfig | tag = Just tagName } token
                         |> Http.toTask
 
                 FavoritedFeed username ->
-                    Request.Widget.list { listConfig | favorited = Just username } token
+                    Request.Dashboard.list { listConfig | favorited = Just username } token
                         |> Http.toTask
 
                 AuthorFeed username ->
-                    Request.Widget.list { listConfig | author = Just username } token
+                    Request.Dashboard.list { listConfig | author = Just username } token
                         |> Http.toTask
     in
         task
             |> Task.map (\feed -> ( page, feed ))
 
 
-replaceWidget : Widget a -> Widget a -> Widget a
-replaceWidget newWidget oldWidget =
-    if newWidget.uuid == oldWidget.uuid then
-        newWidget
+replaceDashboard : Dashboard -> Dashboard -> Dashboard
+replaceDashboard newDashboard oldDashboard =
+    if newDashboard.uuid == oldDashboard.uuid then
+        newDashboard
     else
-        oldWidget
+        oldDashboard
 
 
 selectFeedSource : FeedSource -> SelectList FeedSource -> SelectList FeedSource

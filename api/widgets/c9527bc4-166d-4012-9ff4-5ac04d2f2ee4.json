@@ -20,6 +20,10 @@
               "following": false
           },
           "favorited": false,
-          "favoritesCount": 0
+          "favoritesCount": 0,
+          "data": {
+            "data": []
+          }
+          
     }
 }

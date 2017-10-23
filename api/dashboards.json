@@ -1,0 +1,45 @@
+{
+    "dashboards": [{
+          "uuid": "97340cbd-b3c2-4471-b39a-dcbe31d7f50e",
+          "name": "Haven Power Dashboard",
+          "slug": "haven-power-dashboard",
+          "description": "Haven Power Dashboard",
+          "createdAt": "2017-09-04T16:03:55.948Z",
+          "updatedAt": "2017-09-04T16:03:55.948Z",
+          "author": {
+              "username": "msp",
+              "bio": "beautifully flawed creation .. \n\n",
+              "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
+              "following": false
+          },
+          "favorited": false,
+          "favoritesCount": 0,
+          "widgets": [{
+                "uuid": "006f0092-5a11-468d-b822-ea57753f45c4",
+                "name": "12 months Table",
+                "body": "12 months Table",
+                "description": "12 months of important data",
+                "dataSources": [{
+                    "uuid": "2",
+                    "name": "haven"
+                }],
+                "adapter": "TABLE",
+                "renderer": "TABLE",
+                "createdAt": "2017-09-04T16:03:55.948Z",
+                "updatedAt": "2017-09-04T16:03:55.948Z",
+                "tagList": [],
+                "author": {
+                    "username": "msp",
+                    "bio": "beautifully flawed creation .. \n\n",
+                    "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
+                    "following": false
+                },
+                "favorited": false,
+                "favoritesCount": 0,
+                "data": {
+                  "data": []
+                }
+          }]
+    }],
+    "dashboardsCount": 1
+}

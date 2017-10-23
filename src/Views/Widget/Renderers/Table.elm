@@ -5,7 +5,8 @@ import Data.Widget.Table as Table exposing (Data, Cell)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.TableAdapter as TableAdapter
 import Html exposing (..)
-import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src)
+import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src, title)
+import Views.Widget.Renderers.Utils as Utils
 
 
 render : Widget Body -> Table.Data -> Html msg
@@ -16,11 +17,15 @@ render widget data =
                 ( headerRow, bodyRows, maxValue ) =
                     TableAdapter.adapt data
             in
-                table [ class "table" ]
-                    [ thead []
-                        [ renderHeaderFrom headerRow
+                div [ class "col-md-12 widget" ]
+                    [ h3 [ title widget.description ] [ Html.text widget.name ]
+                    , table [ class "table table-striped" ]
+                        [ thead []
+                            [ renderHeaderFrom headerRow
+                            ]
+                        , tbody [] <| renderBodyFrom bodyRows
                         ]
-                    , tbody [] <| renderBodyFrom bodyRows
+                    , Utils.renderDataSourceInfoFrom widget
                     ]
 
         _ ->

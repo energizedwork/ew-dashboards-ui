@@ -14,7 +14,7 @@ import Request.Widget
 import SelectList exposing (SelectList)
 import Task exposing (Task)
 import Util exposing ((=>), onClickStopPropagation)
-import Views.Widget.Feed as Feed exposing (FeedSource, globalFeed, tagFeed, yourFeed)
+import Views.Dashboard.Feed as Feed exposing (FeedSource, globalFeed, tagFeed, yourFeed)
 import Views.Page as Page
 
 
@@ -85,7 +85,7 @@ viewFeed : Feed.Model -> List (Html Msg)
 viewFeed feed =
     div [ class "feed-toggle" ]
         [ Feed.viewFeedSources feed |> Html.map FeedMsg ]
-        :: (Feed.viewWidgets feed |> List.map (Html.map FeedMsg))
+        :: (Feed.viewDashboards feed |> List.map (Html.map FeedMsg))
 
 
 viewTags : List Tag -> Html Msg

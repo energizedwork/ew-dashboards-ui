@@ -7,9 +7,11 @@ import Data.Widget.Table as Table exposing (Data, Cell)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.HeatMapAdapter as HeatMapAdapter
 import Html exposing (..)
+import Html.Attributes exposing (title)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Html.Attributes exposing (attribute)
+import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
 
@@ -25,7 +27,11 @@ render widget data =
                 dataAsHeaderValueTuples =
                     List.map (List.map2 (,) headerRow) bodyRows
             in
-                view dataAsHeaderValueTuples xLabels yLabels maxValue
+                div [ class "col-md-12 widget" ]
+                    [ h3 [ Html.Attributes.title widget.description ] [ Html.text widget.name ]
+                    , view dataAsHeaderValueTuples xLabels yLabels maxValue
+                    , Utils.renderDataSourceInfoFrom widget
+                    ]
 
         _ ->
             p [ class "data" ] [ Html.text "Sorry, I can only render line charts from a HEAT_MAP adapter right now" ]
@@ -33,17 +39,17 @@ render widget data =
 
 w : Float
 w =
-    1500
+    Utils.largeWidth
 
 
 h : Float
 h =
-    1000
+    Utils.largeHeight
 
 
 padding : Float
 padding =
-    50
+    Utils.largePadding
 
 
 viewPortWidth : Float

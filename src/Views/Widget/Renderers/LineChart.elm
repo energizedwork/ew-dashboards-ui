@@ -8,8 +8,10 @@ import Data.Widget.Table as Table exposing (Data, Cell)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.TableAdapter as TableAdapter
 import Html exposing (..)
+import Html.Attributes exposing (title)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
+import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
 import Visualization.Shape as Shape
@@ -26,7 +28,11 @@ render widget data =
                 dataAsHeaderValueTuples =
                     List.map (List.map2 (,) headerRow) bodyRows
             in
-                view dataAsHeaderValueTuples maxValue
+                div [ class "col-md-6 widget" ]
+                    [ h3 [ Html.Attributes.title widget.description ] [ Html.text widget.name ]
+                    , view dataAsHeaderValueTuples maxValue
+                    , Utils.renderDataSourceInfoFrom widget
+                    ]
 
         _ ->
             p [ class "data" ] [ Html.text "Sorry, I can only render line charts from a TABLE adapter right now" ]
@@ -34,17 +40,17 @@ render widget data =
 
 w : Float
 w =
-    900
+    Utils.mediumWidth
 
 
 h : Float
 h =
-    450
+    Utils.mediumHeight
 
 
 padding : Float
 padding =
-    50
+    Utils.mediumPadding
 
 
 lineColours : Array Color.Color

@@ -8,6 +8,7 @@ module Data.Widget
         , bodyToMarkdownString
         , decoder
         , decoderWithBody
+        , init
         , primaryDataSource
         , slugParser
         , slugToString
@@ -18,6 +19,7 @@ module Data.Widget
 import Data.Widget.Author as Author exposing (Author)
 import Data.Widget.Adapters.Adapter as Adapter exposing (Adapter(..))
 import Data.Widget.Renderer as Renderer exposing (Renderer(..))
+import Data.Widget.Table as Table exposing (Data)
 import Data.DataSource as DataSource exposing (DataSource)
 import Date exposing (Date)
 import Html exposing (Attribute, Html)
@@ -64,8 +66,57 @@ type alias Widget a =
     , favorited : Bool
     , favoritesCount : Int
     , author : Author
+    , data : Data
     , body : a
     }
+
+
+init : Widget Body
+init =
+    let
+        uuid =
+            UUID "not-so-unique"
+
+        name =
+            "Init Widget"
+
+        description =
+            "Init Widget"
+
+        dataSources =
+            [ DataSource.init ]
+
+        adapter =
+            Adapter.TABLE
+
+        renderer =
+            Renderer.TABLE
+
+        tags =
+            []
+
+        createdAt =
+            Date.fromString "2017-01-01T11:07:13.485940Z" |> Result.withDefault (Date.fromTime 0)
+
+        updatedAt =
+            Date.fromString "2017-01-01T11:07:13.485940Z" |> Result.withDefault (Date.fromTime 0)
+
+        favorited =
+            False
+
+        favoritesCount =
+            0
+
+        author =
+            Author.init
+
+        data =
+            Data []
+
+        body =
+            Body "Init Widget"
+    in
+        Widget uuid name description dataSources adapter renderer tags createdAt updatedAt favorited favoritesCount author data body
 
 
 
@@ -99,6 +150,7 @@ baseWidgetDecoder =
         |> required "favorited" Decode.bool
         |> required "favoritesCount" Decode.int
         |> required "author" Author.decoder
+        |> required "data" Table.decoder
 
 
 adapterDecoder : Decoder Adapter

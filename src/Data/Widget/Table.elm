@@ -1,4 +1,4 @@
-module Data.Widget.Table exposing (Data, Row, Cell, decoder)
+module Data.Widget.Table exposing (Data, Row, Cell, decoder, rowDecoder)
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline as Pipeline exposing (custom, decode, required)
