@@ -40,7 +40,7 @@ view toggleFavorite dashboard =
             , a [ class "preview-link", Route.href (Route.Dashboard dashboard.uuid) ]
                 [ h1 [] [ text dashboard.name ]
                 , p [] [ text dashboard.description ]
-                , span [] [ text "Click to view dashboard.." ]
+                , span [ class "small" ] [ text "[Click to view dashboard]" ]
                 ]
             ]
 

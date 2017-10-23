@@ -231,7 +231,7 @@ updateInternal session msg model =
         ToggleFavorite dashboard ->
             case session.user of
                 Nothing ->
-                    { model | errors = model.errors ++ [ "You are currently signed out. You must sign in to favorite articles." ] }
+                    { model | errors = model.errors ++ [ "You are currently signed out. You must sign in to favorite." ] }
                         => Cmd.none
 
                 Just user ->

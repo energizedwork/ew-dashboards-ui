@@ -32,12 +32,12 @@ mediumPadding =
 
 largeWidth : Float
 largeWidth =
-    1500
+    1320
 
 
 largeHeight : Float
 largeHeight =
-    1000
+    880
 
 
 largePadding : Float

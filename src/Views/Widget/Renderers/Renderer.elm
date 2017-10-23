@@ -16,7 +16,9 @@ run : Widget Body -> Table.Data -> Html msg
 run widget data =
     case List.isEmpty data.rows of
         True ->
-            div [ class "spinner-wrapper" ] [ Views.Spinner.spinnerSVG ]
+            div [ class "col-md-6" ]
+                [ div [ class "spinner-wrapper" ] [ Views.Spinner.spinnerSVG ]
+                ]
 
         False ->
             case widget.renderer of

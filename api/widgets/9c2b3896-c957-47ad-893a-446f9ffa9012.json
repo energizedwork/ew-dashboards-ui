@@ -3,7 +3,7 @@
           "uuid": "9c2b3896-c957-47ad-893a-446f9ffa9012",
           "name": "Haven Power Heat Map",
           "body": "Haven Power Heat Map",
-          "description": "One year of MPAN data",
+          "description": "One year of MPAN data, one reading every 30 minutes",
           "dataSources": [{
               "uuid": "998877",
               "name": "haven"
@@ -24,6 +24,6 @@
           "data": {
             "data": []
           }
-          
+
     }
 }

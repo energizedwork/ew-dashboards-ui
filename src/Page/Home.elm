@@ -76,7 +76,7 @@ viewBanner : Html msg
 viewBanner =
     div [ class "banner" ]
         [ div [ class "container" ]
-            [ h1 [ class "logo-font" ] [ text "Widgets" ]
+            [ h2 [ class "logo-font" ] [ text "All Dashboards" ]
             ]
         ]
 

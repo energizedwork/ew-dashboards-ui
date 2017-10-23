@@ -1,0 +1,94 @@
+{
+    "dashboard": {
+          "uuid": "83bb72a2-2aa1-4616-9e03-68bcd2b562ff",
+          "name": "EW Financials",
+          "slug": "ew-financials",
+          "description": "Insight into the EW financial position, data from from Google Sheets",
+          "createdAt": "2017-09-04T16:03:55.948Z",
+          "updatedAt": "2017-09-04T16:03:55.948Z",
+          "author": {
+              "username": "msp",
+              "bio": "beautifully flawed creation .. \n\n",
+              "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
+              "following": false
+          },
+          "favorited": false,
+          "favoritesCount": 0,
+          "widgets": [{
+                "uuid": "c0b02f5d-8e73-4524-9f0f-f343bfd25493",
+                "name": "Bar chart",
+                "body": "Bar chart",
+                "description": "12 months financial data as a bar chart",
+                "dataSources": [{
+                    "uuid": "1P0okW7oVus2KR423Ob1DgbVNCbR_QNg3OjNPj04zcsI",
+                    "name": "sheets"
+                }],
+                "adapter": "TABLE",
+                "renderer": "BAR_CHART",
+                "createdAt": "2017-10-23T16:03:55.948Z",
+                "updatedAt": "2017-10-23T16:03:55.948Z",
+                "tagList": [],
+                "author": {
+                    "username": "msp",
+                    "bio": "beautifully flawed creation .. \n\n",
+                    "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
+                    "following": false
+                },
+                "favorited": false,
+                "favoritesCount": 0,
+                "data": {
+                  "data": []
+                }
+          }, {
+                "uuid": "c9527bc4-166d-4012-9ff4-5ac04d2f2ee4",
+                "name": "Line Chart",
+                "body": "LIne Chart",
+                "description": "12 months financial data as a line chart",
+                "dataSources": [{
+                    "uuid": "1P0okW7oVus2KR423Ob1DgbVNCbR_QNg3OjNPj04zcsI",
+                    "name": "sheets"
+                }],
+                "adapter": "TABLE",
+                "renderer": "LINE_CHART",
+                "createdAt": "2017-10-23T16:03:55.948Z",
+                "updatedAt": "2017-10-23T16:03:55.948Z",
+                "tagList": [],
+                "author": {
+                    "username": "msp",
+                    "bio": "beautifully flawed creation .. \n\n",
+                    "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
+                    "following": false
+                },
+                "favorited": false,
+                "favoritesCount": 0,
+                "data": {
+                  "data": []
+                }
+          }, {
+                "uuid": "006f0092-5a11-468d-b822-ea57753f45c4",
+                "name": "Spreadsheet",
+                "body": "Spreadsheet",
+                "description": "12 months financial data as a table",
+                "dataSources": [{
+                    "uuid": "1P0okW7oVus2KR423Ob1DgbVNCbR_QNg3OjNPj04zcsI",
+                    "name": "sheets"
+                }],
+                "adapter": "TABLE",
+                "renderer": "TABLE",
+                "createdAt": "2017-10-23T16:03:55.948Z",
+                "updatedAt": "2017-10-23T16:03:55.948Z",
+                "tagList": [],
+                "author": {
+                    "username": "msp",
+                    "bio": "beautifully flawed creation .. \n\n",
+                    "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
+                    "following": false
+                },
+                "favorited": false,
+                "favoritesCount": 0,
+                "data": {
+                  "data": []
+                }
+          }]
+    }
+}
