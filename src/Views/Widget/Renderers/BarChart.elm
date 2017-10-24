@@ -28,7 +28,7 @@ render widget data =
                     List.map (List.map2 (,) headerRow) bodyRows
             in
                 div [ class "col-md-6 widget" ]
-                    [ h3 [ Html.Attributes.title widget.description ] [ Html.text widget.name ]
+                    [ h3 [ Html.Attributes.title widget.description, Html.Attributes.class "heading" ] [ Html.text widget.name ]
                     , view dataAsHeaderValueTuples maxValue
                     , Utils.renderDataSourceInfoFrom widget
                     ]
@@ -79,7 +79,7 @@ yScale maxValue =
 
 xAxis : List ( String, String ) -> Svg msg
 xAxis data =
-    Axis.axis { defaultOptions | orientation = Axis.Bottom } (Scale.toRenderable (xScale data))
+    Axis.axis { defaultOptions | orientation = Axis.Bottom, tickFormat = Just Utils.formatStringTick } (Scale.toRenderable (xScale data))
 
 
 yAxis : Float -> Svg msg

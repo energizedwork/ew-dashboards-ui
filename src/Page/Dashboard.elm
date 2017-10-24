@@ -15,13 +15,11 @@ import Html.Attributes exposing (attribute, class, disabled, href, id, placehold
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Http
 import Page.Errored as Errored exposing (PageLoadError, pageLoadError)
-import Request.Widget
 import Request.Dashboard
 import Request.Profile
 import Route
 import Task exposing (Task)
 import Util exposing ((=>), pair, viewIf)
-import Views.Widget
 import Views.Dashboard.Favorite as Favorite
 import Views.Author
 import Views.Dashboard
@@ -126,6 +124,24 @@ view session model =
 
         buttons =
             viewButtons dashboard author session.user
+
+        -- below is for dev only! saves having to wait for a websocket if you're working on UI..
+        devData =
+            Data
+                [ List.range 0 12 |> List.map toString
+                , List.range 100 111 |> List.map toString |> (::) "00:00"
+                , List.range 200 211 |> List.map toString |> (::) "00:30"
+                , List.range 300 311 |> List.map toString |> (::) "01:00"
+                , List.range 400 411 |> List.map toString |> (::) "01:30"
+                , List.range 500 511 |> List.map toString |> (::) "02:00"
+                , List.range 600 611 |> List.map toString |> (::) "02:30"
+                , List.range 700 711 |> List.map toString |> (::) "03:00"
+                , List.range 800 811 |> List.map toString |> (::) "03:30"
+                , List.range 900 911 |> List.map toString |> (::) "04:00"
+                , List.range 1000 1011 |> List.map toString |> (::) "04:30"
+                , List.range 1100 1111 |> List.map toString |> (::) "05:00"
+                , List.range 1200 1211 |> List.map toString |> (::) "05:30"
+                ]
     in
         div [ class "article-page" ]
             [ viewBanner model.errors dashboard author session.user
@@ -134,6 +150,7 @@ view session model =
                     List.map
                         (\widget ->
                             Renderer.run widget widget.data
+                         -- Renderer.run widget devData
                         )
                         model.dashboard.widgets
                 , hr [] []

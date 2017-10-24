@@ -7,6 +7,8 @@ module Views.Widget.Renderers.Utils
         , largeHeight
         , largePadding
         , renderDataSourceInfoFrom
+        , rowToFloats
+        , formatStringTick
         )
 
 import Data.DataSource as DataSource
@@ -48,3 +50,13 @@ largePadding =
 renderDataSourceInfoFrom : Widget a -> Html msg
 renderDataSourceInfoFrom widget =
     p [ class "small data-source-info" ] [ text <| DataSource.toChannel <| Widget.primaryDataSource widget ]
+
+
+rowToFloats : List String -> List Float
+rowToFloats row =
+    List.map (\n -> String.toFloat n |> Result.withDefault 0) row
+
+
+formatStringTick : String -> String
+formatStringTick tick =
+    tick

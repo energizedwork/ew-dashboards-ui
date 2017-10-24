@@ -28,7 +28,7 @@ render widget data =
                     List.map (List.map2 (,) headerRow) bodyRows
             in
                 div [ class "col-md-12 widget" ]
-                    [ h3 [ Html.Attributes.title widget.description ] [ Html.text widget.name ]
+                    [ h3 [ Html.Attributes.title widget.description, Html.Attributes.class "heading" ] [ Html.text widget.name ]
                     , view dataAsHeaderValueTuples xLabels yLabels maxValue
                     , Utils.renderDataSourceInfoFrom widget
                     ]
@@ -95,24 +95,34 @@ view data xLabels yLabels maxValue =
         totalCols =
             List.length firstDataTuple
 
-        cellWidth =
+        heatMapCellWidth =
             (viewPortWidth / toFloat totalCols)
 
-        cellHeight =
+        heatMapCellHeight =
             (viewPortHeight / toFloat totalRows)
 
-        xScale : BandScale String
+        legendCellWidth =
+            (viewPortWidth / maxValue)
+
+        legendCellHeight =
+            (viewPortHeight / toFloat 50)
+
+        valueRange =
+            (List.range 0 <| (String.toInt (toString maxValue) |> Result.withDefault 0))
+
+        xScale : ContinuousScale
         xScale =
-            Scale.band
-                { defaultBandConfig | paddingInner = 0, paddingOuter = 0 }
-                xLabels
-                ( 0, viewPortWidth )
+            Scale.linear ( 0, List.maximum (Utils.rowToFloats xLabels) |> Maybe.withDefault 0 ) ( 0, viewPortWidth )
+
+        legendXScale : ContinuousScale
+        legendXScale =
+            Scale.linear ( 0, maxValue ) ( 0, viewPortWidth )
 
         yScale : BandScale String
         yScale =
             (Scale.band
                 { defaultBandConfig | paddingInner = 0, paddingOuter = 0 }
-                yLabels
+                (yLabels)
                 ( 0, viewPortHeight )
             )
 
@@ -122,11 +132,18 @@ view data xLabels yLabels maxValue =
 
         xAxis : Svg msg
         xAxis =
-            Axis.axis { opts | orientation = Axis.Bottom, tickCount = totalCols } (Scale.toRenderable xScale)
+            Axis.axis { opts | orientation = Axis.Bottom, tickCount = (totalCols // 30) } (xScale)
+
+        legendXAxis : Svg msg
+        legendXAxis =
+            Axis.axis { opts | orientation = Axis.Bottom, tickCount = (floor (maxValue / xAxisDivisor)) } (legendXScale)
+
+        xAxisDivisor =
+            50
 
         yAxis : Svg msg
         yAxis =
-            Axis.axis { opts | orientation = Axis.Left, tickCount = totalRows } (Scale.toRenderable yScale)
+            Axis.axis { opts | orientation = Axis.Left, tickCount = 10, tickFormat = Just Utils.formatStringTick } (Scale.toRenderable yScale)
 
         fillAt colIndex cell =
             case colIndex of
@@ -135,56 +152,99 @@ view data xLabels yLabels maxValue =
                 _ ->
                     (getCellColour (colourScaleFrom cell maxValue))
 
-        renderSquare rowIndex colIndex cell =
-            g [ class "square" ]
-                [ rect
-                    [ x <| toString (padding + toFloat colIndex * cellWidth)
-                    , y <| toString (toFloat rowIndex * cellHeight)
-                    , width <| toString cellWidth
-                    , height <| toString cellHeight
-                    , fill <| fillAt colIndex cell
-                      -- , stroke "#fff"
-                    , attribute "data-amount" cell
+        renderSquare rowIndex colIndex cell cellWidth cellHeight renderLabels =
+            let
+                renderShape =
+                    rect
+                        [ x <| toString (padding + toFloat colIndex * cellWidth)
+                        , y <| toString (toFloat rowIndex * cellHeight)
+                        , width <| toString cellWidth
+                        , height <| toString cellHeight
+                        , fill <| fillAt colIndex cell
+                        , stroke <| fillAt colIndex cell
+                        , attribute "data-amount" cell
+                        ]
+                        []
+
+                renderText =
+                    case renderLabels of
+                        True ->
+                            text_
+                                [ x <| toString <| (padding + toFloat colIndex * cellWidth) + (cellWidth / 2)
+                                , y <| toString <| (toFloat rowIndex * cellHeight) + (cellHeight / 2)
+                                , textAnchor "middle"
+                                , alignmentBaseline "central"
+                                , stroke "none"
+                                , fill "#fff"
+                                , fontSize "8px"
+                                ]
+                                [ Svg.text <| cell ]
+
+                        False ->
+                            text_ [] []
+            in
+                g [ class "square" ]
+                    [ renderShape
+                    , renderText
                     ]
-                    []
-                , text_
-                    [ x <| toString <| (padding + toFloat colIndex * cellWidth) + (cellWidth / 2)
-                    , y <| toString <| (toFloat rowIndex * cellHeight) + (cellHeight / 2)
-                    , textAnchor "middle"
-                    , alignmentBaseline "central"
-                    , stroke "none"
-                    , fill "#fff"
-                    , fontSize "8px"
-                    ]
-                    [ Svg.text <| cell ]
-                ]
 
         renderSquares =
-            List.map
-                (\( rowIndex, row ) ->
-                    g [ class "squares" ]
-                        (List.map
-                            (\( colIndex, ( header, cell ) ) ->
-                                renderSquare rowIndex colIndex cell
+            let
+                renderLabels =
+                    True
+            in
+                List.map
+                    (\( rowIndex, row ) ->
+                        g [ class "squares" ]
+                            (List.map
+                                (\( colIndex, ( header, cell ) ) ->
+                                    renderSquare rowIndex colIndex cell heatMapCellWidth heatMapCellHeight renderLabels
+                                )
+                                (Array.toIndexedList (Array.fromList row))
                             )
-                            (Array.toIndexedList (Array.fromList row))
-                        )
-                )
-                indexedData
+                    )
+                    indexedData
+
+        renderLegend =
+            let
+                renderLabels =
+                    False
+
+                rowIndex =
+                    0
+            in
+                List.map
+                    (\index ->
+                        renderSquare rowIndex index (toString index) legendCellWidth legendCellHeight renderLabels
+                    )
+                    valueRange
     in
-        svg [ width (toString w ++ "px"), height (toString h ++ "px") ]
-            (List.concat
-                [ [ Svg.style []
-                        [ Svg.text """
+        div []
+            [ svg [ width (toString w ++ "px"), height (toString h ++ "px") ]
+                (List.concat
+                    [ [ Svg.style []
+                            [ Svg.text """
                             .square text { display: none; }
                             .square:hover rect { opacity: 0.7; }
                             .square:hover text { display: inline; }
                           """ ]
-                    --   , g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (h - padding) ++ ")") ]
-                    --         [ xAxis ]
-                  , g [ transform ("translate(" ++ toString (padding - 1) ++ ",0)") ]
-                        [ yAxis ]
-                  ]
-                , renderSquares
+                      , g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (h - padding) ++ ")") ]
+                            [ xAxis ]
+                      , g [ transform ("translate(" ++ toString (padding - 1) ++ ",0)") ]
+                            [ yAxis ]
+                      ]
+                    , renderSquares
+                    ]
+                )
+            , h5
+                [ Html.Attributes.style [ ( "marginLeft", ((toString padding) ++ "px") ) ]
                 ]
-            )
+                [ Html.text "Scale" ]
+            , svg [ width (toString w ++ "px"), height (toString (legendCellHeight + 50) ++ "px") ]
+                (List.concat
+                    [ [ Svg.style [] [] ]
+                    , [ g [ class "legend" ] renderLegend ]
+                    , [ g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (legendCellHeight) ++ ")") ] [ legendXAxis ] ]
+                    ]
+                )
+            ]

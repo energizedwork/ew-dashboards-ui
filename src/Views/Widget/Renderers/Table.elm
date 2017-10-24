@@ -18,7 +18,7 @@ render widget data =
                     TableAdapter.adapt data
             in
                 div [ class "col-md-12 widget" ]
-                    [ h3 [ title widget.description ] [ Html.text widget.name ]
+                    [ h3 [ title widget.description, class "heading" ] [ Html.text widget.name ]
                     , table [ class "table table-striped" ]
                         [ thead []
                             [ renderHeaderFrom headerRow

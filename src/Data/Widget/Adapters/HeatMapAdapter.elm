@@ -1,6 +1,7 @@
 module Data.Widget.Adapters.HeatMapAdapter exposing (adapt)
 
 import Data.Widget.Table as Table exposing (Data, Row, Cell)
+import Views.Widget.Renderers.Utils as Utils exposing (..)
 
 
 adapt : Data -> ( Row, List Row, Float, List String, List String )
@@ -43,11 +44,8 @@ adapt data =
                 Nothing ->
                     []
 
-        rowToInt row =
-            List.map (\n -> String.toFloat n |> Result.withDefault 0) row
-
         rowMax row =
-            List.maximum (rowToInt row) |> Maybe.withDefault 0
+            List.maximum (Utils.rowToFloats row) |> Maybe.withDefault 0
 
         bodyRowMaxes =
             List.map rowMax bodyRows
