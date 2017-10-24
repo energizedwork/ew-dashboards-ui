@@ -16,8 +16,18 @@ import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
 
 
-render : Widget Body -> Table.Data -> Html msg
-render widget data =
+type alias Model =
+    { screenWidth : Float
+    , screenHeight : Float
+    , data : List (List ( Cell, Cell ))
+    , xLabels : List String
+    , yLabels : List String
+    , maxValue : Float
+    }
+
+
+render : Int -> Int -> Widget Body -> Table.Data -> Html msg
+render width height widget data =
     case widget.adapter of
         HEAT_MAP ->
             let
@@ -26,10 +36,24 @@ render widget data =
 
                 dataAsHeaderValueTuples =
                     List.map (List.map2 (,) headerRow) bodyRows
+
+                initWidth =
+                    case width of
+                        0 ->
+                            Utils.largeWidth
+
+                        _ ->
+                            (width |> toFloat) - (padding * 2)
+
+                initHeight =
+                    Utils.largeHeight
+
+                initModel =
+                    Model initWidth initHeight dataAsHeaderValueTuples xLabels yLabels maxValue
             in
                 div [ class "col-md-12 widget" ]
                     [ h3 [ Html.Attributes.title widget.description, Html.Attributes.class "heading" ] [ Html.text widget.name ]
-                    , view dataAsHeaderValueTuples xLabels yLabels maxValue
+                    , draw initModel
                     , Utils.renderDataSourceInfoFrom widget
                     ]
 
@@ -52,16 +76,6 @@ padding =
     Utils.largePadding
 
 
-viewPortWidth : Float
-viewPortWidth =
-    w - padding
-
-
-viewPortHeight : Float
-viewPortHeight =
-    h - padding
-
-
 getCellColour : Float -> String
 getCellColour index =
     Scale.infernoInterpolator index
@@ -80,20 +94,31 @@ colourScaleFrom amount maxValue =
         (String.toFloat amount |> Result.withDefault 0)
 
 
-view : List (List ( Cell, Cell )) -> List String -> List String -> Float -> Svg msg
-view data xLabels yLabels maxValue =
+draw : Model -> Svg msg
+draw model =
     let
+        maxValue =
+            model.maxValue
+
         firstDataTuple =
-            List.head data |> Maybe.withDefault []
+            List.head model.data |> Maybe.withDefault []
 
         indexedData =
-            Array.toIndexedList (Array.fromList data)
+            Array.toIndexedList (Array.fromList model.data)
 
         totalRows =
             List.length indexedData
 
         totalCols =
             List.length firstDataTuple
+
+        viewPortWidth : Float
+        viewPortWidth =
+            model.screenWidth - (padding)
+
+        viewPortHeight : Float
+        viewPortHeight =
+            model.screenHeight - (padding)
 
         heatMapCellWidth =
             (viewPortWidth / toFloat totalCols)
@@ -112,7 +137,7 @@ view data xLabels yLabels maxValue =
 
         xScale : ContinuousScale
         xScale =
-            Scale.linear ( 0, List.maximum (Utils.rowToFloats xLabels) |> Maybe.withDefault 0 ) ( 0, viewPortWidth )
+            Scale.linear ( 0, List.maximum (Utils.rowToFloats model.xLabels) |> Maybe.withDefault 0 ) ( 0, viewPortWidth )
 
         legendXScale : ContinuousScale
         legendXScale =
@@ -122,7 +147,7 @@ view data xLabels yLabels maxValue =
         yScale =
             (Scale.band
                 { defaultBandConfig | paddingInner = 0, paddingOuter = 0 }
-                (yLabels)
+                (model.yLabels)
                 ( 0, viewPortHeight )
             )
 
@@ -220,7 +245,7 @@ view data xLabels yLabels maxValue =
                     valueRange
     in
         div []
-            [ svg [ width (toString w ++ "px"), height (toString h ++ "px") ]
+            [ svg [ width (toString model.screenWidth ++ "px"), height (toString model.screenHeight ++ "px") ]
                 (List.concat
                     [ [ Svg.style []
                             [ Svg.text """
@@ -240,7 +265,7 @@ view data xLabels yLabels maxValue =
                 [ Html.Attributes.style [ ( "marginLeft", ((toString padding) ++ "px") ) ]
                 ]
                 [ Html.text "Scale" ]
-            , svg [ width (toString w ++ "px"), height (toString (legendCellHeight + 50) ++ "px") ]
+            , svg [ width (toString model.screenWidth ++ "px"), height (toString (legendCellHeight + 50) ++ "px") ]
                 (List.concat
                     [ [ Svg.style [] [] ]
                     , [ g [ class "legend" ] renderLegend ]

@@ -34,6 +34,7 @@ import Phoenix.Socket
 import Phoenix.Channel
 import Phoenix.Push
 import Dict
+import Window exposing (..)
 
 
 -- CONSTANTS
@@ -63,6 +64,8 @@ type alias Model =
     { errors : List String
     , newMessage : String
     , messages : List String
+    , width : Int
+    , height : Int
     , phxSocket : Phoenix.Socket.Socket Msg
     , dashboard : Dashboard
     }
@@ -70,7 +73,10 @@ type alias Model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Phoenix.Socket.listen model.phxSocket PhoenixMsg
+    Sub.batch
+        [ Window.resizes (\{ height, width } -> ResizeWindow width height)
+        , Phoenix.Socket.listen model.phxSocket PhoenixMsg
+        ]
 
 
 user : String
@@ -97,7 +103,7 @@ init session slug =
             pageLoadError Page.Other ("Dashboard is currently unavailable. " ++ (toString err))
 
         initModel =
-            Model [] "" [] initPhxSocket
+            Model [] "" [] 0 0 initPhxSocket
     in
         Task.map initModel loadWidget
             |> Task.mapError handleLoadError
@@ -149,8 +155,8 @@ view session model =
                 [ div [ class "row article-content" ] <|
                     List.map
                         (\widget ->
-                            Renderer.run widget widget.data
-                         -- Renderer.run widget devData
+                            Renderer.run model.width model.height widget widget.data
+                         -- Renderer.run model.width model.height widget devData
                         )
                         model.dashboard.widgets
                 , hr [] []
@@ -267,6 +273,7 @@ type Msg
     | ReceiveChatMessage JE.Value
     | JoinChannel
     | LeaveChannel
+    | ResizeWindow Int Int
     | ShowJoinedMessage String
     | ShowLeftMessage String
     | NoOp
@@ -284,8 +291,8 @@ update session msg model =
         author =
             dashboard.author
     in
-        case Debug.log "-------------- > Dashboard.update: " msg of
-            -- case msg of
+        -- case Debug.log "-------------- > Dashboard.update: " msg of
+        case msg of
             DismissErrors ->
                 { model | errors = [] } => Cmd.none
 
@@ -491,6 +498,9 @@ update session msg model =
                 ( { model | messages = ("Left channel " ++ channelName) :: model.messages }
                 , Cmd.none
                 )
+
+            ResizeWindow w h ->
+                ( { model | height = h, width = w }, Cmd.none )
 
             NoOp ->
                 ( model, Cmd.none )

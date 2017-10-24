@@ -65,6 +65,8 @@ type alias Model =
     { errors : List String
     , newMessage : String
     , messages : List String
+    , width : Int
+    , height : Int
     , phxSocket : Phoenix.Socket.Socket Msg
     , data : Data
     , widget : Widget Body
@@ -100,7 +102,7 @@ init session slug =
             pageLoadError Page.Other ("Widget is currently unavailable. " ++ (toString err))
 
         initModel =
-            (Model [] "" [] initPhxSocket (Data []))
+            (Model [] "" [] 0 0 initPhxSocket (Data []))
     in
         Task.map initModel loadWidget
             |> Task.mapError handleLoadError
@@ -152,8 +154,8 @@ view session model =
                 [ div [ class "row article-content" ]
                     [ div [ class "col-md-12" ]
                         [ h3 [] [ text <| (widget.name) ]
-                        , Renderer.run widget model.data
-                          -- , Renderer.run widget devData
+                        , Renderer.run model.width model.height widget model.data
+                          --   Renderer.run model.width model.height widget devData
                         , br [] []
                         , br [] []
                         , p [ class "small" ] [ text <| channelName <| Widget.primaryDataSource widget ]

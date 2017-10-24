@@ -12,8 +12,8 @@ import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src)
 
 
-run : Widget Body -> Table.Data -> Html msg
-run widget data =
+run : Int -> Int -> Widget Body -> Table.Data -> Html msg
+run width height widget data =
     case List.isEmpty data.rows of
         True ->
             div [ class "col-md-6" ]
@@ -32,4 +32,4 @@ run widget data =
                     BarChart.render widget data
 
                 HEAT_MAP ->
-                    HeatMap.render widget data
+                    HeatMap.render width height widget data
