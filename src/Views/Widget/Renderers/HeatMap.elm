@@ -8,9 +8,11 @@ import Data.Widget.Adapters.Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.HeatMapAdapter as HeatMapAdapter
 import Html exposing (..)
 import Html.Attributes exposing (title)
+import Html.Events exposing (onSubmit, onInput)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Html.Attributes exposing (attribute)
+import Html.Attributes exposing (attribute, placeholder, defaultValue)
+import Views.Widget.Renderers.RendererMessage as RendererMessage exposing (Msg(..))
 import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
@@ -26,8 +28,8 @@ type alias Model =
     }
 
 
-render : Int -> Int -> Widget Body -> Table.Data -> Html msg
-render width height widget data =
+render : Int -> Int -> Widget Body -> Table.Data -> Bool -> Html RendererMessage.Msg
+render width height widget data updatable =
     case widget.adapter of
         HEAT_MAP ->
             let
@@ -48,17 +50,56 @@ render width height widget data =
                 initHeight =
                     Utils.largeHeight
 
+                primaryDataSource =
+                    (Widget.primaryDataSource widget)
+
+                renderOptionalInputField =
+                    case updatable of
+                        True ->
+                            div []
+                                [ Html.form
+                                    [ Html.Attributes.class "hm-form"
+                                    , onSubmit <| UpdateDataSource (Widget.slugToString widget.uuid) primaryDataSource.uuid primaryDataSource.name
+                                    ]
+                                    [ label [] [ Html.text "Current data source id: " ]
+                                    , input
+                                        [ (defaultValue) primaryDataSource.uuid
+                                        , placeholder "Enter a data source uuid"
+                                        , onInput (\x -> SetDataSourceUUID (x))
+                                        ]
+                                        []
+                                    , button []
+                                        [ Html.text "Update"
+                                        ]
+                                    ]
+                                ]
+
+                        False ->
+                            div [] []
+
                 initModel =
                     Model initWidth initHeight dataAsHeaderValueTuples xLabels yLabels maxValue
             in
                 div [ class "col-md-12 widget" ]
-                    [ h3 [ Html.Attributes.title widget.description, Html.Attributes.class "heading" ] [ Html.text widget.name ]
+                    [ div [ class "row" ]
+                        [ div [ class "col-md-5" ]
+                            [ h3
+                                [ Html.Attributes.title widget.description
+                                , Html.Attributes.class "heading"
+                                , Html.Attributes.style [ ( "marginLeft", ((toString padding) ++ "px") ) ]
+                                ]
+                                [ Html.text widget.name ]
+                            ]
+                        , div [ class "col-md-5 col-md-offset-2" ]
+                            [ renderOptionalInputField
+                            ]
+                        ]
                     , draw initModel
                     , Utils.renderDataSourceInfoFrom widget
                     ]
 
         _ ->
-            p [ class "data" ] [ Html.text "Sorry, I can only render line charts from a HEAT_MAP adapter right now" ]
+            p [ class "data" ] [ Html.text "Sorry, I can only render line charts from a HEAT_MAP / UPDATABLE_HEAT_MAP adapter right now" ]
 
 
 w : Float

@@ -191,6 +191,9 @@ rendererDecoder =
                     "HEAT_MAP" ->
                         Decode.succeed Renderer.HEAT_MAP
 
+                    "UPDATABLE_HEAT_MAP" ->
+                        Decode.succeed Renderer.UPDATABLE_HEAT_MAP
+
                     somethingElse ->
                         Decode.fail <| "Unknown renderer: " ++ somethingElse
             )
