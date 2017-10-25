@@ -157,14 +157,11 @@ draw model =
 
         xAxis : Svg msg
         xAxis =
-            Axis.axis { opts | orientation = Axis.Bottom, tickCount = (totalCols // 30) } (xScale)
+            Axis.axis { opts | orientation = Axis.Bottom, tickCount = 20 } (xScale)
 
         legendXAxis : Svg msg
         legendXAxis =
-            Axis.axis { opts | orientation = Axis.Bottom, tickCount = (floor (maxValue / xAxisDivisor)) } (legendXScale)
-
-        xAxisDivisor =
-            50
+            Axis.axis { opts | orientation = Axis.Bottom, tickCount = 5 } (legendXScale)
 
         yAxis : Svg msg
         yAxis =
