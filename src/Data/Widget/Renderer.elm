@@ -6,3 +6,4 @@ type Renderer
     | LINE_CHART
     | BAR_CHART
     | HEAT_MAP
+    | UPDATABLE_HEAT_MAP

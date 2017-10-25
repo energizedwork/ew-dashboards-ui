@@ -24,7 +24,7 @@
                     "name": "haven"
                 }],
                 "adapter": "HEAT_MAP",
-                "renderer": "HEAT_MAP",
+                "renderer": "UPDATABLE_HEAT_MAP",
                 "createdAt": "2017-10-23T16:03:55.948Z",
                 "updatedAt": "2017-10-23T16:03:55.948Z",
                 "tagList": [],

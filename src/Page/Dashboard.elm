@@ -28,6 +28,7 @@ import Views.Page as Page
 import Views.User.Follow as Follow
 import Data.Widget.Table as Table exposing (Data, Cell, decoder)
 import Views.Widget.Renderers.Renderer as Renderer
+import Views.Widget.Renderers.RendererMessage as RendererMessage exposing (..)
 import Json.Encode as JE
 import Json.Decode as JD exposing (field)
 import Phoenix.Socket
@@ -66,6 +67,7 @@ type alias Model =
     , messages : List String
     , width : Int
     , height : Int
+    , userDefinedDataSourceUUID : Maybe String
     , phxSocket : Phoenix.Socket.Socket Msg
     , dashboard : Dashboard
     }
@@ -103,7 +105,7 @@ init session slug =
             pageLoadError Page.Other ("Dashboard is currently unavailable. " ++ (toString err))
 
         initModel =
-            Model [] "" [] 0 0 initPhxSocket
+            Model [] "" [] 0 0 Nothing initPhxSocket
     in
         Task.map initModel loadWidget
             |> Task.mapError handleLoadError
@@ -155,10 +157,11 @@ view session model =
                 [ div [ class "row article-content" ] <|
                     List.map
                         (\widget ->
-                            Renderer.run model.width model.height widget widget.data
-                         -- Renderer.run model.width model.height widget devData
+                            -- Html.map (\uuid -> RendererMsg uuid) (Renderer.run model.width model.height widget devData)
+                            Html.map (\uuid -> RendererMsg uuid) (Renderer.run model.width model.height widget widget.data)
                         )
                         model.dashboard.widgets
+                  -- , viewAndDebugDataSource model
                 , hr [] []
                 ]
             ]
@@ -276,6 +279,7 @@ type Msg
     | ResizeWindow Int Int
     | ShowJoinedMessage String
     | ShowLeftMessage String
+    | RendererMsg RendererMessage.Msg
     | NoOp
 
 
@@ -291,8 +295,8 @@ update session msg model =
         author =
             dashboard.author
     in
-        -- case Debug.log "-------------- > Dashboard.update: " msg of
-        case msg of
+        case Debug.log "-------------- > Dashboard.update: " msg of
+            -- case msg of
             DismissErrors ->
                 { model | errors = [] } => Cmd.none
 
@@ -407,7 +411,7 @@ update session msg model =
                                     primaryDataSource =
                                         Widget.primaryDataSource widget
                                 in
-                                    Debug.log ("MATCH? primaryDataSource.uuid: " ++ primaryDataSource.uuid ++ " chatMessage.uuid: " ++ chatMessage.uuid) (primaryDataSource.uuid == chatMessage.uuid)
+                                    (primaryDataSource.uuid == chatMessage.uuid)
                         in
                             ( { model
                                 | messages =
@@ -469,7 +473,6 @@ update session msg model =
                         joinChannel socket channels initCmds
                 in
                     ( { model | phxSocket = updatedSocket }
-                      -- , Debug.log "Cmds: " <|
                     , Cmd.batch <|
                         List.map
                             (\cmd ->
@@ -482,8 +485,6 @@ update session msg model =
                 let
                     ( phxSocket, phxCmd ) =
                         Phoenix.Socket.leave "foo:bar" socket
-
-                    -- Phoenix.Socket.leave (channelName <| Widget.primaryDataSource model.widget) socket
                 in
                     ( { model | phxSocket = phxSocket }
                     , Cmd.map PhoenixMsg phxCmd
@@ -501,6 +502,71 @@ update session msg model =
 
             ResizeWindow w h ->
                 ( { model | height = h, width = w }, Cmd.none )
+
+            RendererMsg subMsg ->
+                let
+                    originalDashboard =
+                        model.dashboard
+
+                    ( uuid, updatedSocket, updatedDashboard, cmd ) =
+                        case subMsg of
+                            SetDataSourceUUID uuid ->
+                                ( Just uuid, model.phxSocket, model.dashboard, Cmd.none )
+
+                            UpdateDataSource widgetUUID dataSourceUUID dataSourceName ->
+                                let
+                                    updatedDataSource =
+                                        DataSource (Maybe.withDefault "--" model.userDefinedDataSourceUUID) dataSourceName
+
+                                    updatedDashboard =
+                                        { originalDashboard | widgets = updatedWidgets }
+
+                                    updatedWidgets =
+                                        List.map
+                                            (\widget ->
+                                                case Widget.slugToString widget.uuid == widgetUUID of
+                                                    True ->
+                                                        let
+                                                            ( deleteMe, keepMe ) =
+                                                                List.partition (\ds -> ds.uuid == dataSourceUUID) widget.dataSources
+                                                        in
+                                                            { widget
+                                                                | dataSources =
+                                                                    [ updatedDataSource ] ++ keepMe
+                                                                , data = Data []
+                                                            }
+
+                                                    False ->
+                                                        widget
+                                            )
+                                            model.dashboard.widgets
+
+                                    fullChannelName =
+                                        updatedDataSource
+                                            |> DataSource.toChannel
+
+                                    channel =
+                                        Phoenix.Channel.init fullChannelName
+                                            |> Phoenix.Channel.withPayload userParams
+                                            |> Phoenix.Channel.onJoin (always (ShowJoinedMessage fullChannelName))
+                                            |> Phoenix.Channel.onClose (always (ShowLeftMessage fullChannelName))
+
+                                    -- TODO leave existing channel?
+                                    ( updatedPhxSocket, phxCmd ) =
+                                        Phoenix.Socket.join channel model.phxSocket
+
+                                    listeningSocket =
+                                        updatedPhxSocket |> Phoenix.Socket.on "new:msg" fullChannelName ReceiveChatMessage
+                                in
+                                    ( model.userDefinedDataSourceUUID, listeningSocket, updatedDashboard, phxCmd )
+                in
+                    ( { model
+                        | userDefinedDataSourceUUID = uuid
+                        , phxSocket = updatedSocket
+                        , dashboard = updatedDashboard
+                      }
+                    , Cmd.map PhoenixMsg cmd
+                    )
 
             NoOp ->
                 ( model, Cmd.none )
