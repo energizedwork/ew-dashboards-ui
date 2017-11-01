@@ -1,4 +1,4 @@
-module WidgetDecoder exposing (..)
+module Data.WidgetDecoderTest exposing (..)
 
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
@@ -45,7 +45,10 @@ widgetDecoderTest =
                                 "following": false
                             },
                             "favorited": false,
-                            "favoritesCount": 0
+                            "favoritesCount": 0,
+                            "data": {
+                              "data": []
+                            }
                         }
                     }
                     """
@@ -82,6 +85,7 @@ widgetDecoderTest =
                             , favorited = False
                             , favoritesCount = 0
                             , author = expectedAuthor
+                            , data = { rows = [] }
                             , body = Body "12 months Table"
                             }
                         )
