@@ -232,15 +232,8 @@ draw model =
                 renderText =
                     case renderLabels of
                         True ->
-                            text_
-                                [ x <| toString <| (padding + toFloat colIndex * cellWidth) + (cellWidth / 2)
-                                , y <| toString <| (toFloat rowIndex * cellHeight) + (cellHeight / 2)
-                                , textAnchor "middle"
-                                , alignmentBaseline "central"
-                                , stroke "none"
-                                , fill "#fff"
-                                , fontSize "8px"
-                                ]
+                            Svg.title
+                                []
                                 [ Svg.text <| cell ]
 
                         False ->
@@ -287,9 +280,7 @@ draw model =
                 (List.concat
                     [ [ Svg.style []
                             [ Svg.text """
-                            .square text { display: none; }
-                            .square:hover rect { opacity: 0.7; }
-                            .square:hover text { display: inline; }
+                            .square:hover rect { cursor: none; opacity: 0.7; stroke: white; stroke-width: 2px;}
                           """ ]
                       , g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (h - padding) ++ ")") ]
                             [ xAxis ]
