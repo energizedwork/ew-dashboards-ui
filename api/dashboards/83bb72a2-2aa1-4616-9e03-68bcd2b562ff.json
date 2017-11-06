@@ -20,7 +20,7 @@
                 "body": "Bar chart",
                 "description": "12 months financial data as a bar chart",
                 "dataSources": [{
-                    "uuid": "1P0okW7oVus2KR423Ob1DgbVNCbR_QNg3OjNPj04zcsI",
+                    "uuid": "bf1a974e-c506-482b-8f6a-169c3635ce53",
                     "name": "sheets"
                 }],
                 "adapter": "TABLE",
@@ -45,7 +45,7 @@
                 "body": "LIne Chart",
                 "description": "12 months financial data as a line chart",
                 "dataSources": [{
-                    "uuid": "1P0okW7oVus2KR423Ob1DgbVNCbR_QNg3OjNPj04zcsI",
+                    "uuid": "bf1a974e-c506-482b-8f6a-169c3635ce53",
                     "name": "sheets"
                 }],
                 "adapter": "TABLE",
@@ -70,7 +70,7 @@
                 "body": "Spreadsheet",
                 "description": "12 months financial data as a table",
                 "dataSources": [{
-                    "uuid": "1P0okW7oVus2KR423Ob1DgbVNCbR_QNg3OjNPj04zcsI",
+                    "uuid": "bf1a974e-c506-482b-8f6a-169c3635ce53",
                     "name": "sheets"
                 }],
                 "adapter": "TABLE",

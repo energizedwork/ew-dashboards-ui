@@ -16,11 +16,11 @@
           "favoritesCount": 0,
           "widgets": [{
                 "uuid": "9c2b3896-c957-47ad-893a-446f9ffa9012",
-                "name": "MPAN 998877 Heat Map",
-                "body": "MPAN 998877 Heat Map",
+                "name": "Odette's 365 days for MPAN",
+                "body": "Odette's 365 days for MPAN",
                 "description": "One year of MPAN data, one reading every 30 minutes",
                 "dataSources": [{
-                    "uuid": "1p5cypRkxrxpmtONEOBEWP2BbMowfzQNaZ_YfNb_hkyE",
+                    "uuid": "451a5190-d446-43d5-90b2-e3f135128093",
                     "name": "sheets"
                 }],
                 "adapter": "HEAT_MAP",
@@ -41,11 +41,11 @@
                 }
           }, {
                 "uuid": "d85b248e-d331-48e3-8677-6256240d532a",
-                "name": "MPAN 998877 Table",
-                "body": "MPAN 998877 Table",
+                "name": "Odette's 365 for MPAN Table",
+                "body": "Odette's 365 for MPAN Table",
                 "description": "One year of MPAN data, one reading every 30 minutes",
                 "dataSources": [{
-                    "uuid": "1p5cypRkxrxpmtONEOBEWP2BbMowfzQNaZ_YfNb_hkyE",
+                    "uuid": "451a5190-d446-43d5-90b2-e3f135128093",
                     "name": "sheets"
                 }],
                 "adapter": "TABLE",
