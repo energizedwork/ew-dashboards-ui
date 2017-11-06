@@ -28,7 +28,7 @@ run width height widget data =
             in
                 case widget.renderer of
                     TABLE ->
-                        Table.render widget data
+                        Table.render width height widget data
 
                     LINE_CHART ->
                         LineChart.render widget data

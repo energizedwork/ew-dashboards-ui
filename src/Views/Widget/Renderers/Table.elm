@@ -5,31 +5,45 @@ import Data.Widget.Table as Table exposing (Data, Cell)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.TableAdapter as TableAdapter
 import Html exposing (..)
-import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src, title)
+import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src, title, style)
 import Views.Widget.Renderers.Utils as Utils
 
 
-render : Widget Body -> Table.Data -> Html msg
-render widget data =
+render : Int -> Int -> Widget Body -> Table.Data -> Html msg
+render width height widget data =
     case widget.adapter of
         TABLE ->
             let
                 ( headerRow, bodyRows, maxValue ) =
                     TableAdapter.adapt data
             in
-                div [ class "col-md-12 widget" ]
+                div
+                    [ class <| "col-md-12 widget" ]
                     [ h3 [ title widget.description, class "heading" ] [ Html.text widget.name ]
-                    , table [ class "table table-striped" ]
-                        [ thead []
-                            [ renderHeaderFrom headerRow
+                    , div
+                        [ style
+                            [ ( "maxWidth", ((toString <| width - floor padding * 2) ++ "px") )
+                            , ( "overflow", "auto" )
                             ]
-                        , tbody [] <| renderBodyFrom bodyRows
                         ]
-                    , Utils.renderDataSourceInfoFrom widget
+                        [ table
+                            [ class "table table-striped" ]
+                            [ thead []
+                                [ renderHeaderFrom headerRow
+                                ]
+                            , tbody [] <| renderBodyFrom bodyRows
+                            ]
+                        , Utils.renderDataSourceInfoFrom widget
+                        ]
                     ]
 
         _ ->
             p [ class "data" ] [ text "Sorry, I can only render tables from a TABLE adapter right now" ]
+
+
+padding : Float
+padding =
+    Utils.largePadding
 
 
 renderHeaderFrom : List String -> Html msg
