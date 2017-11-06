@@ -17,8 +17,8 @@ import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousS
 import Visualization.Shape as Shape
 
 
-render : Widget Body -> Table.Data -> Html msg
-render widget data =
+render : Int -> Int -> Widget Body -> Table.Data -> Html msg
+render width height widget data =
     case widget.adapter of
         TABLE ->
             let
@@ -28,24 +28,14 @@ render widget data =
                 dataAsHeaderValueTuples =
                     List.map (List.map2 (,) headerRow) bodyRows
             in
-                div [ class "col-md-6 widget" ]
+                div [ class "col-md-12 widget" ]
                     [ h3 [ Html.Attributes.title widget.description, Html.Attributes.class "heading" ] [ Html.text widget.name ]
-                    , view dataAsHeaderValueTuples maxValue
+                    , view width (height // 2) dataAsHeaderValueTuples maxValue
                     , Utils.renderDataSourceInfoFrom widget
                     ]
 
         _ ->
             p [ class "data" ] [ Html.text "Sorry, I can only render line charts from a TABLE adapter right now" ]
-
-
-w : Float
-w =
-    Utils.mediumWidth
-
-
-h : Float
-h =
-    Utils.mediumHeight
 
 
 padding : Float
@@ -65,8 +55,8 @@ getLineColour index =
         |> Color.Convert.colorToHex
 
 
-view : List (List ( Cell, Cell )) -> Float -> Svg msg
-view data maxValue =
+view : Int -> Int -> List (List ( Cell, Cell )) -> Float -> Svg msg
+view width height data maxValue =
     let
         firstDataTuple =
             List.head data |> Maybe.withDefault []
@@ -76,11 +66,11 @@ view data maxValue =
 
         xScale : BandScale String
         xScale =
-            Scale.band { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 } (List.map Tuple.first firstDataTuple) ( 0, w - 2 * padding )
+            Scale.band { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 } (List.map Tuple.first firstDataTuple) ( 0, toFloat width - 2 * padding )
 
         yScale : ContinuousScale
         yScale =
-            Scale.linear ( 0, maxValue ) ( h - 2 * padding, 0 )
+            Scale.linear ( 0, maxValue ) ( (toFloat height) - 2 * padding, 0 )
 
         opts : Axis.Options a
         opts =
@@ -126,9 +116,9 @@ view data maxValue =
                 )
                 indexedData
     in
-        svg [ width (toString w ++ "px"), height (toString h ++ "px") ]
+        svg [ Svg.Attributes.width (toString width ++ "px"), Svg.Attributes.height (toString height ++ "px") ]
             (List.concat
-                [ [ g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (h - padding) ++ ")") ]
+                [ [ g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (toFloat height - padding) ++ ")") ]
                         [ xAxis ]
                   , g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString padding ++ ")") ]
                         [ yAxis ]

@@ -31,7 +31,7 @@ run width height widget data =
                         Table.render width height widget data
 
                     LINE_CHART ->
-                        LineChart.render widget data
+                        LineChart.render width height widget data
 
                     BAR_CHART ->
                         BarChart.render widget data
