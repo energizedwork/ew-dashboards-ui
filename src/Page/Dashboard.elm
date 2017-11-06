@@ -65,11 +65,10 @@ type alias Model =
     { errors : List String
     , newMessage : String
     , messages : List String
-    , width : Int
-    , height : Int
     , userDefinedDataSourceUUID : Maybe String
     , phxSocket : Phoenix.Socket.Socket Msg
     , dashboard : Dashboard
+    , windowSize : Window.Size
     }
 
 
@@ -105,9 +104,9 @@ init session slug =
             pageLoadError Page.Other ("Dashboard is currently unavailable. " ++ (toString err))
 
         initModel =
-            Model [] "" [] 0 0 Nothing initPhxSocket
+            Model [] "" [] Nothing initPhxSocket
     in
-        Task.map initModel loadWidget
+        Task.map2 initModel loadWidget Window.size
             |> Task.mapError handleLoadError
 
 
@@ -158,7 +157,7 @@ view session model =
                     List.map
                         (\widget ->
                             -- Html.map (\uuid -> RendererMsg uuid) (Renderer.run model.width model.height widget devData)
-                            Html.map (\uuid -> RendererMsg uuid) (Renderer.run model.width model.height widget widget.data)
+                            Html.map (\uuid -> RendererMsg uuid) (Renderer.run model.windowSize.width model.windowSize.height widget widget.data)
                         )
                         model.dashboard.widgets
                   -- , viewAndDebugDataSource model
@@ -501,7 +500,7 @@ update session msg model =
                 )
 
             ResizeWindow w h ->
-                ( { model | height = h, width = w }, Cmd.none )
+                ( { model | windowSize = Window.Size w h }, Cmd.none )
 
             RendererMsg subMsg ->
                 let
