@@ -86,7 +86,6 @@ render width height widget data updatable =
                             [ h3
                                 [ Html.Attributes.title widget.description
                                 , Html.Attributes.class "heading"
-                                , Html.Attributes.style [ ( "marginLeft", ((toString padding) ++ "px") ) ]
                                 ]
                                 [ Html.text widget.name ]
                             ]
@@ -229,12 +228,20 @@ draw model =
                         ]
                         []
 
+                textValue =
+                    case String.isEmpty cell of
+                        True ->
+                            "?"
+
+                        False ->
+                            cell
+
                 renderText =
                     case renderLabels of
                         True ->
                             Svg.title
                                 []
-                                [ Svg.text <| cell ]
+                                [ Svg.text <| textValue ]
 
                         False ->
                             text_ [] []
