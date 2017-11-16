@@ -7,6 +7,7 @@ import Views.Widget.Renderers.Table as Table
 import Views.Widget.Renderers.BarChart as BarChart
 import Views.Widget.Renderers.LineChart as LineChart
 import Views.Widget.Renderers.HeatMap as HeatMap
+import Views.Widget.Renderers.Metric as Metric
 import Views.Widget.Renderers.RendererMessage as RendererMessage exposing (Msg(..))
 import Views.Spinner
 import Html exposing (..)
@@ -41,3 +42,6 @@ run width height widget data =
 
                     UPDATABLE_HEAT_MAP ->
                         HeatMap.render width height widget data updatable
+
+                    METRIC ->
+                        Metric.render width height widget data

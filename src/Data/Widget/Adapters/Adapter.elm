@@ -9,3 +9,4 @@ type Adapter
     = TABLE
     | BAR_CHART
     | HEAT_MAP
+    | METRIC

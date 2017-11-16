@@ -168,6 +168,9 @@ adapterDecoder =
                     "HEAT_MAP" ->
                         Decode.succeed Adapter.HEAT_MAP
 
+                    "METRIC" ->
+                        Decode.succeed Adapter.METRIC
+
                     somethingElse ->
                         Decode.fail <| "Unknown adapter: " ++ somethingElse
             )
@@ -193,6 +196,9 @@ rendererDecoder =
 
                     "UPDATABLE_HEAT_MAP" ->
                         Decode.succeed Renderer.UPDATABLE_HEAT_MAP
+
+                    "METRIC" ->
+                        Decode.succeed Renderer.METRIC
 
                     somethingElse ->
                         Decode.fail <| "Unknown renderer: " ++ somethingElse
