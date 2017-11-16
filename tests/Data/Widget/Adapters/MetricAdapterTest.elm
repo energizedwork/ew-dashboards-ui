@@ -1,7 +1,6 @@
 module Data.Widget.Adapters.MetricAdapterTest exposing (..)
 
 import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer, int, list, string)
 import Test exposing (..)
 import Data.Widget.Adapters.AdapterTestData as TD
 import Data.Widget.Adapters.MetricAdapter as MetricAdapter exposing (adapt)
@@ -21,24 +20,39 @@ adapterConfigTest =
                 , TD.forthRow
                 ]
 
-        config =
+        defaultConfig =
             MetricAdapter.defaultConfig
 
+        suppliedConfig =
+            MetricAdapter.Config ( 1, 1 ) ( 2, 1 )
+
         -- function under test!
-        ( actualSourceFigure, actualTargetFigure ) =
-            MetricAdapter.adapt config input
+        ( defaultActualSourceFigure, defaultActualTargetFigure ) =
+            MetricAdapter.adapt defaultConfig input
+
+        ( suppliedActualSourceFigure, suplliedActualTargetFigure ) =
+            MetricAdapter.adapt suppliedConfig input
 
         -- expectations
-        source =
-            \_ -> Expect.equal actualSourceFigure "Jan"
+        defaultSource =
+            \_ -> Expect.equal defaultActualSourceFigure "Jan"
 
-        target =
-            \_ -> Expect.equal actualTargetFigure "Feb"
+        defaultTarget =
+            \_ -> Expect.equal defaultActualTargetFigure "Feb"
+
+        suppliedSource =
+            \_ -> Expect.equal suppliedActualSourceFigure "102"
+
+        suppliedTarget =
+            \_ -> Expect.equal suplliedActualTargetFigure "202"
     in
         Test.describe "MetricAdapter.adapt"
             [ Test.describe "with default Config"
-                [ Test.test "source is figure at A1" source
-                , Test.test "target is figure at A2" target
+                [ Test.test "source is figure at A1" defaultSource
+                , Test.test "target is figure at A2" defaultTarget
                 ]
-            , Test.todo "with supplied Config"
+            , Test.describe "with supplied Config"
+                [ Test.test "source is figure at B2" suppliedSource
+                , Test.test "target is figure at C2" suppliedTarget
+                ]
             ]

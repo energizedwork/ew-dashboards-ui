@@ -1,47 +1,66 @@
 module Data.Widget.Adapters.MetricAdapter exposing (Config, defaultConfig, adapt)
 
 import Data.Widget.Table as Table exposing (Data, Row, Cell)
-import List.Extra
-import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Array
 
 
+type alias RowNumber =
+    Int
+
+
+type alias ColumnNumber =
+    Int
+
+
+type alias Cell =
+    ( RowNumber, ColumnNumber )
+
+
 type alias Config =
-    { sourceCell : ( Int, Int )
-    , targetCell : ( Int, Int )
+    { sourceCell : Cell
+    , targetCell : Cell
     }
 
 
 defaultConfig : Config
 defaultConfig =
-    Config ( 0, 0 ) ( 1, 0 )
+    Config ( 0, 0 ) ( 0, 1 )
+
+
+rowForCell : Array.Array (List String) -> Cell -> List String
+rowForCell rows cellConfig =
+    case Array.get (Tuple.first cellConfig) rows of
+        Just row ->
+            row
+
+        Nothing ->
+            []
+
+
+valueForCell : Array.Array (List String) -> Cell -> String
+valueForCell rows cell =
+    let
+        row =
+            rowForCell rows cell
+    in
+        case Array.get (Tuple.second cell) (Array.fromList row) of
+            Just value ->
+                value
+
+            Nothing ->
+                ""
 
 
 adapt : Config -> Data -> ( String, String )
 adapt config data =
     let
-        firstRow =
-            case List.head data.rows of
-                Just row ->
-                    row
+        rows =
+            Array.fromList data.rows
 
-                Nothing ->
-                    []
+        sourceValue =
+            valueForCell rows config.sourceCell
 
-        source =
-            case Array.get (0) (Array.fromList firstRow) of
-                Just source ->
-                    source
-
-                Nothing ->
-                    ""
-
-        target =
-            case Array.get (1) (Array.fromList firstRow) of
-                Just target ->
-                    target
-
-                Nothing ->
-                    ""
+        targetValue =
+            valueForCell rows config.targetCell
     in
-        ( source, target )
+        ( sourceValue, targetValue )
