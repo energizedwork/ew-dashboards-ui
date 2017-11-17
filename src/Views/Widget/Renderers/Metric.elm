@@ -24,11 +24,11 @@ viewMetric label metric =
 
 render : Int -> Int -> Widget Body -> Table.Data -> Html msg
 render width height widget data =
-    case widget.adapter of
+    case widget.adapter.type_ of
         METRIC ->
             let
                 ( source, target ) =
-                    MetricAdapter.adapt widget.metricAdapterConfig data
+                    MetricAdapter.adapt widget.adapter.config data
             in
                 div
                     [ class "col-md-12 widget container" ]

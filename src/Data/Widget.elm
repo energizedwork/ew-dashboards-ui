@@ -59,7 +59,7 @@ type alias Widget a =
     , name : String
     , description : String
     , dataSources : List DataSource
-    , adapter : Adapter
+    , adapter : AdapterDefinition
     , renderer : Renderer
     , tags : List String
     , createdAt : Date
@@ -68,9 +68,12 @@ type alias Widget a =
     , favoritesCount : Int
     , author : Author
     , data : Data
-    , metricAdapterConfig : Config
     , body : a
     }
+
+
+type alias AdapterDefinition =
+    { type_ : Adapter, config : Config }
 
 
 init : Widget Body
@@ -89,7 +92,7 @@ init =
             [ DataSource.init ]
 
         adapter =
-            Adapter.TABLE
+            AdapterDefinition Adapter.TABLE defaultConfig
 
         renderer =
             Renderer.TABLE
@@ -115,13 +118,10 @@ init =
         data =
             Data []
 
-        metricAdapterConfig =
-            defaultConfig
-
         body =
             Body "Init Widget"
     in
-        Widget uuid name description dataSources adapter renderer tags createdAt updatedAt favorited favoritesCount author data metricAdapterConfig body
+        Widget uuid name description dataSources adapter renderer tags createdAt updatedAt favorited favoritesCount author data body
 
 
 
@@ -156,11 +156,17 @@ baseWidgetDecoder =
         |> required "favoritesCount" Decode.int
         |> required "author" Author.decoder
         |> required "data" Table.decoder
-        |> optional "metricAdapterConfig" adapterConfigDecoder defaultConfig
 
 
-adapterDecoder : Decoder Adapter
+adapterDecoder : Decoder AdapterDefinition
 adapterDecoder =
+    decode AdapterDefinition
+        |> required "type_" adapterTypeDecoder
+        |> optional "config" adapterConfigDecoder defaultConfig
+
+
+adapterTypeDecoder : Decoder Adapter
+adapterTypeDecoder =
     Decode.string
         |> Decode.andThen
             (\str ->

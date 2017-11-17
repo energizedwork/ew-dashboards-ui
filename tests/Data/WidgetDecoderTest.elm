@@ -1,11 +1,8 @@
 module Data.WidgetDecoderTest exposing (..)
 
 import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer, int, list, string)
 import Test exposing (..)
-import Json.Encode as Encode exposing (object)
 import Json.Decode as Decode exposing (..)
-import String
 import Data.DataSource exposing (DataSource)
 import Data.Widget.Author as Author
 import Data.Widget as Widget exposing (UUID(..), Body(..), decoder)
@@ -33,7 +30,13 @@ widgetDecoderTest =
                                 "uuid": "datasource-1234",
                                 "name": "12 month financials"
                             }],
-                            "adapter": "TABLE",
+                            "adapter": {
+                                "type_":"TABLE",
+                                "config": {
+                                    "sourceCell": [1,0],
+                                    "targetCell": [1,1]
+                                }
+                            },
                             "renderer": "TABLE",
                             "createdAt": "2017-09-04T16:03:55.948Z",
                             "updatedAt": "2017-09-04T16:03:55.948Z",
@@ -48,10 +51,6 @@ widgetDecoderTest =
                             "favoritesCount": 0,
                             "data": {
                               "data": []
-                            },
-                            "metricAdapterConfig": {
-                                "sourceCell": [1,0],
-                                "targetCell": [1,1]
                             }
                         }
                     }
@@ -86,7 +85,7 @@ widgetDecoderTest =
                             , name = "12 months Table"
                             , description = "12 months of important data"
                             , dataSources = expectedDatasources
-                            , adapter = Adapter.TABLE
+                            , adapter = { type_ = Adapter.TABLE, config = expectedAdapterConfig }
                             , renderer = Renderer.TABLE
                             , tags = []
                             , createdAt = expectedDate
@@ -95,7 +94,6 @@ widgetDecoderTest =
                             , favoritesCount = 0
                             , author = expectedAuthor
                             , data = { rows = [] }
-                            , metricAdapterConfig = expectedAdapterConfig
                             , body = Body "12 months Table"
                             }
                         )

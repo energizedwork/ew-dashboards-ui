@@ -30,7 +30,7 @@ type alias Model =
 
 render : Int -> Int -> Widget Body -> Table.Data -> Bool -> Html RendererMessage.Msg
 render width height widget data updatable =
-    case widget.adapter of
+    case widget.adapter.type_ of
         HEAT_MAP ->
             let
                 ( headerRow, bodyRows, maxValue, xLabels, yLabels ) =
