@@ -38,6 +38,10 @@
             "favoritesCount": 0,
             "data": {
                 "data": []
+            },
+            "metricAdapterConfig": {
+                "sourceCell": [1, 1],
+                "targetCell": [1, 2]
             }
         }, {
                 "uuid": "c0b02f5d-8e73-4524-9f0f-f343bfd25493",

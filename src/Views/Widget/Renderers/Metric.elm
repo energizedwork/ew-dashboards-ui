@@ -14,7 +14,7 @@ render width height widget data =
         METRIC ->
             let
                 ( source, target ) =
-                    MetricAdapter.adapt MetricAdapter.defaultConfig data
+                    MetricAdapter.adapt widget.metricAdapterConfig data
             in
                 div
                     [ class <| "col-md-12 widget" ]
@@ -25,4 +25,4 @@ render width height widget data =
                     ]
 
         _ ->
-            p [ class "data" ] [ text "Sorry, I can only render tables from a METRIC adapter right now" ]
+            p [ class "data" ] [ text "Sorry, I can only render metrics from a METRIC adapter right now" ]

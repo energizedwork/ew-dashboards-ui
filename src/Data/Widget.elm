@@ -18,12 +18,13 @@ module Data.Widget
 
 import Data.Widget.Author as Author exposing (Author)
 import Data.Widget.Adapters.Adapter as Adapter exposing (Adapter(..))
+import Data.Widget.Adapters.MetricAdapter as MetricAdapter exposing (CellConfig, Config, defaultConfig)
 import Data.Widget.Renderer as Renderer exposing (Renderer(..))
 import Data.Widget.Table as Table exposing (Data)
 import Data.DataSource as DataSource exposing (DataSource)
 import Date exposing (Date)
 import Html exposing (Attribute, Html)
-import Json.Decode as Decode exposing (Decoder)
+import Json.Decode as Decode exposing (Decoder, index, int, map2)
 import Json.Decode.Extra
 import Json.Decode.Pipeline as Pipeline exposing (custom, decode, hardcoded, required, optional)
 import Markdown
@@ -42,7 +43,7 @@ This definition for `Widget` means we can write:
 viewWidget : Widget Body -> Html msg
 viewFeed : List (Widget ()) -> Html msg
 
-This indicates that `viewWidget` requires an widget _with a `body` present_,
+This indicates that `viewWidget` requires an widget *with a `body` present*,
 wereas `viewFeed` accepts articles with no bodies. (We could also have written
 it as `List (Widget a)` to specify that feeds can accept either articles that
 have `body` present or not. Either work, given that feeds do not attempt to
@@ -67,6 +68,7 @@ type alias Widget a =
     , favoritesCount : Int
     , author : Author
     , data : Data
+    , metricAdapterConfig : Config
     , body : a
     }
 
@@ -113,10 +115,13 @@ init =
         data =
             Data []
 
+        metricAdapterConfig =
+            defaultConfig
+
         body =
             Body "Init Widget"
     in
-        Widget uuid name description dataSources adapter renderer tags createdAt updatedAt favorited favoritesCount author data body
+        Widget uuid name description dataSources adapter renderer tags createdAt updatedAt favorited favoritesCount author data metricAdapterConfig body
 
 
 
@@ -151,6 +156,7 @@ baseWidgetDecoder =
         |> required "favoritesCount" Decode.int
         |> required "author" Author.decoder
         |> required "data" Table.decoder
+        |> optional "metricAdapterConfig" adapterConfigDecoder defaultConfig
 
 
 adapterDecoder : Decoder Adapter
@@ -174,6 +180,22 @@ adapterDecoder =
                     somethingElse ->
                         Decode.fail <| "Unknown adapter: " ++ somethingElse
             )
+
+
+adapterConfigDecoder : Decoder Config
+adapterConfigDecoder =
+    decode Config
+        |> required "sourceCell" cellConfigDecoder
+        |> required "targetCell" cellConfigDecoder
+
+
+cellConfigDecoder : Decoder CellConfig
+cellConfigDecoder =
+    -- Decoding an array to a tuple https://stackoverflow.com/a/47041770
+    -- Why is CellConfig not available here? The following line throws a compiler error `Cannot find variable `CellConfig``
+    -- But CellConfig is exposed by MetricAdapter 🤔
+    -- map2 CellConfig (index 0 int) (index 1 int)
+    map2 (,) (index 0 int) (index 1 int)
 
 
 rendererDecoder : Decoder Renderer

@@ -48,6 +48,10 @@ widgetDecoderTest =
                             "favoritesCount": 0,
                             "data": {
                               "data": []
+                            },
+                            "metricAdapterConfig": {
+                                "sourceCell": [1,0],
+                                "targetCell": [1,1]
                             }
                         }
                     }
@@ -65,6 +69,11 @@ widgetDecoderTest =
 
                 expectedDatasources =
                     [ DataSource "datasource-1234" "12 month financials" ]
+
+                expectedAdapterConfig =
+                    { sourceCell = ( 1, 0 )
+                    , targetCell = ( 1, 1 )
+                    }
 
                 decodedOutput =
                     Decode.decodeString (Widget.decoderWithBody |> Decode.field "widget") input
@@ -86,6 +95,7 @@ widgetDecoderTest =
                             , favoritesCount = 0
                             , author = expectedAuthor
                             , data = { rows = [] }
+                            , metricAdapterConfig = expectedAdapterConfig
                             , body = Body "12 months Table"
                             }
                         )

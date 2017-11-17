@@ -1,6 +1,6 @@
-module Data.Widget.Adapters.MetricAdapter exposing (Config, defaultConfig, adapt)
+module Data.Widget.Adapters.MetricAdapter exposing (CellConfig, Config, defaultConfig, adapt)
 
-import Data.Widget.Table as Table exposing (Data, Row, Cell)
+import Data.Widget.Table as Table exposing (Data)
 import Array
 
 
@@ -12,13 +12,13 @@ type alias ColumnNumber =
     Int
 
 
-type alias Cell =
+type alias CellConfig =
     ( RowNumber, ColumnNumber )
 
 
 type alias Config =
-    { sourceCell : Cell
-    , targetCell : Cell
+    { sourceCell : CellConfig
+    , targetCell : CellConfig
     }
 
 
@@ -27,7 +27,7 @@ defaultConfig =
     Config ( 0, 0 ) ( 0, 1 )
 
 
-rowForCell : Array.Array (List String) -> Cell -> List String
+rowForCell : Array.Array (List String) -> CellConfig -> List String
 rowForCell rows cellConfig =
     case Array.get (Tuple.first cellConfig) rows of
         Just row ->
@@ -37,7 +37,7 @@ rowForCell rows cellConfig =
             []
 
 
-valueForCell : Array.Array (List String) -> Cell -> String
+valueForCell : Array.Array (List String) -> CellConfig -> String
 valueForCell rows cell =
     let
         row =
