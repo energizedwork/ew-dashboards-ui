@@ -31,11 +31,7 @@ widgetDecoderTest =
                                 "name": "12 month financials"
                             }],
                             "adapter": {
-                                "type_":"TABLE",
-                                "config": {
-                                    "sourceCell": [1,0],
-                                    "targetCell": [1,1]
-                                }
+                                "type_":"TABLE"
                             },
                             "renderer": "TABLE",
                             "createdAt": "2017-09-04T16:03:55.948Z",
@@ -85,7 +81,7 @@ widgetDecoderTest =
                             , name = "12 months Table"
                             , description = "12 months of important data"
                             , dataSources = expectedDatasources
-                            , adapter = { type_ = Adapter.TABLE, config = expectedAdapterConfig }
+                            , adapter = { type_ = Adapter.TABLE, config = Nothing }
                             , renderer = Renderer.TABLE
                             , tags = []
                             , createdAt = expectedDate

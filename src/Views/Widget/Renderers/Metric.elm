@@ -26,16 +26,21 @@ render : Int -> Int -> Widget Body -> Table.Data -> Html msg
 render width height widget data =
     case widget.adapter.type_ of
         METRIC ->
-            let
-                ( source, target ) =
-                    MetricAdapter.adapt widget.adapter.config data
-            in
-                div
-                    [ class "col-md-12 widget container" ]
-                    [ h3 [ title widget.description, class "heading" ] [ Html.text widget.name ]
-                    , viewMetric "Actual" source
-                    , viewMetric "Target" target
-                    ]
+            case widget.adapter.config of
+                Nothing ->
+                    p [ class "data" ] [ text "Sorry, you must supply a valid config to the METRIC adapter" ]
+
+                Just config ->
+                    let
+                        ( source, target ) =
+                            MetricAdapter.adapt config data
+                    in
+                        div
+                            [ class "col-md-12 widget container" ]
+                            [ h3 [ title widget.description, class "heading" ] [ Html.text widget.name ]
+                            , viewMetric "Actual" source
+                            , viewMetric "Target" target
+                            ]
 
         _ ->
             p [ class "data" ] [ text "Sorry, I can only render metrics from a METRIC adapter right now" ]

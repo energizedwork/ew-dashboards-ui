@@ -24,7 +24,7 @@ import Data.Widget.Table as Table exposing (Data)
 import Data.DataSource as DataSource exposing (DataSource)
 import Date exposing (Date)
 import Html exposing (Attribute, Html)
-import Json.Decode as Decode exposing (Decoder, index, int, map2)
+import Json.Decode as Decode exposing (Decoder, index, int, map2, maybe)
 import Json.Decode.Extra
 import Json.Decode.Pipeline as Pipeline exposing (custom, decode, hardcoded, required, optional)
 import Markdown
@@ -73,7 +73,7 @@ type alias Widget a =
 
 
 type alias AdapterDefinition =
-    { type_ : Adapter, config : Config }
+    { type_ : Adapter, config : Maybe Config }
 
 
 init : Widget Body
@@ -92,7 +92,7 @@ init =
             [ DataSource.init ]
 
         adapter =
-            AdapterDefinition Adapter.TABLE defaultConfig
+            AdapterDefinition Adapter.TABLE Nothing
 
         renderer =
             Renderer.TABLE
@@ -162,7 +162,7 @@ adapterDecoder : Decoder AdapterDefinition
 adapterDecoder =
     decode AdapterDefinition
         |> required "type_" adapterTypeDecoder
-        |> optional "config" adapterConfigDecoder defaultConfig
+        |> optional "config" (maybe adapterConfigDecoder) Nothing
 
 
 adapterTypeDecoder : Decoder Adapter
