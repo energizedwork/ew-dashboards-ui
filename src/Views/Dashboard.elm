@@ -6,7 +6,6 @@ import Date.Format
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src)
 import Route exposing (Route)
-import Views.DataSource as DataSource exposing (view)
 import Views.Dashboard.Favorite as Favorite
 
 

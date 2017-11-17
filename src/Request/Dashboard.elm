@@ -19,7 +19,6 @@ import Data.User as User exposing (Username)
 import Http
 import HttpBuilder exposing (RequestBuilder, withBody, withExpect, withQueryParams)
 import Json.Decode as Decode
-import Json.Encode as Encode
 import Request.Helpers exposing (mockApiUrl)
 import Util exposing ((=>))
 
