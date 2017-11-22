@@ -19,7 +19,7 @@ import Visualization.Shape as Shape
 
 render : Int -> Int -> Widget Body -> Table.Data -> Html msg
 render width height widget data =
-    case widget.adapter.type_ of
+    case widget.adapter of
         TABLE ->
             let
                 ( headerRow, bodyRows, maxValue ) =

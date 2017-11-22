@@ -81,7 +81,7 @@ widgetDecoderTest =
                             , name = "12 months Table"
                             , description = "12 months of important data"
                             , dataSources = expectedDatasources
-                            , adapter = { type_ = Adapter.TABLE, config = Nothing }
+                            , adapter = Adapter.TABLE
                             , renderer = Renderer.TABLE
                             , tags = []
                             , createdAt = expectedDate
