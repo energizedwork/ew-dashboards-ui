@@ -17,7 +17,4 @@ type alias CellPosition =
 
 cellPositionDecoder : Decoder CellPosition
 cellPositionDecoder =
-    -- Why is CellPosition not available here? The following line throws a compiler error `Cannot find variable `CellPosition``
-    -- But CellPosition is exposed by MetricAdapter 🤔
-    -- map2 CellPosition (index 0 int) (index 1 int)
     map2 (,) (index 0 int) (index 1 int)
