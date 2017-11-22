@@ -1,9 +1,8 @@
 module Data.Widget.Adapters.Adapter exposing (Adapter(..), decoder)
 
-import Data.Widget.Adapters.MetricAdapter as MetricAdapter exposing (Config, defaultConfig)
+import Data.Widget.Adapters.MetricAdapter as MetricAdapter exposing (Config, defaultConfig, adapterConfigDecoder)
 import Json.Decode as Decode exposing (Decoder, maybe)
-import Json.Decode.Pipeline as Pipeline exposing (custom, decode, hardcoded, required, optional)
-import Data.Widget.Adapters.CellPosition exposing (CellPosition, cellPositionDecoder)
+import Json.Decode.Pipeline as Pipeline exposing (decode, required, optional)
 
 
 type alias Definition =
@@ -47,10 +46,3 @@ definitionDecoder =
     decode Definition
         |> required "type_" Decode.string
         |> optional "config" (maybe adapterConfigDecoder) Nothing
-
-
-adapterConfigDecoder : Decoder Config
-adapterConfigDecoder =
-    decode Config
-        |> required "sourceCell" cellPositionDecoder
-        |> required "targetCell" cellPositionDecoder

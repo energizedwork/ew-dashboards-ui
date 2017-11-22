@@ -1,8 +1,10 @@
-module Data.Widget.Adapters.MetricAdapter exposing (Config, defaultConfig, adapt)
+module Data.Widget.Adapters.MetricAdapter exposing (Config, defaultConfig, adapt, adapterConfigDecoder)
 
-import Data.Widget.Adapters.CellPosition exposing (CellPosition)
+import Data.Widget.Adapters.CellPosition exposing (CellPosition, cellPositionDecoder)
 import Data.Widget.Table as Table exposing (Data)
 import Array
+import Json.Decode as Decode exposing (Decoder)
+import Json.Decode.Pipeline as Pipeline exposing (decode, required)
 
 
 type alias Config =
@@ -53,3 +55,10 @@ adapt config data =
             valueForCell rows config.targetCell
     in
         ( sourceValue, targetValue )
+
+
+adapterConfigDecoder : Decoder Config
+adapterConfigDecoder =
+    decode Config
+        |> required "sourceCell" cellPositionDecoder
+        |> required "targetCell" cellPositionDecoder
