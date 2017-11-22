@@ -1,6 +1,6 @@
 module Data.Widget.Adapters.MetricAdapter exposing (Config, defaultConfig, adapt, adapterConfigDecoder)
 
-import Data.Widget.Adapters.CellPosition exposing (CellPosition, cellPositionDecoder)
+import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition, decoder)
 import Data.Widget.Table as Table exposing (Data)
 import Array
 import Json.Decode as Decode exposing (Decoder)
@@ -60,5 +60,5 @@ adapt config data =
 adapterConfigDecoder : Decoder Config
 adapterConfigDecoder =
     decode Config
-        |> required "sourceCell" cellPositionDecoder
-        |> required "targetCell" cellPositionDecoder
+        |> required "sourceCell" CellPosition.decoder
+        |> required "targetCell" CellPosition.decoder

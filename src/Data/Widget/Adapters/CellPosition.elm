@@ -1,4 +1,4 @@
-module Data.Widget.Adapters.CellPosition exposing (CellPosition, cellPositionDecoder)
+module Data.Widget.Adapters.CellPosition exposing (CellPosition, decoder)
 
 import Json.Decode as Decode exposing (Decoder, index, int, map2)
 
@@ -15,6 +15,6 @@ type alias CellPosition =
     ( RowNumber, ColumnNumber )
 
 
-cellPositionDecoder : Decoder CellPosition
-cellPositionDecoder =
+decoder : Decoder CellPosition
+decoder =
     map2 (,) (index 0 int) (index 1 int)
