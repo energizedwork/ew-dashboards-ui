@@ -2,7 +2,7 @@ module Data.Widget.Adapters.AdapterDecoderTest exposing (..)
 
 import Expect exposing (Expectation)
 import Data.Widget.Adapters.Adapter as Adapter exposing (Adapter(..))
-import Data.Widget.Adapters.MetricAdapter as MetricAdapter exposing (CellConfig, Config, defaultConfig)
+import Data.Widget.Adapters.MetricAdapter as MetricAdapter exposing (Config, defaultConfig)
 import Json.Decode as Decode exposing (..)
 import Test exposing (..)
 

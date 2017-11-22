@@ -1,8 +1,9 @@
 module Data.Widget.Adapters.Adapter exposing (Adapter(..), decoder)
 
-import Data.Widget.Adapters.MetricAdapter as MetricAdapter exposing (CellConfig, Config, defaultConfig)
-import Json.Decode as Decode exposing (Decoder, index, int, map2, maybe)
+import Data.Widget.Adapters.MetricAdapter as MetricAdapter exposing (Config, defaultConfig)
+import Json.Decode as Decode exposing (Decoder, maybe)
 import Json.Decode.Pipeline as Pipeline exposing (custom, decode, hardcoded, required, optional)
+import Data.Widget.Adapters.CellPosition exposing (CellPosition, cellPositionDecoder)
 
 
 type alias Definition =
@@ -48,21 +49,8 @@ definitionDecoder =
         |> optional "config" (maybe adapterConfigDecoder) Nothing
 
 
-
--- TODO should CellConfig be in it's own module? Not sure it lives here.
-
-
 adapterConfigDecoder : Decoder Config
 adapterConfigDecoder =
     decode Config
-        |> required "sourceCell" cellConfigDecoder
-        |> required "targetCell" cellConfigDecoder
-
-
-cellConfigDecoder : Decoder CellConfig
-cellConfigDecoder =
-    -- Decoding an array to a tuple https://stackoverflow.com/a/47041770
-    -- Why is CellConfig not available here? The following line throws a compiler error `Cannot find variable `CellConfig``
-    -- But CellConfig is exposed by MetricAdapter 🤔
-    -- map2 CellConfig (index 0 int) (index 1 int)
-    map2 (,) (index 0 int) (index 1 int)
+        |> required "sourceCell" cellPositionDecoder
+        |> required "targetCell" cellPositionDecoder
