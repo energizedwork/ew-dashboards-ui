@@ -18,7 +18,7 @@ module Data.Widget
 
 import Data.Widget.Author as Author exposing (Author)
 import Data.Widget.Adapters.Adapter as Adapter exposing (Adapter(..))
-import Data.Widget.Adapters.MetricAdapter as MetricAdapter exposing (CellConfig, Config, defaultConfig)
+import Data.Widget.Adapters.Adapter as Adapter exposing (Adapter(..))
 import Data.Widget.Renderer as Renderer exposing (Renderer(..))
 import Data.Widget.Table as Table exposing (Data)
 import Data.DataSource as DataSource exposing (DataSource)
@@ -59,7 +59,7 @@ type alias Widget a =
     , name : String
     , description : String
     , dataSources : List DataSource
-    , adapter : AdapterDefinition
+    , adapter : Adapter
     , renderer : Renderer
     , tags : List String
     , createdAt : Date
@@ -70,10 +70,6 @@ type alias Widget a =
     , data : Data
     , body : a
     }
-
-
-type alias AdapterDefinition =
-    { type_ : Adapter, config : Maybe Config }
 
 
 init : Widget Body
@@ -92,7 +88,7 @@ init =
             [ DataSource.init ]
 
         adapter =
-            AdapterDefinition Adapter.TABLE Nothing
+            Adapter.TABLE
 
         renderer =
             Renderer.TABLE
@@ -147,7 +143,7 @@ baseWidgetDecoder =
         |> required "name" Decode.string
         |> required "description" (Decode.map (Maybe.withDefault "") (Decode.nullable Decode.string))
         |> required "dataSources" (Decode.list DataSource.decoder)
-        |> required "adapter" adapterDecoder
+        |> required "adapter" Adapter.decoder
         |> required "renderer" rendererDecoder
         |> required "tagList" (Decode.list Decode.string)
         |> required "createdAt" Json.Decode.Extra.date
@@ -156,52 +152,6 @@ baseWidgetDecoder =
         |> required "favoritesCount" Decode.int
         |> required "author" Author.decoder
         |> required "data" Table.decoder
-
-
-adapterDecoder : Decoder AdapterDefinition
-adapterDecoder =
-    decode AdapterDefinition
-        |> required "type_" adapterTypeDecoder
-        |> optional "config" (maybe adapterConfigDecoder) Nothing
-
-
-adapterTypeDecoder : Decoder Adapter
-adapterTypeDecoder =
-    Decode.string
-        |> Decode.andThen
-            (\str ->
-                case str of
-                    "TABLE" ->
-                        Decode.succeed Adapter.TABLE
-
-                    "BAR_CHART" ->
-                        Decode.succeed Adapter.BAR_CHART
-
-                    "HEAT_MAP" ->
-                        Decode.succeed Adapter.HEAT_MAP
-
-                    "METRIC" ->
-                        Decode.succeed Adapter.METRIC
-
-                    somethingElse ->
-                        Decode.fail <| "Unknown adapter: " ++ somethingElse
-            )
-
-
-adapterConfigDecoder : Decoder Config
-adapterConfigDecoder =
-    decode Config
-        |> required "sourceCell" cellConfigDecoder
-        |> required "targetCell" cellConfigDecoder
-
-
-cellConfigDecoder : Decoder CellConfig
-cellConfigDecoder =
-    -- Decoding an array to a tuple https://stackoverflow.com/a/47041770
-    -- Why is CellConfig not available here? The following line throws a compiler error `Cannot find variable `CellConfig``
-    -- But CellConfig is exposed by MetricAdapter 🤔
-    -- map2 CellConfig (index 0 int) (index 1 int)
-    map2 (,) (index 0 int) (index 1 int)
 
 
 rendererDecoder : Decoder Renderer

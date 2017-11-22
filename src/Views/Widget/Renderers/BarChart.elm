@@ -18,7 +18,7 @@ import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousS
 
 render : Widget Body -> Table.Data -> Html msg
 render widget data =
-    case widget.adapter.type_ of
+    case widget.adapter of
         TABLE ->
             let
                 ( headerRow, bodyRows, maxValue ) =
