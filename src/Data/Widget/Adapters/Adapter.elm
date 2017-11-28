@@ -1,8 +1,14 @@
 module Data.Widget.Adapters.Adapter exposing (Adapter(..), decoder)
 
-import Data.Widget.Adapters.MetricAdapter as MetricAdapter exposing (Config, defaultConfig, adapterConfigDecoder)
-import Json.Decode as Decode exposing (Decoder, maybe)
+import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition, decoder)
+import Data.Widget.Adapters.MetricAdapter as MetricAdapter
+import Json.Decode as Decode exposing (Decoder, maybe, dict, string)
 import Json.Decode.Pipeline as Pipeline exposing (decode, required, optional)
+import Dict exposing (Dict)
+
+
+type alias Config =
+    Dict String CellPosition
 
 
 type alias Definition =
@@ -15,7 +21,7 @@ type Adapter
     = TABLE
     | BAR_CHART
     | HEAT_MAP
-    | METRIC MetricAdapter.Config
+    | METRIC Config
 
 
 decoder : Decoder Adapter
@@ -45,4 +51,4 @@ definitionDecoder : Decoder Definition
 definitionDecoder =
     decode Definition
         |> required "type_" Decode.string
-        |> optional "config" (maybe adapterConfigDecoder) Nothing
+        |> optional "config" (maybe (dict CellPosition.decoder)) Nothing

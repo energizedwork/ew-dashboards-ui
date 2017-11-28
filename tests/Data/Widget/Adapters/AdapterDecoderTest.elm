@@ -2,9 +2,10 @@ module Data.Widget.Adapters.AdapterDecoderTest exposing (..)
 
 import Expect exposing (Expectation)
 import Data.Widget.Adapters.Adapter as Adapter exposing (Adapter(..))
-import Data.Widget.Adapters.MetricAdapter as MetricAdapter exposing (Config, defaultConfig)
+import Data.Widget.Adapters.MetricAdapter as MetricAdapter exposing (defaultConfig)
 import Json.Decode as Decode exposing (..)
 import Test exposing (..)
+import Dict exposing (Dict)
 
 
 adapterDecoderTest : Test
@@ -44,7 +45,7 @@ adapterDecoderTest =
                     Expect.equal
                         (Decode.decodeString Adapter.decoder input)
                         (Ok
-                            (Adapter.METRIC <| MetricAdapter.Config ( 1, 1 ) ( 1, 3 ))
+                            (Adapter.METRIC <| Dict.fromList [ ( "sourceCell", ( 1, 1 ) ), ( "targetCell", ( 1, 3 ) ) ])
                         )
     in
         Test.describe "Adapter.decode"

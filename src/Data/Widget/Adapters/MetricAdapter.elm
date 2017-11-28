@@ -1,21 +1,24 @@
-module Data.Widget.Adapters.MetricAdapter exposing (Config, defaultConfig, adapt, adapterConfigDecoder)
+module Data.Widget.Adapters.MetricAdapter exposing (defaultConfig, adapt)
 
 import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition, decoder)
 import Data.Widget.Table as Table exposing (Data)
 import Array
-import Json.Decode as Decode exposing (Decoder)
-import Json.Decode.Pipeline as Pipeline exposing (decode, required)
+import Dict exposing (Dict)
 
 
-type alias Config =
-    { sourceCell : CellPosition
-    , targetCell : CellPosition
-    }
+defaultSourceCellPosition : CellPosition
+defaultSourceCellPosition =
+    ( 0, 0 )
 
 
-defaultConfig : Config
+defaultTargetCellPosition : CellPosition
+defaultTargetCellPosition =
+    ( 0, 1 )
+
+
+defaultConfig : Dict String CellPosition
 defaultConfig =
-    Config ( 0, 0 ) ( 0, 1 )
+    Dict.fromList [ ( "sourceCell", defaultSourceCellPosition ), ( "targetCell", defaultTargetCellPosition ) ]
 
 
 rowForCell : Array.Array (List String) -> CellPosition -> List String
@@ -42,23 +45,16 @@ valueForCell rows cell =
                 ""
 
 
-adapt : Config -> Data -> ( String, String )
+adapt : Dict String CellPosition -> Data -> ( String, String )
 adapt config data =
     let
         rows =
             Array.fromList data.rows
 
         sourceValue =
-            valueForCell rows config.sourceCell
+            valueForCell rows (Maybe.withDefault defaultSourceCellPosition (Dict.get "sourceCell" config))
 
         targetValue =
-            valueForCell rows config.targetCell
+            valueForCell rows (Maybe.withDefault defaultTargetCellPosition (Dict.get "targetCell" config))
     in
         ( sourceValue, targetValue )
-
-
-adapterConfigDecoder : Decoder Config
-adapterConfigDecoder =
-    decode Config
-        |> required "sourceCell" CellPosition.decoder
-        |> required "targetCell" CellPosition.decoder

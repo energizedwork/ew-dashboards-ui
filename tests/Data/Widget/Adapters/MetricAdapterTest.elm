@@ -5,6 +5,7 @@ import Test exposing (..)
 import Data.Widget.Adapters.AdapterTestData as TD
 import Data.Widget.Adapters.MetricAdapter as MetricAdapter exposing (adapt)
 import Data.Widget.Table as Table exposing (Data)
+import Dict exposing (Dict)
 
 
 adapterConfigTest : Test
@@ -24,7 +25,7 @@ adapterConfigTest =
             MetricAdapter.defaultConfig
 
         suppliedConfig =
-            MetricAdapter.Config ( 1, 1 ) ( 2, 1 )
+            Dict.fromList [ ( "sourceCell", ( 1, 1 ) ), ( "targetCell", ( 2, 1 ) ) ]
 
         -- function under test!
         ( defaultActualSourceFigure, defaultActualTargetFigure ) =
