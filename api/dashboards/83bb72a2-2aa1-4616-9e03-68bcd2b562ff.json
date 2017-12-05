@@ -26,8 +26,8 @@
             "adapter": {
                 "type_": "METRIC",
                 "config": {
-                    "sourceCell": [1, 1],
-                    "targetCell": [1, 2]
+                    "sourceCell": [1, 0],
+                    "targetCell": [2, 1]
                 }
             },
             "renderer": "METRIC",
