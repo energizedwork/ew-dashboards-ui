@@ -33,7 +33,7 @@ adapterConfigTest =
             Dict.fromList
                 [ ( "lineRows", CellRange.asJsonValue [ ( 5, 1 ), ( 10, 3 ) ] )
                 , ( "barRows", CellRange.asJsonValue [ ( 5, 4 ), ( 10, 5 ) ] )
-                , ( "xLabelsIndex", Encode.int 0 )
+                , ( "xLabelsIndex", Encode.int 3 )
                 , ( "yLabelsIndicies", List.map (\y -> Encode.int y) [ 0 ] |> Encode.list )
                 ]
 
@@ -44,10 +44,10 @@ adapterConfigTest =
         ( suppliedActualHeaderRow, suppliedActualLineRows, suppliedActualBarRows, suppliedActualMaxValue, suppliedActualXLabels, suppliedActualYLabels ) =
             LineAndBarAdapter.adapt suppliedConfig input
 
+        -- expectations
         defaultHeaders =
             \_ -> defaultActualHeaderRow |> Expect.equal TD.headerRow
 
-        -- expectations
         defaultLineChartRows =
             \_ ->
                 defaultActualLineRows |> Expect.equal [ TD.firstRow, TD.secondRow ]
@@ -60,6 +60,9 @@ adapterConfigTest =
 
         defaultXLabels =
             \_ -> defaultActualXLabels |> Expect.equal TD.headerRow
+
+        suppliedHeaders =
+            \_ -> suppliedActualHeaderRow |> Expect.equal TD.secondRow
 
         suppliedLineChartRows =
             \_ ->
@@ -77,6 +80,12 @@ adapterConfigTest =
                         [ [ "305", "306", "307", "308", "309", "310" ]
                         , [ "405", "406", "407", "408", "409", "410" ]
                         ]
+
+        suppliedMaxValue =
+            \_ -> suppliedActualMaxValue |> Expect.equal 410
+
+        suppliedXLabels =
+            suppliedHeaders
     in
         Test.describe "HeatMapAdapter.adapt"
             [ Test.describe "with default Config"
@@ -89,7 +98,12 @@ adapterConfigTest =
                 , Test.todo "second y-axis labels are the range of values from the second row of the line chart data"
                 ]
             , Test.describe "with supplied Config"
-                [ Test.test "line chart rows are correct" suppliedLineChartRows
-                , Test.test "bar chart rows are correct" suppliedBarChartRows
+                [ Test.test "headers are third row" suppliedHeaders
+                , Test.test "line chart rows are as specified" suppliedLineChartRows
+                , Test.test "bar chart rows are as specified" suppliedBarChartRows
+                , Test.test "max value is extracted from body rows" suppliedMaxValue
+                , Test.test "x-axis labels are as specified" suppliedXLabels
+                , Test.todo "first y-axis labels are as specified"
+                , Test.todo "second y-axis labels are as specified"
                 ]
             ]

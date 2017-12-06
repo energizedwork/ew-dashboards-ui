@@ -14,12 +14,12 @@ import Views.Widget.Renderers.Utils as Utils exposing (..)
 
 xLabelsIndex : Int
 xLabelsIndex =
-    0
+    1
 
 
 yLabelsIndex : List Int
 yLabelsIndex =
-    [ 0 ]
+    [ 1 ]
 
 
 
@@ -42,18 +42,12 @@ adapt : AdapterConfig.Config -> Data -> ( Row, List Row, List Row, Float, List S
 adapt optionalConfig data =
     let
         actualXLabelsIndex =
-            Dict.get "xLabelsIndex" optionalConfig
+            (Dict.get "xLabelsIndex" optionalConfig
                 |> Maybe.withDefault (Encode.int xLabelsIndex)
                 |> Json.decodeValue Json.int
                 |> Result.withDefault xLabelsIndex
-
-        headerRow =
-            case List.head data.rows of
-                Just header ->
-                    header
-
-                Nothing ->
-                    []
+            )
+                - 1
 
         xLabels =
             case List.Extra.getAt actualXLabelsIndex data.rows of
@@ -62,6 +56,9 @@ adapt optionalConfig data =
 
                 Nothing ->
                     []
+
+        headerRow =
+            xLabels
 
         yLabels =
             case List.tail data.rows of
