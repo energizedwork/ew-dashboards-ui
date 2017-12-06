@@ -7,3 +7,4 @@ type Renderer
     | BAR_CHART
     | HEAT_MAP
     | UPDATABLE_HEAT_MAP
+    | METRIC

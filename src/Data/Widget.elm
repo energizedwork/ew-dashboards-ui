@@ -23,7 +23,7 @@ import Data.Widget.Table as Table exposing (Data)
 import Data.DataSource as DataSource exposing (DataSource)
 import Date exposing (Date)
 import Html exposing (Attribute, Html)
-import Json.Decode as Decode exposing (Decoder)
+import Json.Decode as Decode exposing (Decoder, index, int, map2, maybe)
 import Json.Decode.Extra
 import Json.Decode.Pipeline as Pipeline exposing (custom, decode, hardcoded, required, optional)
 import Markdown
@@ -42,7 +42,7 @@ This definition for `Widget` means we can write:
 viewWidget : Widget Body -> Html msg
 viewFeed : List (Widget ()) -> Html msg
 
-This indicates that `viewWidget` requires an widget _with a `body` present_,
+This indicates that `viewWidget` requires an widget *with a `body` present*,
 wereas `viewFeed` accepts articles with no bodies. (We could also have written
 it as `List (Widget a)` to specify that feeds can accept either articles that
 have `body` present or not. Either work, given that feeds do not attempt to
@@ -142,7 +142,7 @@ baseWidgetDecoder =
         |> required "name" Decode.string
         |> required "description" (Decode.map (Maybe.withDefault "") (Decode.nullable Decode.string))
         |> required "dataSources" (Decode.list DataSource.decoder)
-        |> required "adapter" adapterDecoder
+        |> required "adapter" Adapter.decoder
         |> required "renderer" rendererDecoder
         |> required "tagList" (Decode.list Decode.string)
         |> required "createdAt" Json.Decode.Extra.date
@@ -151,26 +151,6 @@ baseWidgetDecoder =
         |> required "favoritesCount" Decode.int
         |> required "author" Author.decoder
         |> required "data" Table.decoder
-
-
-adapterDecoder : Decoder Adapter
-adapterDecoder =
-    Decode.string
-        |> Decode.andThen
-            (\str ->
-                case str of
-                    "TABLE" ->
-                        Decode.succeed Adapter.TABLE
-
-                    "BAR_CHART" ->
-                        Decode.succeed Adapter.BAR_CHART
-
-                    "HEAT_MAP" ->
-                        Decode.succeed Adapter.HEAT_MAP
-
-                    somethingElse ->
-                        Decode.fail <| "Unknown adapter: " ++ somethingElse
-            )
 
 
 rendererDecoder : Decoder Renderer
@@ -193,6 +173,9 @@ rendererDecoder =
 
                     "UPDATABLE_HEAT_MAP" ->
                         Decode.succeed Renderer.UPDATABLE_HEAT_MAP
+
+                    "METRIC" ->
+                        Decode.succeed Renderer.METRIC
 
                     somethingElse ->
                         Decode.fail <| "Unknown renderer: " ++ somethingElse

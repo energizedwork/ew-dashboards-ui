@@ -1,11 +1,8 @@
 module Data.WidgetDecoderTest exposing (..)
 
 import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer, int, list, string)
 import Test exposing (..)
-import Json.Encode as Encode exposing (object)
 import Json.Decode as Decode exposing (..)
-import String
 import Data.DataSource exposing (DataSource)
 import Data.Widget.Author as Author
 import Data.Widget as Widget exposing (UUID(..), Body(..), decoder)
@@ -33,7 +30,9 @@ widgetDecoderTest =
                                 "uuid": "datasource-1234",
                                 "name": "12 month financials"
                             }],
-                            "adapter": "TABLE",
+                            "adapter": {
+                                "type_":"TABLE"
+                            },
                             "renderer": "TABLE",
                             "createdAt": "2017-09-04T16:03:55.948Z",
                             "updatedAt": "2017-09-04T16:03:55.948Z",
@@ -65,6 +64,11 @@ widgetDecoderTest =
 
                 expectedDatasources =
                     [ DataSource "datasource-1234" "12 month financials" ]
+
+                expectedAdapterConfig =
+                    { sourceCell = ( 1, 0 )
+                    , targetCell = ( 1, 1 )
+                    }
 
                 decodedOutput =
                     Decode.decodeString (Widget.decoderWithBody |> Decode.field "widget") input
