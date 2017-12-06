@@ -3,9 +3,11 @@ module Data.Widget.Adapters.MetricAdapterTest exposing (..)
 import Expect exposing (Expectation)
 import Test exposing (..)
 import Data.Widget.Adapters.AdapterTestData as TD
+import Data.Widget.Adapters.CellPosition as CellPosition exposing (..)
 import Data.Widget.Adapters.MetricAdapter as MetricAdapter exposing (adapt)
 import Data.Widget.Table as Table exposing (Data)
 import Dict exposing (Dict)
+import Json.Encode as Encode exposing (..)
 
 
 adapterConfigTest : Test
@@ -24,8 +26,17 @@ adapterConfigTest =
         defaultConfig =
             MetricAdapter.defaultConfig
 
+        suppliedConfigSource =
+            CellPosition.asJsonValue ( 1, 1 )
+
+        suppliedConfigTarget =
+            CellPosition.asJsonValue ( 2, 1 )
+
         suppliedConfig =
-            Dict.fromList [ ( "sourceCell", ( 1, 1 ) ), ( "targetCell", ( 2, 1 ) ) ]
+            Dict.fromList
+                [ ( "sourceCell", suppliedConfigSource )
+                , ( "targetCell", suppliedConfigTarget )
+                ]
 
         -- function under test!
         ( defaultActualSourceFigure, defaultActualTargetFigure ) =
