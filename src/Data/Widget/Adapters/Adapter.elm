@@ -1,14 +1,9 @@
-module Data.Widget.Adapters.Adapter exposing (Adapter(..), Config, decoder)
+module Data.Widget.Adapters.Adapter exposing (Adapter(..), decoder)
 
 import Data.Widget.Adapters.Config as AdapterConfig
 import Data.Widget.Adapters.MetricAdapter as MetricAdapter
-import Dict exposing (Dict)
 import Json.Decode as Decode exposing (Decoder, maybe, dict, string, Value)
 import Json.Decode.Pipeline as Pipeline exposing (decode, required, optional)
-
-
-type alias Config =
-    Dict String Value
 
 
 type alias Definition =
