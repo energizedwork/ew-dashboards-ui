@@ -1,26 +1,52 @@
-module Data.Widget.Adapters.LineAndBarAdapter exposing (Config, defaultConfig, adapt)
+module Data.Widget.Adapters.LineAndBarAdapter exposing (defaultConfig, adapt)
 
+import Array
+import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition, asJsonValue, decoder)
+import Data.Widget.Adapters.CellRange as CellRange exposing (..)
+import Data.Widget.Adapters.Config as AdapterConfig
 import Data.Widget.Table as Table exposing (Data, Row, Cell)
+import Dict exposing (Dict)
+import Json.Decode as Json exposing (Value)
+import Json.Encode as Encode exposing (Value)
 import List.Extra
 import Views.Widget.Renderers.Utils as Utils exposing (..)
 
 
-type alias Config =
-    { lineRows : List Row
-    , barRows : List Row
-    , xLabelsIndex : Int
-    , yLabelsIndicies : List Int
-    }
+xLabelsIndex : Int
+xLabelsIndex =
+    0
 
 
-defaultConfig : Config
+yLabelsIndex : List Int
+yLabelsIndex =
+    [ 0 ]
+
+
+
+-- Possible values:
+-- "lineRows"
+-- "barRows"
+-- "xLabelsIndex"
+-- "yLabelsIndicies"
+
+
+defaultConfig : Dict String Json.Value
 defaultConfig =
-    Config [] [] 0 [ 0 ]
+    Dict.fromList
+        [ ( "xLabelsIndex", Encode.int xLabelsIndex )
+        , ( "yLabelsIndicies", List.map (\y -> Encode.int y) yLabelsIndex |> Encode.list )
+        ]
 
 
-adapt : Config -> Data -> ( Row, List Row, List Row, Float, List String, List String )
-adapt config data =
+adapt : AdapterConfig.Config -> Data -> ( Row, List Row, List Row, Float, List String, List String )
+adapt optionalConfig data =
     let
+        actualXLabelsIndex =
+            Dict.get "xLabelsIndex" optionalConfig
+                |> Maybe.withDefault (Encode.int xLabelsIndex)
+                |> Json.decodeValue Json.int
+                |> Result.withDefault xLabelsIndex
+
         headerRow =
             case List.head data.rows of
                 Just header ->
@@ -30,7 +56,7 @@ adapt config data =
                     []
 
         xLabels =
-            case List.Extra.getAt config.xLabelsIndex data.rows of
+            case List.Extra.getAt actualXLabelsIndex data.rows of
                 Just xLabel ->
                     xLabel
 
@@ -49,16 +75,60 @@ adapt config data =
                 Nothing ->
                     []
 
-        bodyRows =
-            case List.tail data.rows of
-                Just body ->
-                    body
+        lineRows =
+            case Dict.get "lineRows" optionalConfig of
+                Just lineRows ->
+                    let
+                        range =
+                            lineRows
+                                |> Json.decodeValue CellRange.decoder
+                                |> Result.withDefault [ ( 1, 1 ), ( 10, 2 ) ]
+                    in
+                        CellRange.extractRows data range
 
                 Nothing ->
                     []
 
+        barRows =
+            case Dict.get "barRows" optionalConfig of
+                Just barRows ->
+                    let
+                        range =
+                            barRows
+                                |> Json.decodeValue (Json.list CellPosition.decoder)
+                                |> Result.withDefault [ ( 1, 3 ), ( 10, 4 ) ]
+                    in
+                        CellRange.extractRows data range
+
+                Nothing ->
+                    []
+
+        bodyRows =
+            case
+                not (List.isEmpty lineRows)
+                    && not (List.isEmpty barRows)
+            of
+                True ->
+                    lineRows ++ barRows
+
+                False ->
+                    case List.tail data.rows of
+                        Just body ->
+                            body
+
+                        Nothing ->
+                            []
+
         ( lineChartRows, barChartRows ) =
-            List.Extra.splitAt (totalDataRows // 2) bodyRows
+            case
+                not (List.isEmpty lineRows)
+                    && not (List.isEmpty barRows)
+            of
+                True ->
+                    ( lineRows, barRows )
+
+                False ->
+                    List.Extra.splitAt (totalDataRows // 2) bodyRows
 
         totalDataRows =
             List.length bodyRows

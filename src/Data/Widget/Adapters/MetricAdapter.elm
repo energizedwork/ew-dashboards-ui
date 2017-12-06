@@ -6,7 +6,6 @@ import Data.Widget.Table as Table exposing (Data)
 import Array
 import Dict exposing (Dict)
 import Json.Decode as Json exposing (Value)
-import Json.Encode as Encode exposing (..)
 
 
 sourceCellPosition : CellPosition
