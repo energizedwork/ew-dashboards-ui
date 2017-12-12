@@ -12,10 +12,10 @@ import Views.Widget.Renderers.Utils as Utils
 render : Int -> Int -> Widget Body -> Table.Data -> Html msg
 render width height widget data =
     case widget.adapter of
-        TABLE ->
+        TABLE optionalConfig ->
             let
                 ( headerRow, bodyRows, minValue, maxValue, xLabels ) =
-                    TableAdapter.adapt TableAdapter.defaultConfig data
+                    TableAdapter.adapt optionalConfig data
             in
                 div
                     [ class <| "col-md-12 widget" ]

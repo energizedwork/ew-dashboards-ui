@@ -4,7 +4,8 @@ import Array
 import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition, asJsonValue, decoder)
 import Data.Widget.Adapters.CellRange as CellRange exposing (..)
 import Data.Widget.Adapters.Config as AdapterConfig
-import Data.Widget.Table as Table exposing (Data, Row, Cell)
+import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (..)
+import Data.Widget.Table as Table exposing (Cell, Data, Row)
 import Dict exposing (Dict)
 import Json.Decode as Json exposing (Value)
 import Json.Encode as Encode exposing (Value)
@@ -17,129 +18,82 @@ xLabelsIndex =
     1
 
 
-yLabelsIndex : List Int
-yLabelsIndex =
-    [ 1 ]
-
-
 
 -- Possible values:
 -- "lineRows"
 -- "barRows"
 -- "xLabelsIndex"
--- "yLabelsIndicies"
 
 
 defaultConfig : Dict String Json.Value
 defaultConfig =
     Dict.fromList
         [ ( "xLabelsIndex", Encode.int xLabelsIndex )
-        , ( "yLabelsIndicies", List.map (\y -> Encode.int y) yLabelsIndex |> Encode.list )
         ]
 
 
-adapt : AdapterConfig.Config -> Data -> ( Row, List Row, List Row, Float, List String, List String )
+adapt : AdapterConfig.Config -> Data -> ( Row, List Row, List Row, Float, Float, List String )
 adapt optionalConfig data =
     let
-        actualXLabelsIndex =
-            (Dict.get "xLabelsIndex" optionalConfig
-                |> Maybe.withDefault (Encode.int xLabelsIndex)
-                |> Json.decodeValue Json.int
-                |> Result.withDefault xLabelsIndex
-            )
-                - 1
+        lineRowsRange =
+            Dict.get "lineRows" optionalConfig
 
-        xLabels =
-            case List.Extra.getAt actualXLabelsIndex data.rows of
-                Just xLabel ->
-                    xLabel
+        barRowsRange =
+            Dict.get "barRows" optionalConfig
+
+        cleansedConfig =
+            optionalConfig
+                |> Dict.remove "lineRows"
+                |> Dict.remove "barRows"
+
+        tempLineChartConfig =
+            case lineRowsRange of
+                Just lineRowsRange ->
+                    Dict.fromList
+                        [ ( "bodyRows", lineRowsRange )
+                        ]
 
                 Nothing ->
-                    []
+                    Dict.empty
+
+        lineChartConfig =
+            Dict.union
+                cleansedConfig
+                tempLineChartConfig
+
+        ( lineChartHeaderRow, lineChartRows, lineChartMinValue, lineChartMaxValue, lineChartXLabels ) =
+            TableAdapter.adapt lineChartConfig data
+
+        tempBarChartConfig =
+            case barRowsRange of
+                Just barRowsRange ->
+                    Dict.fromList
+                        [ ( "bodyRows", barRowsRange )
+                        ]
+
+                Nothing ->
+                    Dict.empty
+
+        barChartConfig =
+            Dict.union
+                cleansedConfig
+                tempBarChartConfig
+
+        ( barChartHeaderRow, barChartRows, barChartMinValue, barChartMaxValue, barChartXLabels ) =
+            TableAdapter.adapt barChartConfig data
+
+        xLabels =
+            lineChartHeaderRow
 
         headerRow =
             xLabels
 
-        yLabels =
-            case List.tail data.rows of
-                Just body ->
-                    body
-                        |> List.map
-                            (\row ->
-                                List.head row |> Maybe.withDefault ""
-                            )
-
-                Nothing ->
-                    []
-
-        lineRows =
-            case Dict.get "lineRows" optionalConfig of
-                Just lineRows ->
-                    let
-                        range =
-                            lineRows
-                                |> Json.decodeValue CellRange.decoder
-                                |> Result.withDefault [ ( 1, 1 ), ( 10, 2 ) ]
-                    in
-                        CellRange.extractRows data range
-
-                Nothing ->
-                    []
-
-        barRows =
-            case Dict.get "barRows" optionalConfig of
-                Just barRows ->
-                    let
-                        range =
-                            barRows
-                                |> Json.decodeValue (Json.list CellPosition.decoder)
-                                |> Result.withDefault [ ( 1, 3 ), ( 10, 4 ) ]
-                    in
-                        CellRange.extractRows data range
-
-                Nothing ->
-                    []
-
-        bodyRows =
-            case
-                not (List.isEmpty lineRows)
-                    && not (List.isEmpty barRows)
-            of
-                True ->
-                    lineRows ++ barRows
-
-                False ->
-                    case List.tail data.rows of
-                        Just body ->
-                            body
-
-                        Nothing ->
-                            []
-
-        ( lineChartRows, barChartRows ) =
-            case
-                not (List.isEmpty lineRows)
-                    && not (List.isEmpty barRows)
-            of
-                True ->
-                    ( lineRows, barRows )
-
-                False ->
-                    List.Extra.splitAt (totalDataRows // 2) bodyRows
-
-        totalDataRows =
-            List.length bodyRows
-
-        rowMax row =
-            List.maximum (Utils.rowToFloats row) |> Maybe.withDefault 0
-
-        bodyRowMaxes =
-            List.map rowMax bodyRows
+        minValue =
+            List.minimum [ barChartMinValue, lineChartMinValue ]
+                |> Maybe.withDefault 0
 
         maxValue =
-            (List.maximum bodyRowMaxes |> Maybe.withDefault 0)
-
-        firstCellPerRow row =
-            List.head row |> Maybe.withDefault ""
+            List.maximum [ barChartMaxValue, lineChartMaxValue ]
+                |> Maybe.withDefault 0
     in
-        ( headerRow, lineChartRows, barChartRows, maxValue, xLabels, yLabels )
+        ( headerRow, lineChartRows, barChartRows, minValue, maxValue, xLabels )

@@ -1,7 +1,5 @@
 module Data.Widget.Adapters.TableAdapter exposing (defaultConfig, adapt)
 
-import Array
-import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition, asJsonValue, decoder)
 import Data.Widget.Adapters.CellRange as CellRange exposing (..)
 import Data.Widget.Adapters.Config as AdapterConfig
 import Data.Widget.Table as Table exposing (Data, Row, Cell)
@@ -9,7 +7,6 @@ import Dict exposing (Dict)
 import Json.Decode as Json exposing (Value)
 import Json.Encode as Encode exposing (Value)
 import List.Extra
-import Views.Widget.Renderers.Utils as Utils exposing (..)
 
 
 xLabelsIndex : Int

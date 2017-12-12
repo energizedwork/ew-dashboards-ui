@@ -31,17 +31,16 @@ adapterConfigTest =
 
         suppliedConfig =
             Dict.fromList
-                [ ( "lineRows", CellRange.asJsonValue [ ( 5, 1 ), ( 10, 3 ) ] )
+                [ ( "lineRows", CellRange.asJsonValue [ ( 5, 2 ), ( 10, 3 ) ] )
                 , ( "barRows", CellRange.asJsonValue [ ( 5, 4 ), ( 10, 5 ) ] )
                 , ( "xLabelsIndex", Encode.int 3 )
-                , ( "yLabelsIndicies", List.map (\y -> Encode.int y) [ 0 ] |> Encode.list )
                 ]
 
         -- functions under test!
-        ( defaultActualHeaderRow, defaultActualLineRows, defaultActualBarRows, defaultActualMaxValue, defaultActualXLabels, defaultActualYLabels ) =
+        ( defaultActualHeaderRow, defaultActualLineRows, defaultActualBarRows, defaultActualMinValue, defaultActualMaxValue, defaultActualXLabels ) =
             LineAndBarAdapter.adapt defaultConfig input
 
-        ( suppliedActualHeaderRow, suppliedActualLineRows, suppliedActualBarRows, suppliedActualMaxValue, suppliedActualXLabels, suppliedActualYLabels ) =
+        ( suppliedActualHeaderRow, suppliedActualLineRows, suppliedActualBarRows, suppliedActualMinValue, suppliedActualMaxValue, suppliedActualXLabels ) =
             LineAndBarAdapter.adapt suppliedConfig input
 
         -- expectations
@@ -50,10 +49,26 @@ adapterConfigTest =
 
         defaultLineChartRows =
             \_ ->
-                defaultActualLineRows |> Expect.equal [ TD.firstRow, TD.secondRow ]
+                defaultActualLineRows
+                    |> Expect.equal
+                        [ TD.firstRow
+                        , TD.secondRow
+                        , TD.thirdRow
+                        , TD.forthRow
+                        ]
 
         defaultBarChartRows =
-            \_ -> defaultActualBarRows |> Expect.equal [ TD.thirdRow, TD.forthRow ]
+            \_ ->
+                defaultActualBarRows
+                    |> Expect.equal
+                        [ TD.firstRow
+                        , TD.secondRow
+                        , TD.thirdRow
+                        , TD.forthRow
+                        ]
+
+        defaultMinValue =
+            \_ -> defaultActualMinValue |> Expect.equal 101
 
         defaultMaxValue =
             \_ -> defaultActualMaxValue |> Expect.equal 412
@@ -68,8 +83,7 @@ adapterConfigTest =
             \_ ->
                 suppliedActualLineRows
                     |> Expect.equal
-                        [ [ "May", "Jun", "Jul", "Aug", "Sep", "Oct" ]
-                        , [ "105", "106", "107", "108", "109", "110" ]
+                        [ [ "105", "106", "107", "108", "109", "110" ]
                         , [ "205", "206", "207", "208", "209", "210" ]
                         ]
 
@@ -81,6 +95,9 @@ adapterConfigTest =
                         , [ "405", "406", "407", "408", "409", "410" ]
                         ]
 
+        suppliedMinValue =
+            \_ -> suppliedActualMinValue |> Expect.equal 105
+
         suppliedMaxValue =
             \_ -> suppliedActualMaxValue |> Expect.equal 410
 
@@ -90,20 +107,18 @@ adapterConfigTest =
         Test.describe "LineAndBarAdapter.adapt"
             [ Test.describe "with default Config"
                 [ Test.test "headers are first row" defaultHeaders
-                , Test.test "line chart rows are first half of body rows" defaultLineChartRows
-                , Test.test "bar chart rows are second half of body rows" defaultBarChartRows
+                , Test.test "line chart rows are all body rows" defaultLineChartRows
+                , Test.test "bar chart rows are sll body rows" defaultBarChartRows
+                , Test.test "min value is extracted from body rows" defaultMinValue
                 , Test.test "max value is extracted from body rows" defaultMaxValue
                 , Test.test "x-axis labels are the first row" defaultXLabels
-                , Test.todo "first y-axis labels are the range of values from the first row of the line chart data"
-                , Test.todo "second y-axis labels are the range of values from the second row of the line chart data"
                 ]
             , Test.describe "with supplied Config"
                 [ Test.test "headers are third row" suppliedHeaders
                 , Test.test "line chart rows are as specified" suppliedLineChartRows
                 , Test.test "bar chart rows are as specified" suppliedBarChartRows
+                , Test.test "min value is extracted from body rows" suppliedMinValue
                 , Test.test "max value is extracted from body rows" suppliedMaxValue
                 , Test.test "x-axis labels are as specified" suppliedXLabels
-                , Test.todo "first y-axis labels are as specified"
-                , Test.todo "second y-axis labels are as specified"
                 ]
             ]

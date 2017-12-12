@@ -16,16 +16,17 @@ module Data.Widget
         , tagToString
         )
 
-import Data.Widget.Author as Author exposing (Author)
+import Data.DataSource as DataSource exposing (DataSource)
 import Data.Widget.Adapters.Adapter as Adapter exposing (Adapter(..))
+import Data.Widget.Adapters.TableAdapter as TableAdapter
+import Data.Widget.Author as Author exposing (Author)
 import Data.Widget.Renderer as Renderer exposing (Renderer(..))
 import Data.Widget.Table as Table exposing (Data)
-import Data.DataSource as DataSource exposing (DataSource)
 import Date exposing (Date)
 import Html exposing (Attribute, Html)
 import Json.Decode as Decode exposing (Decoder, index, int, map2, maybe)
 import Json.Decode.Extra
-import Json.Decode.Pipeline as Pipeline exposing (custom, decode, hardcoded, required, optional)
+import Json.Decode.Pipeline as Pipeline exposing (custom, decode, hardcoded, optional, required)
 import Markdown
 import UrlParser
 
@@ -87,7 +88,7 @@ init =
             [ DataSource.init ]
 
         adapter =
-            Adapter.TABLE
+            Adapter.TABLE TableAdapter.defaultConfig
 
         renderer =
             Renderer.TABLE
