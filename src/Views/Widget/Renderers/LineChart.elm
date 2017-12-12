@@ -22,8 +22,8 @@ render width height widget data =
     case widget.adapter of
         TABLE ->
             let
-                ( headerRow, bodyRows, maxValue ) =
-                    TableAdapter.adapt data
+                ( headerRow, bodyRows, minValue, maxValue, xLabels ) =
+                    TableAdapter.adapt TableAdapter.defaultConfig data
 
                 dataAsHeaderValueTuples =
                     List.map (List.map2 (,) headerRow) bodyRows

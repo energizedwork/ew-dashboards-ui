@@ -87,7 +87,7 @@ adapterConfigTest =
         suppliedXLabels =
             suppliedHeaders
     in
-        Test.describe "HeatMapAdapter.adapt"
+        Test.describe "LineAndBarAdapter.adapt"
             [ Test.describe "with default Config"
                 [ Test.test "headers are first row" defaultHeaders
                 , Test.test "line chart rows are first half of body rows" defaultLineChartRows
