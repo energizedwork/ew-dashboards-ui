@@ -35,7 +35,7 @@ run width height widget data =
                         LineChart.render width height widget data
 
                     BAR_CHART ->
-                        BarChart.render widget data
+                        BarChart.render width height widget data
 
                     HEAT_MAP ->
                         HeatMap.render width height widget data (not updatable)
