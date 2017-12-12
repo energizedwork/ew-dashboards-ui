@@ -1,9 +1,10 @@
 module Views.Widget.Renderers.Metric exposing (render)
 
-import Data.Widget as Widget exposing (Widget, Body)
-import Data.Widget.Table as Table exposing (Data)
+import Data.DataSource as DataSource exposing (toChannel)
+import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.MetricAdapter as MetricAdapter
+import Data.Widget.Table as Table exposing (Data)
 import Html exposing (..)
 import Html.Attributes exposing (class, title)
 
@@ -31,8 +32,15 @@ render width height widget data =
                     MetricAdapter.adapt config data
             in
                 div
-                    [ class "col-md-12 widget container" ]
-                    [ h3 [ title widget.description, class "heading" ] [ Html.text widget.name ]
+                    [ class "col-md-3 widget container" ]
+                    [ h3
+                        [ title <|
+                            widget.description
+                                ++ " from "
+                                ++ (DataSource.toChannel <| Widget.primaryDataSource widget)
+                        , class "heading"
+                        ]
+                        [ Html.text widget.name ]
                     , viewMetric "Actual" source
                     , viewMetric "Target" target
                     ]
