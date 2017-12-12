@@ -15,7 +15,6 @@ type alias Definition =
 
 type Adapter
     = TABLE AdapterConfig.Config
-    | BAR_CHART
     | HEAT_MAP
     | METRIC AdapterConfig.Config
 
@@ -31,8 +30,15 @@ decoder =
                             TABLE
                                 (definition.config |> Maybe.withDefault TableAdapter.defaultConfig)
 
+                    "LINE_CHART" ->
+                        Decode.succeed <|
+                            TABLE
+                                (definition.config |> Maybe.withDefault TableAdapter.defaultConfig)
+
                     "BAR_CHART" ->
-                        Decode.succeed BAR_CHART
+                        Decode.succeed <|
+                            TABLE
+                                (definition.config |> Maybe.withDefault TableAdapter.defaultConfig)
 
                     "HEAT_MAP" ->
                         Decode.succeed HEAT_MAP
