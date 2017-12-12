@@ -23,7 +23,9 @@
                     "uuid": "451a5190-d446-43d5-90b2-e3f135128093",
                     "name": "sheets"
                 }],
-                "adapter": "HEAT_MAP",
+                "adapter": {
+                  "type_": "HEAT_MAP"
+                },
                 "renderer": "HEAT_MAP",
                 "createdAt": "2017-10-23T16:03:55.948Z",
                 "updatedAt": "2017-10-23T16:03:55.948Z",
@@ -48,7 +50,9 @@
                     "uuid": "bc590718-f045-4176-ae04-0a96b93bbef2",
                     "name": "sheets"
                 }],
-                "adapter": "TABLE",
+                "adapter": {
+                  "type_": "LINE_CHART"
+                },
                 "renderer": "LINE_CHART",
                 "createdAt": "2017-10-23T16:03:55.948Z",
                 "updatedAt": "2017-10-23T16:03:55.948Z",
@@ -73,7 +77,10 @@
                     "uuid": "451a5190-d446-43d5-90b2-e3f135128093",
                     "name": "sheets"
                 }],
-                "adapter": "TABLE",
+                "adapter": {
+                  "type_": "TABLE"
+                },
+
                 "renderer": "TABLE",
                 "createdAt": "2017-10-23T16:03:55.948Z",
                 "updatedAt": "2017-10-23T16:03:55.948Z",
