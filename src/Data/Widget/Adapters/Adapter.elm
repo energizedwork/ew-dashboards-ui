@@ -2,8 +2,9 @@ module Data.Widget.Adapters.Adapter exposing (Adapter(..), decoder)
 
 import Data.Widget.Adapters.Config as AdapterConfig
 import Data.Widget.Adapters.MetricAdapter as MetricAdapter
-import Json.Decode as Decode exposing (Decoder, maybe, dict, string, Value)
-import Json.Decode.Pipeline as Pipeline exposing (decode, required, optional)
+import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (defaultConfig)
+import Json.Decode as Decode exposing (Decoder, Value, dict, maybe, string)
+import Json.Decode.Pipeline as Pipeline exposing (decode, optional, required)
 
 
 type alias Definition =
@@ -13,8 +14,7 @@ type alias Definition =
 
 
 type Adapter
-    = TABLE
-    | BAR_CHART
+    = TABLE AdapterConfig.Config
     | HEAT_MAP
     | METRIC AdapterConfig.Config
 
@@ -26,16 +26,27 @@ decoder =
             (\definition ->
                 case definition.type_ of
                     "TABLE" ->
-                        Decode.succeed TABLE
+                        Decode.succeed <|
+                            TABLE
+                                (definition.config |> Maybe.withDefault TableAdapter.defaultConfig)
+
+                    "LINE_CHART" ->
+                        Decode.succeed <|
+                            TABLE
+                                (definition.config |> Maybe.withDefault TableAdapter.defaultConfig)
 
                     "BAR_CHART" ->
-                        Decode.succeed BAR_CHART
+                        Decode.succeed <|
+                            TABLE
+                                (definition.config |> Maybe.withDefault TableAdapter.defaultConfig)
 
                     "HEAT_MAP" ->
                         Decode.succeed HEAT_MAP
 
                     "METRIC" ->
-                        Decode.succeed <| METRIC (definition.config |> Maybe.withDefault MetricAdapter.defaultConfig)
+                        Decode.succeed <|
+                            METRIC
+                                (definition.config |> Maybe.withDefault MetricAdapter.defaultConfig)
 
                     somethingElse ->
                         Decode.fail <| "Unknown adapter: " ++ somethingElse

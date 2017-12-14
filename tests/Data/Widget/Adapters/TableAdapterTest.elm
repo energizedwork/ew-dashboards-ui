@@ -1,9 +1,9 @@
-module Data.Widget.Adapters.LineAndBarAdapterTest exposing (..)
+module Data.Widget.Adapters.TableAdapterTest exposing (..)
 
 import Data.Widget.Adapters.AdapterTestData as TD
 import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition, asJsonValue, decoder)
 import Data.Widget.Adapters.CellRange as CellRange exposing (asJsonValue)
-import Data.Widget.Adapters.LineAndBarAdapter as LineAndBarAdapter exposing (adapt)
+import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (adapt)
 import Data.Widget.Table as Table exposing (Data)
 import Dict exposing (Dict)
 import Expect exposing (Expectation)
@@ -27,39 +27,28 @@ adapterConfigTest =
                 ]
 
         defaultConfig =
-            LineAndBarAdapter.defaultConfig
+            TableAdapter.defaultConfig
 
         suppliedConfig =
             Dict.fromList
-                [ ( "lineRows", CellRange.asJsonValue [ ( 5, 2 ), ( 10, 3 ) ] )
-                , ( "barRows", CellRange.asJsonValue [ ( 5, 4 ), ( 10, 5 ) ] )
+                [ ( "bodyRows", CellRange.asJsonValue [ ( 5, 2 ), ( 10, 3 ) ] )
                 , ( "xLabelsIndex", Encode.int 3 )
                 ]
 
         -- functions under test!
-        ( defaultActualHeaderRow, defaultActualLineRows, defaultActualBarRows, defaultActualMinValue, defaultActualMaxValue, defaultActualXLabels ) =
-            LineAndBarAdapter.adapt defaultConfig input
+        ( defaultActualHeaderRow, defaultActualBodyRows, defaultActualMinValue, defaultActualMaxValue, defaultActualXLabels ) =
+            TableAdapter.adapt defaultConfig input
 
-        ( suppliedActualHeaderRow, suppliedActualLineRows, suppliedActualBarRows, suppliedActualMinValue, suppliedActualMaxValue, suppliedActualXLabels ) =
-            LineAndBarAdapter.adapt suppliedConfig input
+        ( suppliedActualHeaderRow, suppliedActualBodyRows, suppliedActualMinValue, suppliedActualMaxValue, suppliedActualXLabels ) =
+            TableAdapter.adapt suppliedConfig input
 
         -- expectations
         defaultHeaders =
             \_ -> defaultActualHeaderRow |> Expect.equal TD.headerRow
 
-        defaultLineChartRows =
+        defaultBodyRows =
             \_ ->
-                defaultActualLineRows
-                    |> Expect.equal
-                        [ TD.firstRow
-                        , TD.secondRow
-                        , TD.thirdRow
-                        , TD.forthRow
-                        ]
-
-        defaultBarChartRows =
-            \_ ->
-                defaultActualBarRows
+                defaultActualBodyRows
                     |> Expect.equal
                         [ TD.firstRow
                         , TD.secondRow
@@ -81,42 +70,32 @@ adapterConfigTest =
 
         suppliedLineChartRows =
             \_ ->
-                suppliedActualLineRows
+                suppliedActualBodyRows
                     |> Expect.equal
                         [ [ "105", "106", "107", "108", "109", "110" ]
                         , [ "205", "206", "207", "208", "209", "210" ]
-                        ]
-
-        suppliedBarChartRows =
-            \_ ->
-                suppliedActualBarRows
-                    |> Expect.equal
-                        [ [ "305", "306", "307", "308", "309", "310" ]
-                        , [ "405", "406", "407", "408", "409", "410" ]
                         ]
 
         suppliedMinValue =
             \_ -> suppliedActualMinValue |> Expect.equal 105
 
         suppliedMaxValue =
-            \_ -> suppliedActualMaxValue |> Expect.equal 410
+            \_ -> suppliedActualMaxValue |> Expect.equal 210
 
         suppliedXLabels =
             suppliedHeaders
     in
-        Test.describe "LineAndBarAdapter.adapt"
+        Test.describe "TableAdapter.adapt"
             [ Test.describe "with default Config"
                 [ Test.test "headers are first row" defaultHeaders
-                , Test.test "line chart rows are all body rows" defaultLineChartRows
-                , Test.test "bar chart rows are sll body rows" defaultBarChartRows
+                , Test.test "body rows are remain rows, excluding the header row" defaultBodyRows
                 , Test.test "min value is extracted from body rows" defaultMinValue
                 , Test.test "max value is extracted from body rows" defaultMaxValue
                 , Test.test "x-axis labels are the first row" defaultXLabels
                 ]
             , Test.describe "with supplied Config"
                 [ Test.test "headers are third row" suppliedHeaders
-                , Test.test "line chart rows are as specified" suppliedLineChartRows
-                , Test.test "bar chart rows are as specified" suppliedBarChartRows
+                , Test.test "body chart rows are as specified" suppliedLineChartRows
                 , Test.test "min value is extracted from body rows" suppliedMinValue
                 , Test.test "max value is extracted from body rows" suppliedMaxValue
                 , Test.test "x-axis labels are as specified" suppliedXLabels

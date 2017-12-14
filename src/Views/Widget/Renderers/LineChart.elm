@@ -20,10 +20,10 @@ import Visualization.Shape as Shape
 render : Int -> Int -> Widget Body -> Table.Data -> Html msg
 render width height widget data =
     case widget.adapter of
-        TABLE ->
+        TABLE optionalConfig ->
             let
-                ( headerRow, bodyRows, maxValue ) =
-                    TableAdapter.adapt data
+                ( headerRow, bodyRows, minValue, maxValue, xLabels ) =
+                    TableAdapter.adapt optionalConfig data
 
                 dataAsHeaderValueTuples =
                     List.map (List.map2 (,) headerRow) bodyRows
