@@ -1,7 +1,6 @@
-module Data.Widget.Adapters.CellRange exposing (CellRange, asJsonValue, decoder, extractRows)
+module Data.Widget.Adapters.CellRange exposing (CellRange, encode, decoder, extractRows)
 
-import Array exposing (..)
-import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition, asJsonValue, decoder)
+import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder)
 import Data.Widget.Table exposing (..)
 import Json.Decode as Decode exposing (Decoder, Value, index, int, map2)
 import Json.Encode as Encode exposing (int)
@@ -12,44 +11,46 @@ import List.Extra exposing (..)
 
 
 type alias CellRange =
-    List CellPosition
+    { start : CellPosition
+    , end : CellPosition
+    }
 
 
 decoder : Decoder CellRange
 decoder =
-    Decode.list CellPosition.decoder
+    Decode.map2 CellRange
+        (Decode.field "start" CellPosition.decoder)
+        (Decode.field "end" CellPosition.decoder)
 
 
-asJsonValue : CellRange -> Decode.Value
-asJsonValue cellRanges =
-    List.map CellPosition.asJsonValue cellRanges
-        |> Encode.list
+encode : CellRange -> Decode.Value
+encode cellRange =
+    Encode.object
+        [ ( "start", CellPosition.encode cellRange.start )
+        , ( "end", CellPosition.encode cellRange.end )
+        ]
 
 
 extractRows : Data -> CellRange -> List Row
 extractRows data range =
     let
         lowerBound =
-            (Array.get 0 (Array.fromList range)
-                |> Maybe.withDefault ( 1, 1 )
-            )
+            range.start
 
         upperBound =
-            (Array.get 1 (Array.fromList range)
-                |> Maybe.withDefault ( 3, 2 )
-            )
+            range.end
 
         cellStart =
-            Tuple.first lowerBound
+            CellPosition.x lowerBound
 
         cellEnd =
-            Tuple.first upperBound
+            CellPosition.x upperBound
 
         rowStart =
-            ((Tuple.second lowerBound))
+            CellPosition.y lowerBound
 
         rowEnd =
-            ((Tuple.second upperBound))
+            CellPosition.y upperBound
 
         rowRange =
             (List.range rowStart rowEnd)
@@ -76,3 +77,9 @@ extractRows data range =
                 rowRange
     in
         extractedRows
+
+
+
+-- firstRow : Data -> CellRange
+-- firstRow data =
+--     CellRange [ CellPosition ( 1, 1 ), CellPosition ( 1, 1 ) ]

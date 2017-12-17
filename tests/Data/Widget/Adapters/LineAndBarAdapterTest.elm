@@ -1,8 +1,8 @@
 module Data.Widget.Adapters.LineAndBarAdapterTest exposing (..)
 
 import Data.Widget.Adapters.AdapterTestData as TD
-import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition, asJsonValue, decoder)
-import Data.Widget.Adapters.CellRange as CellRange exposing (asJsonValue)
+import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder)
+import Data.Widget.Adapters.CellRange as CellRange exposing (CellRange, encode)
 import Data.Widget.Adapters.LineAndBarAdapter as LineAndBarAdapter exposing (adapt)
 import Data.Widget.Table as Table exposing (Data)
 import Dict exposing (Dict)
@@ -31,8 +31,18 @@ adapterConfigTest =
 
         suppliedConfig =
             Dict.fromList
-                [ ( "lineRows", CellRange.asJsonValue [ ( 5, 2 ), ( 10, 3 ) ] )
-                , ( "barRows", CellRange.asJsonValue [ ( 5, 4 ), ( 10, 5 ) ] )
+                [ ( "lineRows"
+                  , CellRange.encode <|
+                        CellRange
+                            (CellPosition ( 5, 2 ))
+                            (CellPosition ( 10, 3 ))
+                  )
+                , ( "barRows"
+                  , CellRange.encode <|
+                        CellRange
+                            (CellPosition ( 5, 4 ))
+                            (CellPosition ( 10, 5 ))
+                  )
                 , ( "xLabelsIndex", Encode.int 3 )
                 ]
 

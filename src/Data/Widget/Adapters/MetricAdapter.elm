@@ -1,6 +1,6 @@
 module Data.Widget.Adapters.MetricAdapter exposing (defaultConfig, adapt)
 
-import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition, asJsonValue, decoder)
+import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder)
 import Data.Widget.Adapters.Config as AdapterConfig
 import Data.Widget.Table as Table exposing (Data)
 import Array
@@ -10,25 +10,25 @@ import Json.Decode as Json exposing (Value)
 
 sourceCellPosition : CellPosition
 sourceCellPosition =
-    ( 0, 0 )
+    CellPosition ( 0, 0 )
 
 
 targetCellPosition : CellPosition
 targetCellPosition =
-    ( 0, 1 )
+    CellPosition ( 0, 1 )
 
 
 defaultConfig : Dict String Json.Value
 defaultConfig =
     Dict.fromList
-        [ ( "sourceCell", CellPosition.asJsonValue sourceCellPosition )
-        , ( "targetCell", CellPosition.asJsonValue targetCellPosition )
+        [ ( "sourceCell", CellPosition.encode sourceCellPosition )
+        , ( "targetCell", CellPosition.encode targetCellPosition )
         ]
 
 
 rowForCell : Array.Array (List String) -> CellPosition -> List String
-rowForCell rows cellConfig =
-    case Array.get (Tuple.first cellConfig) rows of
+rowForCell rows cellPosition =
+    case Array.get (CellPosition.x cellPosition) rows of
         Just row ->
             row
 
@@ -37,12 +37,12 @@ rowForCell rows cellConfig =
 
 
 valueForCell : Array.Array (List String) -> CellPosition -> String
-valueForCell rows cell =
+valueForCell rows cellPosition =
     let
         row =
-            rowForCell rows cell
+            rowForCell rows cellPosition
     in
-        case Array.get (Tuple.second cell) (Array.fromList row) of
+        case Array.get (CellPosition.y cellPosition) (Array.fromList row) of
             Just value ->
                 value
 
@@ -58,13 +58,13 @@ adapt optionalConfig data =
 
         sourceCell =
             Dict.get "sourceCell" optionalConfig
-                |> Maybe.withDefault (CellPosition.asJsonValue sourceCellPosition)
+                |> Maybe.withDefault (CellPosition.encode sourceCellPosition)
                 |> Json.decodeValue CellPosition.decoder
                 |> Result.withDefault sourceCellPosition
 
         targetCell =
             Dict.get "targetCell" optionalConfig
-                |> Maybe.withDefault (CellPosition.asJsonValue targetCellPosition)
+                |> Maybe.withDefault (CellPosition.encode targetCellPosition)
                 |> Json.decodeValue CellPosition.decoder
                 |> Result.withDefault targetCellPosition
 

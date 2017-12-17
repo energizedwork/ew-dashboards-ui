@@ -1,8 +1,9 @@
 module Data.Widget.Adapters.TableAdapter exposing (defaultConfig, adapt)
 
+import Data.Widget.Adapters.CellPosition exposing (CellPosition(..))
 import Data.Widget.Adapters.CellRange as CellRange exposing (..)
 import Data.Widget.Adapters.Config as AdapterConfig
-import Data.Widget.Table as Table exposing (Data, Row, Cell)
+import Data.Widget.Table as Table exposing (Cell, Data, Row)
 import Dict exposing (Dict)
 import Json.Decode as Json exposing (Value)
 import Json.Encode as Encode exposing (Value)
@@ -18,13 +19,24 @@ xLabelsIndex =
 -- Possible values:
 -- "bodyRows"
 -- "xLabelsIndex"
+-- TODO Change to use CellRange, not an index
 
 
 defaultConfig : Dict String Json.Value
 defaultConfig =
     Dict.fromList
-        [ ( "xLabelsIndex", Encode.int xLabelsIndex )
-        ]
+        [ ( "xLabelsIndex", Encode.int xLabelsIndex ) ]
+
+
+
+-- Dict.fromList
+--     [ ( "xLabels"
+--       , CellRange.encode <|
+--             CellRange
+--                 (CellPosition ( 1, 1 ))
+--                 (CellPosition ( 10, 1 ))
+--       )
+--     ]
 
 
 adapt : AdapterConfig.Config -> Data -> ( Row, List Row, Float, Float, List String )
@@ -38,6 +50,7 @@ adapt optionalConfig data =
             )
                 - 1
 
+        -- TODO should be CellRange.extractRows data headerRange
         xLabels =
             case List.Extra.getAt actualXLabelsIndex data.rows of
                 Just xLabel ->
@@ -56,7 +69,11 @@ adapt optionalConfig data =
                         range =
                             bodyRows
                                 |> Json.decodeValue CellRange.decoder
-                                |> Result.withDefault [ ( 1, 1 ), ( 10, 2 ) ]
+                                |> Result.withDefault
+                                    (CellRange
+                                        (CellPosition ( 1, 1 ))
+                                        (CellPosition ( 10, 2 ))
+                                    )
                     in
                         CellRange.extractRows data range
 

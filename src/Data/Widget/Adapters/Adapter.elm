@@ -57,4 +57,8 @@ definitionDecoder : Decoder Definition
 definitionDecoder =
     decode Definition
         |> required "type_" Decode.string
-        |> optional "config" (maybe (Decode.dict Decode.value)) Nothing
+        |> optional "config"
+            (maybe
+                (Decode.dict Decode.value)
+            )
+            Nothing

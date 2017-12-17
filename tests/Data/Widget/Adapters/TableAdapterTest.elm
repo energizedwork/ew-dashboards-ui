@@ -1,8 +1,8 @@
 module Data.Widget.Adapters.TableAdapterTest exposing (..)
 
 import Data.Widget.Adapters.AdapterTestData as TD
-import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition, asJsonValue, decoder)
-import Data.Widget.Adapters.CellRange as CellRange exposing (asJsonValue)
+import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder)
+import Data.Widget.Adapters.CellRange as CellRange exposing (CellRange, encode)
 import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (adapt)
 import Data.Widget.Table as Table exposing (Data)
 import Dict exposing (Dict)
@@ -31,7 +31,12 @@ adapterConfigTest =
 
         suppliedConfig =
             Dict.fromList
-                [ ( "bodyRows", CellRange.asJsonValue [ ( 5, 2 ), ( 10, 3 ) ] )
+                [ ( "bodyRows"
+                  , CellRange.encode <|
+                        CellRange
+                            (CellPosition ( 5, 2 ))
+                            (CellPosition ( 10, 3 ))
+                  )
                 , ( "xLabelsIndex", Encode.int 3 )
                 ]
 
@@ -66,8 +71,13 @@ adapterConfigTest =
             \_ -> defaultActualXLabels |> Expect.equal TD.headerRow
 
         suppliedHeaders =
-            \_ -> suppliedActualHeaderRow |> Expect.equal TD.secondRow
+            \_ ->
+                suppliedActualHeaderRow |> Expect.equal TD.secondRow
 
+        -- TODO incorrect expectation above, correct below!
+        -- suppliedActualHeaderRow
+        --     |> Expect.equal
+        --         [ "205", "206", "207", "208", "209", "210" ]
         suppliedLineChartRows =
             \_ ->
                 suppliedActualBodyRows
@@ -95,7 +105,7 @@ adapterConfigTest =
                 ]
             , Test.describe "with supplied Config"
                 [ Test.test "headers are third row" suppliedHeaders
-                , Test.test "body chart rows are as specified" suppliedLineChartRows
+                , Test.test "body rows are as specified" suppliedLineChartRows
                 , Test.test "min value is extracted from body rows" suppliedMinValue
                 , Test.test "max value is extracted from body rows" suppliedMaxValue
                 , Test.test "x-axis labels are as specified" suppliedXLabels

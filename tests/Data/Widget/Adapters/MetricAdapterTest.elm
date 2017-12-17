@@ -27,10 +27,10 @@ adapterConfigTest =
             MetricAdapter.defaultConfig
 
         suppliedConfigSource =
-            CellPosition.asJsonValue ( 1, 1 )
+            CellPosition.encode <| CellPosition ( 1, 1 )
 
         suppliedConfigTarget =
-            CellPosition.asJsonValue ( 2, 1 )
+            CellPosition.encode <| CellPosition ( 2, 1 )
 
         suppliedConfig =
             Dict.fromList

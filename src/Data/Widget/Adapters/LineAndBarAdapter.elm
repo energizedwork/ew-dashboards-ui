@@ -1,7 +1,7 @@
 module Data.Widget.Adapters.LineAndBarAdapter exposing (defaultConfig, adapt)
 
 import Array
-import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition, asJsonValue, decoder)
+import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition, encode, decoder)
 import Data.Widget.Adapters.CellRange as CellRange exposing (..)
 import Data.Widget.Adapters.Config as AdapterConfig
 import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (..)
