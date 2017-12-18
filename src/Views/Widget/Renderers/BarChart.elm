@@ -1,4 +1,4 @@
-module Views.Widget.Renderers.BarChart exposing (render)
+module Views.Widget.Renderers.BarChart exposing (render, renderColumn, renderColumns, renderXAxis, renderYAxis)
 
 import Array exposing (..)
 import Color
@@ -128,17 +128,6 @@ view width height data maxValue =
 
         totalRows =
             List.length indexedData
-
-        renderColumns num =
-            List.map
-                (\( index, row ) ->
-                    renderColumn index totalRows row
-                )
-                indexedData
-
-        renderColumn index totalRows row =
-            g [ transform ("translate(" ++ toString padding ++ ", " ++ toString padding ++ ")"), class "series" ] <|
-                List.map (column height index totalRows (getBarColour index) (xScale width row) maxValue) row
     in
         svg [ Svg.Attributes.width (toString width ++ "px"), Svg.Attributes.height (toString height ++ "px") ]
             (List.concat
@@ -148,11 +137,49 @@ view width height data maxValue =
                             .column:hover rect { opacity: 0.7; }
                             .column:hover text { display: inline; z-index: 9999; }
                           """ ]
-                  , g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (toFloat height - padding) ++ ")") ]
-                        [ xAxis width firstDataTuple ]
-                  , g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString padding ++ ")") ]
-                        [ (yAxis height maxValue) ]
+                  , renderXAxis width height firstDataTuple
+                  , renderYAxis width height maxValue
                   ]
-                , renderColumns <| List.length data
+                , renderColumns width height totalRows indexedData maxValue
                 ]
             )
+
+
+renderColumns :
+    Int
+    -> Int
+    -> Int
+    -> List ( Int, List ( String, String ) )
+    -> Float
+    -> List (Svg msg)
+renderColumns width height totalRows indexedData maxValue =
+    List.map
+        (\( index, row ) ->
+            renderColumn width height index totalRows row maxValue
+        )
+        indexedData
+
+
+renderColumn :
+    Int
+    -> Int
+    -> Int
+    -> Int
+    -> List ( String, String )
+    -> Float
+    -> Svg msg
+renderColumn width height index totalRows row maxValue =
+    g [ transform ("translate(" ++ toString padding ++ ", " ++ toString padding ++ ")"), class "series" ] <|
+        List.map (column height index totalRows (getBarColour index) (xScale width row) maxValue) row
+
+
+renderXAxis : Int -> Int -> List ( Cell, Cell ) -> Svg msg
+renderXAxis width height firstDataTuple =
+    g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (toFloat height - padding) ++ ")") ]
+        [ xAxis width firstDataTuple ]
+
+
+renderYAxis : Int -> Int -> Float -> Svg msg
+renderYAxis width height maxValue =
+    g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString padding ++ ")") ]
+        [ (yAxis height maxValue) ]

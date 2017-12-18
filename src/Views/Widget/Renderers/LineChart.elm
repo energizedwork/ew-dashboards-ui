@@ -1,4 +1,4 @@
-module Views.Widget.Renderers.LineChart exposing (render)
+module Views.Widget.Renderers.LineChart exposing (render, renderLines, renderLine, renderXAxis, renderYAxis)
 
 import Array exposing (..)
 import Color
@@ -64,65 +64,103 @@ view width height data maxValue =
         indexedData =
             Array.toIndexedList (Array.fromList data)
 
-        xScale : BandScale String
-        xScale =
-            Scale.band { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 } (List.map Tuple.first firstDataTuple) ( 0, toFloat width - 2 * padding )
-
-        yScale : ContinuousScale
-        yScale =
-            Scale.linear ( 0, maxValue ) ( (toFloat height) - 2 * padding, 0 )
-
         opts : Axis.Options a
         opts =
             Axis.defaultOptions
 
         xAxis : Svg msg
         xAxis =
-            Axis.axis { opts | orientation = Axis.Bottom, tickFormat = Just Utils.formatStringTick, tickCount = List.length firstDataTuple } (Scale.toRenderable xScale)
+            Axis.axis
+                { opts
+                    | orientation = Axis.Bottom
+                    , tickFormat = Just Utils.formatStringTick
+                    , tickCount = List.length firstDataTuple
+                }
+                (Scale.toRenderable <| xScale width firstDataTuple)
 
         yAxis : Svg msg
         yAxis =
-            Axis.axis { opts | orientation = Axis.Left, tickCount = 5 } yScale
-
-        areaGenerator : ( String, String ) -> Maybe ( ( Float, Float ), ( Float, Float ) )
-        areaGenerator ( x, y ) =
-            Just ( ( Scale.convert xScale x, Tuple.first (Scale.rangeExtent yScale) ), ( Scale.convert xScale x, Scale.convert yScale (String.toFloat y |> Result.withDefault 0) ) )
-
-        lineGenerator : ( String, String ) -> Maybe ( Float, Float )
-        lineGenerator ( x, y ) =
-            Just ( Scale.convert xScale x, Scale.convert yScale (String.toFloat y |> Result.withDefault 0) )
-
-        generateAreaData : List ( String, String ) -> String
-        generateAreaData dataTuple =
-            List.map areaGenerator dataTuple
-                |> Shape.area Shape.linearCurve
-
-        generateLineData : List ( String, String ) -> String
-        generateLineData dataTuple =
-            List.map lineGenerator dataTuple
-                |> Shape.line Shape.linearCurve
-
-        renderLine colour lineData =
-            g [ transform ("translate(78" ++ ", " ++ toString padding ++ ")"), class "series" ]
-                [ Svg.path [ d lineData, stroke colour, strokeWidth "3px", fill "none" ] []
-                  -- , Svg.path [ d area, stroke "none", strokeWidth "3px", fill "rgba(255, 0, 0, 0.54)" ] []
-                ]
-
-        renderLines =
-            List.map
-                (\( index, dataTuple ) ->
-                    generateLineData dataTuple
-                        |> renderLine (getLineColour (index))
-                )
-                indexedData
+            Axis.axis { opts | orientation = Axis.Left, tickCount = 5 }
+                (yScale height maxValue)
     in
         svg [ Svg.Attributes.width (toString width ++ "px"), Svg.Attributes.height (toString height ++ "px") ]
             (List.concat
-                [ [ g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (toFloat height - padding) ++ ")") ]
-                        [ xAxis ]
-                  , g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString padding ++ ")") ]
-                        [ yAxis ]
+                [ [ renderXAxis width height xAxis
+                  , renderYAxis width height yAxis
                   ]
-                , renderLines
+                , renderLines width height maxValue firstDataTuple indexedData
                 ]
             )
+
+
+renderLines :
+    Int
+    -> Int
+    -> Float
+    -> List ( Cell, Cell )
+    -> List ( Int, List ( Cell, Cell ) )
+    -> List (Svg msg)
+renderLines width height maxValue firstDataTuple indexedData =
+    List.map
+        (\( index, dataTuple ) ->
+            generateLineData width height maxValue firstDataTuple dataTuple
+                |> renderLine (getLineColour (index))
+        )
+        indexedData
+
+
+renderLine : String -> String -> Svg msg
+renderLine colour lineData =
+    g [ transform ("translate(78" ++ ", " ++ toString padding ++ ")"), class "series" ]
+        [ Svg.path [ d lineData, stroke colour, strokeWidth "3px", fill "none" ] []
+        ]
+
+
+renderXAxis : a -> Int -> Svg msg -> Svg msg
+renderXAxis width height xAxis =
+    g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (toFloat height - padding) ++ ")") ]
+        [ xAxis ]
+
+
+renderYAxis : a -> b -> Svg msg -> Svg msg
+renderYAxis width height yAxis =
+    g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString padding ++ ")") ]
+        [ yAxis ]
+
+
+generateLineData :
+    Int
+    -> Int
+    -> Float
+    -> List ( Cell, Cell )
+    -> List ( Cell, Cell )
+    -> String
+generateLineData width height maxValue firstDataTuple dataTuple =
+    List.map (lineGenerator width height maxValue firstDataTuple) dataTuple
+        |> Shape.line Shape.linearCurve
+
+
+lineGenerator :
+    Int
+    -> Int
+    -> Float
+    -> List ( Cell, Cell )
+    -> ( String, String )
+    -> Maybe ( Float, Float )
+lineGenerator width height maxValue firstDataTuple ( x, y ) =
+    Just
+        ( Scale.convert (xScale width firstDataTuple) x
+        , Scale.convert (yScale height maxValue) (String.toFloat y |> Result.withDefault 0)
+        )
+
+
+xScale : Int -> List ( a1, a2 ) -> BandScale a1
+xScale width firstDataTuple =
+    Scale.band { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 }
+        (List.map Tuple.first firstDataTuple)
+        ( 0, toFloat width - 2 * padding )
+
+
+yScale : Int -> Float -> ContinuousScale
+yScale height maxValue =
+    Scale.linear ( 0, maxValue ) ( (toFloat height) - 2 * padding, 0 )
