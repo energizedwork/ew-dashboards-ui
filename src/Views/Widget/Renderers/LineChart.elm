@@ -1,4 +1,4 @@
-module Views.Widget.Renderers.LineChart exposing (render, renderLines, renderLine, renderXAxis, renderYAxis)
+module Views.Widget.Renderers.LineChart exposing (render, renderLines, renderLine, renderXAxis, renderYAxis, xScale, yScale)
 
 import Array exposing (..)
 import Color
@@ -64,29 +64,19 @@ view width height data maxValue =
         indexedData =
             Array.toIndexedList (Array.fromList data)
 
-        opts : Axis.Options a
-        opts =
+        numTicks =
+            List.length firstDataTuple
+
+        defaultOptions =
             Axis.defaultOptions
 
-        xAxis : Svg msg
-        xAxis =
-            Axis.axis
-                { opts
-                    | orientation = Axis.Bottom
-                    , tickFormat = Just Utils.formatStringTick
-                    , tickCount = List.length firstDataTuple
-                }
-                (Scale.toRenderable <| xScale width firstDataTuple)
-
-        yAxis : Svg msg
-        yAxis =
-            Axis.axis { opts | orientation = Axis.Left, tickCount = 5 }
-                (yScale height maxValue)
+        opts =
+            { defaultOptions | orientation = Axis.Left, tickCount = 5 }
     in
         svg [ Svg.Attributes.width (toString width ++ "px"), Svg.Attributes.height (toString height ++ "px") ]
             (List.concat
-                [ [ renderXAxis width height xAxis
-                  , renderYAxis width height yAxis
+                [ [ renderXAxis width height numTicks (xScale width firstDataTuple)
+                  , renderYAxis width height (yScale height maxValue) opts
                   ]
                 , renderLines width height maxValue firstDataTuple indexedData
                 ]
@@ -116,16 +106,65 @@ renderLine colour lineData =
         ]
 
 
-renderXAxis : a -> Int -> Svg msg -> Svg msg
-renderXAxis width height xAxis =
-    g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (toFloat height - padding) ++ ")") ]
-        [ xAxis ]
+
+-- TODO somethings up with the type of this scale, tho it seems to work without type defs :/
+-- renderXAxis : Int -> Int -> Int -> BandScale a1 -> Svg msg
 
 
-renderYAxis : a -> b -> Svg msg -> Svg msg
-renderYAxis width height yAxis =
-    g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString padding ++ ")") ]
-        [ yAxis ]
+renderXAxis width height numTicks bandScale =
+    let
+        opts =
+            Axis.defaultOptions
+
+        xAxis : Svg msg
+        xAxis =
+            Axis.axis
+                { opts
+                    | orientation = Axis.Bottom
+                    , tickFormat = Just Utils.formatStringTick
+                    , tickCount = numTicks
+                }
+                (Scale.toRenderable <| bandScale)
+    in
+        g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (toFloat height - padding) ++ ")") ]
+            [ xAxis ]
+
+
+
+-- TODO somethings up with the type of this scale, tho it seems to work without type defs :/
+-- renderYAxis : Int -> Int -> Scale.ContinuousScale -> Axis.Options a -> Svg msg
+
+
+renderYAxis width height continuousScale opts =
+    let
+        yAxis : Svg msg
+        yAxis =
+            Axis.axis opts continuousScale
+
+        xTranslate =
+            case opts.orientation of
+                Axis.Left ->
+                    floor <| padding - 1
+
+                Axis.Right ->
+                    width - (floor (padding) + 1)
+
+                Axis.Top ->
+                    floor <| padding - 1
+
+                Axis.Bottom ->
+                    floor <| padding - 1
+    in
+        g
+            [ transform
+                ("translate("
+                    ++ toString (xTranslate)
+                    ++ ", "
+                    ++ toString padding
+                    ++ ")"
+                )
+            ]
+            [ yAxis ]
 
 
 generateLineData :

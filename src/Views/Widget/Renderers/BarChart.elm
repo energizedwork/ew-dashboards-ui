@@ -140,7 +140,7 @@ view width height data maxValue =
                   , renderXAxis width height firstDataTuple
                   , renderYAxis width height maxValue
                   ]
-                , renderColumns width height totalRows indexedData maxValue
+                , renderColumns width height maxValue totalRows indexedData
                 ]
             )
 
@@ -148,11 +148,11 @@ view width height data maxValue =
 renderColumns :
     Int
     -> Int
+    -> Float
     -> Int
     -> List ( Int, List ( String, String ) )
-    -> Float
     -> List (Svg msg)
-renderColumns width height totalRows indexedData maxValue =
+renderColumns width height maxValue totalRows indexedData =
     List.map
         (\( index, row ) ->
             renderColumn width height index totalRows row maxValue
