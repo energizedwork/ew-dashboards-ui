@@ -161,9 +161,7 @@ decoderTest =
                                 (CellPosition ( 20, 4 ))
                         )
     in
-        Test.describe "CellRange"
-            [ Test.test "decoder" runDecode
-            ]
+        Test.test "CellRange.decoder" runDecode
 
 
 encoderTest : Test
@@ -179,6 +177,44 @@ encoderTest =
                 (toString <| CellRange.encode input)
                     |> Expect.equal "{ start = { 0 = 3, 1 = 3 }, end = { 0 = 10, 1 = 4 } }"
     in
-        Test.describe "CellRange encode"
-            [ Test.test "encode" runEncode
+        Test.test "CellRange.encode" runEncode
+
+
+defaultRangesTest : Test
+defaultRangesTest =
+    let
+        input =
+            Data
+                [ TD.headerRow
+                , TD.firstRow
+                , TD.secondRow
+                , TD.thirdRow
+                , TD.forthRow
+                ]
+
+        runFirstRowRange =
+            \_ ->
+                CellRange.firstRowRange input
+                    |> Expect.equal
+                        (CellRange
+                            (CellPosition ( 1, 1 ))
+                            (CellPosition ( 12, 1 ))
+                        )
+
+        runRemainingRowsRange =
+            \_ ->
+                CellRange.remainingRowsRange input
+                    |> Expect.equal
+                        (CellRange
+                            (CellPosition ( 1, 2 ))
+                            (CellPosition ( 12, 5 ))
+                        )
+    in
+        Test.describe "CellRangeTest default ranges"
+            [ Test.describe "CellRange.firstRowRange"
+                [ Test.test "returns the range of the first row" runFirstRowRange
+                ]
+            , Test.describe "CellRange.remainingRowsRange"
+                [ Test.test "returns the rows excluding the first" runRemainingRowsRange
+                ]
             ]

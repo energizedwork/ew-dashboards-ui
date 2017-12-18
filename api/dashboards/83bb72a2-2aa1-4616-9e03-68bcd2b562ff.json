@@ -146,13 +146,15 @@
       "adapter": {
         "type_": "BAR_CHART",
         "config": {
+          "xLabels": {
+            "start": [1, 1],
+            "end": [12, 1]
+          },
           "bodyRows": {
             "start": [1, 2],
-            "end": [12, 3]
-          },
-          "xLabelsIndex": 1
+            "end": [12, 6]
+          }
         }
-
       },
       "renderer": "BAR_CHART",
       "createdAt": "2017-10-23T16:03:55.948Z",

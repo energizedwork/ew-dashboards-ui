@@ -13,23 +13,15 @@ import List.Extra
 import Views.Widget.Renderers.Utils as Utils exposing (..)
 
 
-xLabelsIndex : Int
-xLabelsIndex =
-    1
-
-
-
 -- Possible values:
 -- "lineRows"
 -- "barRows"
--- "xLabelsIndex"
+-- "xLabels"
 
 
 defaultConfig : Dict String Json.Value
 defaultConfig =
-    Dict.fromList
-        [ ( "xLabelsIndex", Encode.int xLabelsIndex )
-        ]
+    Dict.empty
 
 
 adapt : AdapterConfig.Config -> Data -> ( Row, List Row, List Row, Float, Float, List String )

@@ -43,7 +43,12 @@ adapterConfigTest =
                             (CellPosition ( 5, 4 ))
                             (CellPosition ( 10, 5 ))
                   )
-                , ( "xLabelsIndex", Encode.int 3 )
+                , ( "xLabels"
+                  , CellRange.encode <|
+                        CellRange
+                            (CellPosition ( 5, 3 ))
+                            (CellPosition ( 10, 3 ))
+                  )
                 ]
 
         -- functions under test!
@@ -87,7 +92,10 @@ adapterConfigTest =
             \_ -> defaultActualXLabels |> Expect.equal TD.headerRow
 
         suppliedHeaders =
-            \_ -> suppliedActualHeaderRow |> Expect.equal TD.secondRow
+            \_ ->
+                suppliedActualHeaderRow
+                    |> Expect.equal
+                        [ "205", "206", "207", "208", "209", "210" ]
 
         suppliedLineChartRows =
             \_ ->
