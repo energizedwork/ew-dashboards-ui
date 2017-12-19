@@ -45,10 +45,10 @@ adapterDecoderTest =
                         """
 
                     expectedSourceCell =
-                        CellPosition.asJsonValue ( 1, 1 )
+                        CellPosition.encode <| CellPosition ( 1, 1 )
 
                     expectedTargetCell =
-                        CellPosition.asJsonValue ( 1, 3 )
+                        CellPosition.encode <| CellPosition ( 1, 3 )
                 in
                     Expect.equal
                         (Decode.decodeString Adapter.decoder input)

@@ -1,13 +1,13 @@
 module Data.Widget.Adapters.CellRangeTest exposing (..)
 
 import Data.Widget.Adapters.AdapterTestData as TD
-import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition, asJsonValue, decoder)
-import Data.Widget.Adapters.CellRange as CellRange exposing (asJsonValue)
-import Data.Widget.Adapters.LineAndBarAdapter as LineAndBarAdapter exposing (adapt)
+import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), decoder, encode)
+import Data.Widget.Adapters.CellRange as CellRange exposing (..)
 import Data.Widget.Table as Table exposing (Data)
 import Dict exposing (Dict)
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
+import Json.Decode as Decode exposing (..)
 import Json.Encode as Encode exposing (..)
 import List.Extra
 import Test exposing (..)
@@ -29,7 +29,11 @@ cellRangeTest =
         -- expectations
         originBasedRange10x2 =
             \_ ->
-                CellRange.extractRows input [ ( 1, 1 ), ( 10, 2 ) ]
+                CellRange.extractRows input
+                    (CellRange
+                        (CellPosition ( 1, 1 ))
+                        (CellPosition ( 10, 2 ))
+                    )
                     |> Expect.equal
                         [ [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct" ]
                         , [ "101", "102", "103", "104", "105", "106", "107", "108", "109", "110" ]
@@ -37,7 +41,11 @@ cellRangeTest =
 
         originBasedRange6x5 =
             \_ ->
-                CellRange.extractRows input [ ( 1, 1 ), ( 6, 5 ) ]
+                CellRange.extractRows input
+                    (CellRange
+                        (CellPosition ( 1, 1 ))
+                        (CellPosition ( 6, 5 ))
+                    )
                     |> Expect.equal
                         [ [ "Jan", "Feb", "Mar", "Apr", "May", "Jun" ]
                         , [ "101", "102", "103", "104", "105", "106" ]
@@ -48,7 +56,11 @@ cellRangeTest =
 
         offsetBasedRange9x2 =
             \_ ->
-                CellRange.extractRows input [ ( 2, 2 ), ( 10, 3 ) ]
+                CellRange.extractRows input
+                    (CellRange
+                        (CellPosition ( 2, 2 ))
+                        (CellPosition ( 10, 3 ))
+                    )
                     |> Expect.equal
                         [ [ "102", "103", "104", "105", "106", "107", "108", "109", "110" ]
                         , [ "202", "203", "204", "205", "206", "207", "208", "209", "210" ]
@@ -56,7 +68,11 @@ cellRangeTest =
 
         offsetBasedRange4x3 =
             \_ ->
-                CellRange.extractRows input [ ( 5, 3 ), ( 8, 5 ) ]
+                CellRange.extractRows input
+                    (CellRange
+                        (CellPosition ( 5, 3 ))
+                        (CellPosition ( 8, 5 ))
+                    )
                     |> Expect.equal
                         [ [ "205", "206", "207", "208" ]
                         , [ "305", "306", "307", "308" ]
@@ -65,7 +81,11 @@ cellRangeTest =
 
         offsetBasedRange2x2 =
             \_ ->
-                CellRange.extractRows input [ ( 10, 4 ), ( 11, 5 ) ]
+                CellRange.extractRows input
+                    (CellRange
+                        (CellPosition ( 10, 4 ))
+                        (CellPosition ( 11, 5 ))
+                    )
                     |> Expect.equal
                         [ [ "310", "311" ]
                         , [ "410", "411" ]
@@ -73,17 +93,29 @@ cellRangeTest =
 
         offsetBasedRange1x1 =
             \_ ->
-                CellRange.extractRows input [ ( 6, 4 ), ( 6, 4 ) ]
+                CellRange.extractRows input
+                    (CellRange
+                        (CellPosition ( 6, 4 ))
+                        (CellPosition ( 6, 4 ))
+                    )
                     |> Expect.equal [ [ "306" ] ]
 
         offsetBasedRange3x1 =
             \_ ->
-                CellRange.extractRows input [ ( 10, 3 ), ( 12, 3 ) ]
+                CellRange.extractRows input
+                    (CellRange
+                        (CellPosition ( 10, 3 ))
+                        (CellPosition ( 12, 3 ))
+                    )
                     |> Expect.equal [ [ "210", "211", "212" ] ]
 
         offsetBasedRange1x3 =
             \_ ->
-                CellRange.extractRows input [ ( 9, 3 ), ( 9, 5 ) ]
+                CellRange.extractRows input
+                    (CellRange
+                        (CellPosition ( 9, 3 ))
+                        (CellPosition ( 9, 5 ))
+                    )
                     |> Expect.equal
                         [ [ "209" ]
                         , [ "309" ]
@@ -105,4 +137,48 @@ cellRangeTest =
                 , Test.test "3x1 starting at (10,3)" offsetBasedRange3x1
                 , Test.test "1x3 starting at (9, 3)" offsetBasedRange1x3
                 ]
+            ]
+
+
+decoderTest : Test
+decoderTest =
+    let
+        input =
+            """
+            {
+                "start": [2, 2],
+                "end": [20, 4]
+            }
+            """
+
+        runDecode =
+            \_ ->
+                Decode.decodeString (CellRange.decoder) input
+                    |> Expect.equal
+                        (Ok <|
+                            CellRange
+                                (CellPosition ( 2, 2 ))
+                                (CellPosition ( 20, 4 ))
+                        )
+    in
+        Test.describe "CellRange"
+            [ Test.test "decoder" runDecode
+            ]
+
+
+encoderTest : Test
+encoderTest =
+    let
+        input =
+            CellRange
+                (CellPosition ( 3, 3 ))
+                (CellPosition ( 10, 4 ))
+
+        runEncode =
+            \_ ->
+                (toString <| CellRange.encode input)
+                    |> Expect.equal "{ start = { 0 = 3, 1 = 3 }, end = { 0 = 10, 1 = 4 } }"
+    in
+        Test.describe "CellRange encode"
+            [ Test.test "encode" runEncode
             ]

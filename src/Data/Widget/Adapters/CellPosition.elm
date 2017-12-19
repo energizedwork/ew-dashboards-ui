@@ -1,29 +1,34 @@
-module Data.Widget.Adapters.CellPosition exposing (CellPosition, asJsonValue, decoder)
+module Data.Widget.Adapters.CellPosition exposing (CellPosition(..), x, y, encode, decoder)
 
-import Json.Decode as Decode exposing (Decoder, index, int, map2, Value)
+import Json.Decode as Decode exposing (Decoder, Value, index, int, map2)
 import Json.Encode as Encode exposing (int)
+import Tuple exposing (..)
 
 
-type alias RowNumber =
-    Int
-
-
-type alias ColumnNumber =
-    Int
-
-
-type alias CellPosition =
-    ( RowNumber, ColumnNumber )
+type CellPosition
+    = CellPosition ( Int, Int )
 
 
 decoder : Decoder CellPosition
 decoder =
-    map2 (,) (index 0 Decode.int) (index 1 Decode.int)
+    Decode.map2 (,) (index 0 Decode.int) (index 1 Decode.int)
+        |> Decode.andThen
+            (\( x, y ) -> Decode.succeed <| CellPosition ( x, y ))
 
 
-asJsonValue : CellPosition -> Decode.Value
-asJsonValue cellPosition =
+encode : CellPosition -> Decode.Value
+encode cellPosition =
     Encode.list
-        [ Encode.int <| Tuple.first cellPosition
-        , Encode.int <| Tuple.second cellPosition
+        [ Encode.int <| x cellPosition
+        , Encode.int <| y cellPosition
         ]
+
+
+x : CellPosition -> Int
+x (CellPosition position) =
+    Tuple.first position
+
+
+y : CellPosition -> Int
+y (CellPosition position) =
+    Tuple.second position
