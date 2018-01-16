@@ -169,6 +169,9 @@ rendererDecoder =
                     "BAR_CHART" ->
                         Decode.succeed Renderer.BAR_CHART
 
+                    "LINE_AND_BAR_CHART" ->
+                        Decode.succeed Renderer.LINE_AND_BAR_CHART
+
                     "HEAT_MAP" ->
                         Decode.succeed Renderer.HEAT_MAP
 

@@ -1,6 +1,7 @@
 module Data.Widget.Adapters.Adapter exposing (Adapter(..), decoder)
 
 import Data.Widget.Adapters.Config as AdapterConfig
+import Data.Widget.Adapters.LineAndBarAdapter as LineAndBarAdapter
 import Data.Widget.Adapters.MetricAdapter as MetricAdapter
 import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (defaultConfig)
 import Json.Decode as Decode exposing (Decoder, Value, dict, maybe, string)
@@ -15,6 +16,7 @@ type alias Definition =
 
 type Adapter
     = TABLE AdapterConfig.Config
+    | LINE_AND_BAR_CHART AdapterConfig.Config
     | HEAT_MAP
     | METRIC AdapterConfig.Config
 
@@ -39,6 +41,11 @@ decoder =
                         Decode.succeed <|
                             TABLE
                                 (definition.config |> Maybe.withDefault TableAdapter.defaultConfig)
+
+                    "LINE_AND_BAR_CHART" ->
+                        Decode.succeed <|
+                            LINE_AND_BAR_CHART
+                                (definition.config |> Maybe.withDefault LineAndBarAdapter.defaultConfig)
 
                     "HEAT_MAP" ->
                         Decode.succeed HEAT_MAP

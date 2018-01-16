@@ -1,4 +1,4 @@
-module Data.Widget.Adapters.CellRange exposing (CellRange, encode, decoder, extractRows)
+module Data.Widget.Adapters.CellRange exposing (CellRange, encode, decoder, extractRow, extractRows, firstRowRange, remainingRowsRange)
 
 import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder)
 import Data.Widget.Table exposing (..)
@@ -79,7 +79,44 @@ extractRows data range =
         extractedRows
 
 
+extractRow : Data -> CellRange -> Row
+extractRow data range =
+    List.head (extractRows data range)
+        |> Maybe.withDefault []
 
--- firstRow : Data -> CellRange
--- firstRow data =
---     CellRange [ CellPosition ( 1, 1 ), CellPosition ( 1, 1 ) ]
+
+firstRowRange : Data -> CellRange
+firstRowRange data =
+    let
+        firstRow =
+            List.head data.rows
+                |> Maybe.withDefault []
+
+        numberCells =
+            List.length firstRow
+    in
+        CellRange
+            (CellPosition ( 1, 1 ))
+            (CellPosition ( numberCells, 1 ))
+
+
+remainingRowsRange : Data -> CellRange
+remainingRowsRange data =
+    let
+        remainingRows =
+            List.tail data.rows
+                |> Maybe.withDefault []
+
+        firstRow =
+            List.head remainingRows
+                |> Maybe.withDefault []
+
+        numberCells =
+            List.length firstRow
+
+        numberRows =
+            List.length data.rows
+    in
+        CellRange
+            (CellPosition ( 1, 2 ))
+            (CellPosition ( numberCells, numberRows ))

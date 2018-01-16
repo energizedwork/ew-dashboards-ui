@@ -1,4 +1,4 @@
-module Views.Widget.Renderers.BarChart exposing (render)
+module Views.Widget.Renderers.BarChart exposing (render, renderColumn, renderColumns, renderXAxis, renderYAxis)
 
 import Array exposing (..)
 import Color
@@ -16,8 +16,8 @@ import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
 
 
-render : Widget Body -> Table.Data -> Html msg
-render widget data =
+render : Int -> Int -> Widget Body -> Table.Data -> Html msg
+render width height widget data =
     case widget.adapter of
         TABLE optionalConfig ->
             let
@@ -29,22 +29,12 @@ render widget data =
             in
                 div [ class "col-md-6 widget" ]
                     [ h3 [ Html.Attributes.title widget.description, Html.Attributes.class "heading" ] [ Html.text widget.name ]
-                    , view dataAsHeaderValueTuples maxValue
+                    , view (width // 2) (height // 2) dataAsHeaderValueTuples maxValue
                     , Utils.renderDataSourceInfoFrom widget
                     ]
 
         _ ->
             p [ class "data" ] [ Html.text "Sorry, I can only render bar charts from a TABLE adapter right now" ]
-
-
-w : Float
-w =
-    Utils.mediumWidth
-
-
-h : Float
-h =
-    Utils.mediumHeight
 
 
 padding : Float
@@ -64,31 +54,31 @@ getBarColour index =
         |> Color.Convert.colorToHex
 
 
-xScale : List ( String, String ) -> BandScale String
-xScale data =
+xScale : Int -> List ( String, String ) -> BandScale String
+xScale width data =
     Scale.band
         { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 }
         (List.map Tuple.first data)
-        ( 0, w - 2 * padding )
+        ( 0, toFloat width - 2 * padding )
 
 
-yScale : Float -> ContinuousScale
-yScale maxValue =
-    Scale.linear ( 0, maxValue ) ( h - 2 * padding, 0 )
+yScale : Int -> Float -> ContinuousScale
+yScale height maxValue =
+    Scale.linear ( 0, maxValue ) ( toFloat height - 2 * padding, 0 )
 
 
-xAxis : List ( String, String ) -> Svg msg
-xAxis data =
-    Axis.axis { defaultOptions | orientation = Axis.Bottom, tickFormat = Just Utils.formatStringTick } (Scale.toRenderable (xScale data))
+xAxis : Int -> List ( String, String ) -> Svg msg
+xAxis width data =
+    Axis.axis { defaultOptions | orientation = Axis.Bottom, tickFormat = Just Utils.formatStringTick } (Scale.toRenderable (xScale width data))
 
 
-yAxis : Float -> Svg msg
-yAxis maxValue =
-    Axis.axis { defaultOptions | orientation = Axis.Left, tickCount = 5 } (yScale maxValue)
+yAxis : Int -> Float -> Svg msg
+yAxis height maxValue =
+    Axis.axis { defaultOptions | orientation = Axis.Left, tickCount = 5 } (yScale height maxValue)
 
 
-column : Int -> Int -> String -> BandScale String -> Float -> ( String, String ) -> Svg msg
-column index totalRows colour xScaleBand maxValue ( header, value ) =
+column : Int -> Int -> Int -> String -> BandScale String -> Float -> ( String, String ) -> Svg msg
+column height index totalRows colour xScaleBand maxValue ( header, value ) =
     let
         xpos =
             (Scale.convert xScaleBand header) + (colWidth * (toFloat index))
@@ -97,23 +87,23 @@ column index totalRows colour xScaleBand maxValue ( header, value ) =
             (Scale.convert (Scale.toRenderable xScaleBand) header) + (colWidth * (toFloat index))
 
         ypos =
-            Scale.convert (yScale maxValue) (String.toFloat value |> Result.withDefault 0)
+            Scale.convert (yScale height maxValue) (String.toFloat value |> Result.withDefault 0)
 
         yposText =
-            Scale.convert (yScale maxValue) (String.toFloat value |> Result.withDefault 0) - 5
+            Scale.convert (yScale height maxValue) (String.toFloat value |> Result.withDefault 0) - 5
 
         colWidth =
             Scale.bandwidth xScaleBand / toFloat (totalRows)
 
         colHeight =
-            h - Scale.convert (yScale maxValue) (String.toFloat value |> Result.withDefault 0) - 2 * padding
+            toFloat height - Scale.convert (yScale height maxValue) (String.toFloat value |> Result.withDefault 0) - 2 * padding
     in
         g [ class "column" ]
             [ rect
                 [ x <| toString xpos
                 , y <| toString ypos
-                , width <| toString colWidth
-                , height <| toString colHeight
+                , Svg.Attributes.width <| toString colWidth
+                , Svg.Attributes.height <| toString colHeight
                 , fill colour
                 ]
                 []
@@ -127,8 +117,8 @@ column index totalRows colour xScaleBand maxValue ( header, value ) =
             ]
 
 
-view : List (List ( Cell, Cell )) -> Float -> Svg msg
-view data maxValue =
+view : Int -> Int -> List (List ( Cell, Cell )) -> Float -> Svg msg
+view width height data maxValue =
     let
         firstDataTuple =
             List.head data |> Maybe.withDefault []
@@ -138,19 +128,8 @@ view data maxValue =
 
         totalRows =
             List.length indexedData
-
-        renderColumns num =
-            List.map
-                (\( index, row ) ->
-                    renderColumn index totalRows row
-                )
-                indexedData
-
-        renderColumn index totalRows row =
-            g [ transform ("translate(" ++ toString padding ++ ", " ++ toString padding ++ ")"), class "series" ] <|
-                List.map (column index totalRows (getBarColour index) (xScale row) maxValue) row
     in
-        svg [ width (toString w ++ "px"), height (toString h ++ "px") ]
+        svg [ Svg.Attributes.width (toString width ++ "px"), Svg.Attributes.height (toString height ++ "px") ]
             (List.concat
                 [ [ Svg.style []
                         [ Svg.text """
@@ -158,11 +137,49 @@ view data maxValue =
                             .column:hover rect { opacity: 0.7; }
                             .column:hover text { display: inline; z-index: 9999; }
                           """ ]
-                  , g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (h - padding) ++ ")") ]
-                        [ xAxis firstDataTuple ]
-                  , g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString padding ++ ")") ]
-                        [ (yAxis maxValue) ]
+                  , renderXAxis width height firstDataTuple
+                  , renderYAxis width height maxValue
                   ]
-                , renderColumns <| List.length data
+                , renderColumns width height maxValue totalRows indexedData
                 ]
             )
+
+
+renderColumns :
+    Int
+    -> Int
+    -> Float
+    -> Int
+    -> List ( Int, List ( String, String ) )
+    -> List (Svg msg)
+renderColumns width height maxValue totalRows indexedData =
+    List.map
+        (\( index, row ) ->
+            renderColumn width height index totalRows row maxValue
+        )
+        indexedData
+
+
+renderColumn :
+    Int
+    -> Int
+    -> Int
+    -> Int
+    -> List ( String, String )
+    -> Float
+    -> Svg msg
+renderColumn width height index totalRows row maxValue =
+    g [ transform ("translate(" ++ toString padding ++ ", " ++ toString padding ++ ")"), class "series" ] <|
+        List.map (column height index totalRows (getBarColour index) (xScale width row) maxValue) row
+
+
+renderXAxis : Int -> Int -> List ( Cell, Cell ) -> Svg msg
+renderXAxis width height firstDataTuple =
+    g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (toFloat height - padding) ++ ")") ]
+        [ xAxis width firstDataTuple ]
+
+
+renderYAxis : Int -> Int -> Float -> Svg msg
+renderYAxis width height maxValue =
+    g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString padding ++ ")") ]
+        [ (yAxis height maxValue) ]

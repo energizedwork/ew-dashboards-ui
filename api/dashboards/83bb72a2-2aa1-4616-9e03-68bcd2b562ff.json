@@ -136,25 +136,31 @@
       }
     }, {
       "uuid": "c0b02f5d-8e73-4524-9f0f-f343bfd25492",
-      "name": "Actuals",
-      "body": "Actuals",
+      "name": "Actuals Combo",
+      "body": "Actuals Combo",
       "description": "12 months financial data as a bar chart",
       "dataSources": [{
         "uuid": "bf1a974e-c506-482b-8f6a-169c3635ce53",
         "name": "sheets"
       }],
       "adapter": {
-        "type_": "BAR_CHART",
+        "type_": "LINE_AND_BAR_CHART",
         "config": {
-          "bodyRows": {
-            "start": [1, 2],
-            "end": [12, 3]
+          "xLabels": {
+            "start": [1, 1],
+            "end": [12, 1]
           },
-          "xLabelsIndex": 1
+          "lineRows": {
+            "start": [1, 3],
+            "end": [12, 7]
+          },
+          "barRows": {
+            "start": [1, 2],
+            "end": [12, 2]
+          }
         }
-
       },
-      "renderer": "BAR_CHART",
+      "renderer": "LINE_AND_BAR_CHART",
       "createdAt": "2017-10-23T16:03:55.948Z",
       "updatedAt": "2017-10-23T16:03:55.948Z",
       "tagList": [],

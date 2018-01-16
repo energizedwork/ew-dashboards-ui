@@ -1,38 +1,26 @@
 module Data.Widget.Adapters.LineAndBarAdapter exposing (defaultConfig, adapt)
 
 import Array
-import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition, encode, decoder)
-import Data.Widget.Adapters.CellRange as CellRange exposing (..)
 import Data.Widget.Adapters.Config as AdapterConfig
 import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (..)
+import Data.Widget.Chart as Chart exposing (Data)
 import Data.Widget.Table as Table exposing (Cell, Data, Row)
 import Dict exposing (Dict)
 import Json.Decode as Json exposing (Value)
-import Json.Encode as Encode exposing (Value)
-import List.Extra
-import Views.Widget.Renderers.Utils as Utils exposing (..)
-
-
-xLabelsIndex : Int
-xLabelsIndex =
-    1
-
 
 
 -- Possible values:
 -- "lineRows"
 -- "barRows"
--- "xLabelsIndex"
+-- "xLabels"
 
 
 defaultConfig : Dict String Json.Value
 defaultConfig =
-    Dict.fromList
-        [ ( "xLabelsIndex", Encode.int xLabelsIndex )
-        ]
+    Dict.empty
 
 
-adapt : AdapterConfig.Config -> Data -> ( Row, List Row, List Row, Float, Float, List String )
+adapt : AdapterConfig.Config -> Table.Data -> ( Chart.Data, Chart.Data )
 adapt optionalConfig data =
     let
         lineRowsRange =
@@ -82,18 +70,33 @@ adapt optionalConfig data =
         ( barChartHeaderRow, barChartRows, barChartMinValue, barChartMaxValue, barChartXLabels ) =
             TableAdapter.adapt barChartConfig data
 
-        xLabels =
-            lineChartHeaderRow
+        lineData =
+            List.map (List.map2 (,) lineChartHeaderRow) lineChartRows
 
-        headerRow =
-            xLabels
+        barData =
+            List.map (List.map2 (,) barChartHeaderRow) barChartRows
 
-        minValue =
-            List.minimum [ barChartMinValue, lineChartMinValue ]
-                |> Maybe.withDefault 0
+        indexedLineData =
+            Array.toIndexedList (Array.fromList lineData)
 
-        maxValue =
-            List.maximum [ barChartMaxValue, lineChartMaxValue ]
-                |> Maybe.withDefault 0
+        indexedBarData =
+            Array.toIndexedList (Array.fromList barData)
+
+        lineChartData =
+            Chart.Data lineChartRows
+                lineData
+                indexedLineData
+                lineChartMinValue
+                lineChartMaxValue
+                lineChartXLabels
+
+        barChartData =
+            Chart.Data
+                barChartRows
+                barData
+                indexedBarData
+                barChartMinValue
+                barChartMaxValue
+                barChartXLabels
     in
-        ( headerRow, lineChartRows, barChartRows, minValue, maxValue, xLabels )
+        ( lineChartData, barChartData )
