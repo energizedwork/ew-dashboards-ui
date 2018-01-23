@@ -32,8 +32,8 @@ Elm is whitespace sensitive so elm-live uses [elm-format](https://atom.io/packag
 
 
 ## Deploy
-``` $ npm install -g firebase-tools ```
+``` $ git remote add heroku https://git.heroku.com/ew-dashboards-ui.git ```
 
-``` $ firebase deploy ```
+``` $ git push heroku master ```
 
-``` $ open https://dashboards-ui.firebaseapp.com ```
+``` $ open https://ew-dashboards-ui.herokuapp.com ```
