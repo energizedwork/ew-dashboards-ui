@@ -1,0 +1,8 @@
+{
+  "root": ".",
+  "clean_urls": true,
+  "basic_auth": true,
+  "routes": {
+    "/**": "index.html"
+  }
+}
