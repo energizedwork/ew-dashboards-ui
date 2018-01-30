@@ -14,7 +14,7 @@ import NumberParser
 -- TODO refactor to use Chart.Data
 
 
-adapt : AdapterConfig.Config -> Data -> ( Row, List Row, Float, Float, Row, Maybe (List String) )
+adapt : AdapterConfig.Config -> Data -> ( Row, List Row, Float, Float, Row )
 adapt optionalConfig data =
     let
         defaultHeaderRange =
@@ -22,9 +22,6 @@ adapt optionalConfig data =
 
         defaultBodyRange =
             CellRange.remainingRowsRange data
-
-        defaultSeriesLabelsRange =
-            CellRange.emptyRange
 
         headerRange =
             Dict.get "xLabels" optionalConfig
@@ -55,22 +52,6 @@ adapt optionalConfig data =
         rowToNumber row =
             List.map NumberParser.fromString row
 
-        seriesLabels =
-            case Dict.get "seriesLabels" optionalConfig of
-                Just seriesLabels ->
-                    let
-                        labels =
-                            seriesLabels
-                                |> Json.decodeValue CellRange.decoder
-                                |> Result.withDefault defaultSeriesLabelsRange
-                                |> CellRange.extractRows data
-                                |> List.map (\a -> Maybe.withDefault "" (List.head a))
-                    in
-                        Just labels
-
-                Nothing ->
-                    Nothing
-
         rowToInt row =
             List.map (\n -> String.toFloat n |> Result.withDefault 0) row
 
@@ -92,4 +73,4 @@ adapt optionalConfig data =
         maxValue =
             (List.maximum bodyRowMaxes |> Maybe.withDefault 0)
     in
-        ( headerRow, bodyRows, minValue, maxValue, xLabels, seriesLabels )
+        ( headerRow, bodyRows, minValue, maxValue, xLabels )

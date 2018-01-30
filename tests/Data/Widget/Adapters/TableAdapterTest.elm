@@ -18,22 +18,13 @@ adapterConfigTest : Test
 adapterConfigTest =
     let
         -- setup data
-        unlabelledInput =
+        input =
             Data
                 [ TD.headerRow
                 , TD.firstRow
                 , TD.secondRow
                 , TD.thirdRow
                 , TD.forthRow
-                ]
-
-        labelledInput =
-            Data
-                [ TD.headerRow
-                , TD.firstRow ++ [ "Label 1" ]
-                , TD.secondRow ++ [ "Label 2" ]
-                , TD.thirdRow ++ [ "Label 3" ]
-                , TD.forthRow ++ [ "Label 4" ]
                 ]
 
         defaultConfig =
@@ -53,20 +44,14 @@ adapterConfigTest =
                             (CellPosition ( 5, 3 ))
                             (CellPosition ( 10, 3 ))
                   )
-                , ( "seriesLabels"
-                  , CellRange.encode <|
-                        CellRange
-                            (CellPosition ( 13, 2 ))
-                            (CellPosition ( 13, 5 ))
-                  )
                 ]
 
         -- functions under test!
-        ( defaultActualHeaderRow, defaultActualBodyRows, defaultActualMinValue, defaultActualMaxValue, defaultActualXLabels, defaultActualSeriesLabels ) =
-            TableAdapter.adapt defaultConfig unlabelledInput
+        ( defaultActualHeaderRow, defaultActualBodyRows, defaultActualMinValue, defaultActualMaxValue, defaultActualXLabels ) =
+            TableAdapter.adapt defaultConfig input
 
-        ( suppliedActualHeaderRow, suppliedActualBodyRows, suppliedActualMinValue, suppliedActualMaxValue, suppliedActualXLabels, suppliedActualSeriesLabels ) =
-            TableAdapter.adapt suppliedConfig labelledInput
+        ( suppliedActualHeaderRow, suppliedActualBodyRows, suppliedActualMinValue, suppliedActualMaxValue, suppliedActualXLabels ) =
+            TableAdapter.adapt suppliedConfig input
 
         -- expectations
         defaultHeaders =
@@ -81,12 +66,6 @@ adapterConfigTest =
                         , TD.thirdRow
                         , TD.forthRow
                         ]
-
-        defaultSeriesLabels =
-            \_ ->
-                defaultActualSeriesLabels
-                    |> Expect.equal
-                        Nothing
 
         defaultMinValue =
             \_ -> defaultActualMinValue |> Expect.equal 101
@@ -111,14 +90,6 @@ adapterConfigTest =
                         , [ "205", "206", "207", "208", "209", "210" ]
                         ]
 
-        suppliedSeriesLabels =
-            \_ ->
-                suppliedActualSeriesLabels
-                    |> Expect.equal
-                        (Just
-                            [ "Label 1", "Label 2", "Label 3", "Label 4" ]
-                        )
-
         suppliedMinValue =
             \_ -> suppliedActualMinValue |> Expect.equal 105
 
@@ -132,7 +103,6 @@ adapterConfigTest =
             [ Test.describe "with default Config"
                 [ Test.test "headers are first row" defaultHeaders
                 , Test.test "body rows are remain rows, excluding the header row" defaultBodyRows
-                , Test.test "series labels are empty" defaultSeriesLabels
                 , Test.test "min value is extracted from body rows" defaultMinValue
                 , Test.test "max value is extracted from body rows" defaultMaxValue
                 , Test.test "x-axis labels are the first row" defaultXLabels
@@ -140,7 +110,6 @@ adapterConfigTest =
             , Test.describe "with supplied Config"
                 [ Test.test "headers are third row" suppliedHeaders
                 , Test.test "body rows are as specified" suppliedLineChartRows
-                , Test.test "series labels are as specified" suppliedSeriesLabels
                 , Test.test "min value is extracted from body rows" suppliedMinValue
                 , Test.test "max value is extracted from body rows" suppliedMaxValue
                 , Test.test "x-axis labels are as specified" suppliedXLabels

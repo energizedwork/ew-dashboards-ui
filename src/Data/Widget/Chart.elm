@@ -10,4 +10,5 @@ type alias Data =
     , minValue : Float
     , maxValue : Float
     , xLabels : List String
+    , seriesLabels : Maybe (List String)
     }

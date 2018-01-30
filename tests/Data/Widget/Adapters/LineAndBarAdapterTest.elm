@@ -17,13 +17,22 @@ adapterConfigTest : Test
 adapterConfigTest =
     let
         -- setup data
-        input =
+        unlabelledInput =
             Data
                 [ TD.headerRow
                 , TD.firstRow
                 , TD.secondRow
                 , TD.thirdRow
                 , TD.forthRow
+                ]
+
+        labelledInput =
+            Data
+                [ TD.headerRow
+                , TD.firstRow ++ [ "Label 1" ]
+                , TD.secondRow ++ [ "Label 2" ]
+                , TD.thirdRow ++ [ "Label 3" ]
+                , TD.forthRow ++ [ "Label 4" ]
                 ]
 
         defaultConfig =
@@ -36,6 +45,12 @@ adapterConfigTest =
                         CellRange
                             (CellPosition ( 5, 2 ))
                             (CellPosition ( 10, 3 ))
+                  )
+                , ( "lineSeriesLabels"
+                  , CellRange.encode <|
+                        CellRange
+                            (CellPosition ( 13, 2 ))
+                            (CellPosition ( 13, 5 ))
                   )
                 , ( "barRows"
                   , CellRange.encode <|
@@ -53,10 +68,10 @@ adapterConfigTest =
 
         -- functions under test!
         ( defaultLineChart, defaultBarChart ) =
-            LineAndBarAdapter.adapt defaultConfig input
+            LineAndBarAdapter.adapt defaultConfig unlabelledInput
 
         ( suppliedLineChart, suppliedBarChart ) =
-            LineAndBarAdapter.adapt suppliedConfig input
+            LineAndBarAdapter.adapt suppliedConfig labelledInput
 
         -- expectations
         defaultLineChartRows =
@@ -68,6 +83,12 @@ adapterConfigTest =
                         , TD.thirdRow
                         , TD.forthRow
                         ]
+
+        defaultLineSeriesLabels =
+            \_ ->
+                defaultLineChart.seriesLabels
+                    |> Expect.equal
+                        Nothing
 
         defaultBarChartRows =
             \_ ->
@@ -102,6 +123,14 @@ adapterConfigTest =
                         , [ "205", "206", "207", "208", "209", "210" ]
                         ]
 
+        suppliedLineSeriesLabels =
+            \_ ->
+                suppliedLineChart.seriesLabels
+                    |> Expect.equal
+                        (Just
+                            [ "Label 1", "Label 2", "Label 3", "Label 4" ]
+                        )
+
         suppliedBarChartRows =
             \_ ->
                 suppliedBarChart.rows
@@ -131,6 +160,7 @@ adapterConfigTest =
         Test.describe "LineAndBarAdapter.adapt"
             [ Test.describe "with default Config"
                 [ Test.test "line chart rows are all body rows" defaultLineChartRows
+                , Test.test "line chart series labels are empty" defaultLineSeriesLabels
                 , Test.test "bar chart rows are sll body rows" defaultBarChartRows
                 , Test.test "min value is extracted from line rows" defaultLineMinValue
                 , Test.test "max value is extracted from line rows" defaultLineMaxValue
@@ -140,6 +170,7 @@ adapterConfigTest =
                 ]
             , Test.describe "with supplied Config"
                 [ Test.test "line chart rows are as specified" suppliedLineChartRows
+                , Test.test "line chart series labels are as specified" suppliedLineSeriesLabels
                 , Test.test "bar chart rows are as specified" suppliedBarChartRows
                 , Test.test "min value is extracted from line rows" suppliedLineMinValue
                 , Test.test "max value is extracted from line rows" suppliedLineMaxValue

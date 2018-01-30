@@ -7,10 +7,12 @@ import Data.Widget.Chart as Chart exposing (Data)
 import Data.Widget.Table as Table exposing (Cell, Data, Row)
 import Dict exposing (Dict)
 import Json.Decode as Json exposing (Value)
+import Data.Widget.Adapters.CellRange as CellRange exposing (..)
 
 
 -- Possible values:
 -- "lineRows"
+-- "lineSeriesLabels"
 -- "barRows"
 -- "xLabels"
 
@@ -23,6 +25,9 @@ defaultConfig =
 adapt : AdapterConfig.Config -> Table.Data -> ( Chart.Data, Chart.Data )
 adapt optionalConfig data =
     let
+        defaultSeriesLabelsRange =
+            CellRange.emptyRange
+
         lineRowsRange =
             Dict.get "lineRows" optionalConfig
 
@@ -49,7 +54,23 @@ adapt optionalConfig data =
                 cleansedConfig
                 tempLineChartConfig
 
-        ( lineChartHeaderRow, lineChartRows, lineChartMinValue, lineChartMaxValue, lineChartXLabels, lineChartSeriesLabels ) =
+        lineChartSeriesLabels =
+            case Dict.get "lineSeriesLabels" optionalConfig of
+                Just seriesLabels ->
+                    let
+                        labels =
+                            seriesLabels
+                                |> Json.decodeValue CellRange.decoder
+                                |> Result.withDefault defaultSeriesLabelsRange
+                                |> CellRange.extractRows data
+                                |> List.map (\a -> Maybe.withDefault "" (List.head a))
+                    in
+                        Just labels
+
+                Nothing ->
+                    Nothing
+
+        ( lineChartHeaderRow, lineChartRows, lineChartMinValue, lineChartMaxValue, lineChartXLabels ) =
             TableAdapter.adapt lineChartConfig data
 
         tempBarChartConfig =
@@ -67,7 +88,7 @@ adapt optionalConfig data =
                 cleansedConfig
                 tempBarChartConfig
 
-        ( barChartHeaderRow, barChartRows, barChartMinValue, barChartMaxValue, barChartXLabels, barChartSeriesLabels ) =
+        ( barChartHeaderRow, barChartRows, barChartMinValue, barChartMaxValue, barChartXLabels ) =
             TableAdapter.adapt barChartConfig data
 
         lineData =
@@ -89,6 +110,7 @@ adapt optionalConfig data =
                 lineChartMinValue
                 lineChartMaxValue
                 lineChartXLabels
+                lineChartSeriesLabels
 
         barChartData =
             Chart.Data
@@ -98,5 +120,6 @@ adapt optionalConfig data =
                 barChartMinValue
                 barChartMaxValue
                 barChartXLabels
+                Nothing
     in
         ( lineChartData, barChartData )
