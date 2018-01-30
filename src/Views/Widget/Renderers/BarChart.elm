@@ -1,12 +1,13 @@
 module Views.Widget.Renderers.BarChart exposing (render, renderColumn, renderColumns, renderXAxis, renderYAxis)
 
 import Array exposing (..)
+import Char
 import Color
 import Color.Convert
-import Data.Widget as Widget exposing (Widget, Body)
-import Data.Widget.Table as Table exposing (Data, Cell)
+import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.TableAdapter as TableAdapter
+import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
 import Html.Attributes exposing (title)
 import Svg exposing (..)
@@ -86,17 +87,21 @@ column height index totalRows colour xScaleBand maxValue ( header, value ) =
         xposText =
             (Scale.convert (Scale.toRenderable xScaleBand) header) + (colWidth * (toFloat index))
 
+        valueSantized =
+            String.toFloat (String.filter Char.isDigit value)
+                |> Result.withDefault 0
+
         ypos =
-            Scale.convert (yScale height maxValue) (String.toFloat value |> Result.withDefault 0)
+            Scale.convert (yScale height maxValue) valueSantized
 
         yposText =
-            Scale.convert (yScale height maxValue) (String.toFloat value |> Result.withDefault 0) - 5
+            Scale.convert (yScale height maxValue) valueSantized - 5
 
         colWidth =
             Scale.bandwidth xScaleBand / toFloat (totalRows)
 
         colHeight =
-            toFloat height - Scale.convert (yScale height maxValue) (String.toFloat value |> Result.withDefault 0) - 2 * padding
+            toFloat height - Scale.convert (yScale height maxValue) valueSantized - 2 * padding
     in
         g [ class "column" ]
             [ rect

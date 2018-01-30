@@ -1,12 +1,13 @@
 module Views.Widget.Renderers.LineChart exposing (render, renderLines, renderLine, renderXAxis, renderYAxis, xScale, yScale)
 
 import Array exposing (..)
+import Char
 import Color
 import Color.Convert
-import Data.Widget as Widget exposing (Widget, Body)
-import Data.Widget.Table as Table exposing (Data, Cell)
+import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.TableAdapter as TableAdapter
+import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
 import Html.Attributes exposing (title)
 import Svg exposing (..)
@@ -59,7 +60,8 @@ view : Int -> Int -> List (List ( Cell, Cell )) -> Float -> Svg msg
 view width height data maxValue =
     let
         firstDataTuple =
-            List.head data |> Maybe.withDefault []
+            List.head data
+                |> Maybe.withDefault []
 
         indexedData =
             Array.toIndexedList (Array.fromList data)
@@ -187,10 +189,23 @@ lineGenerator :
     -> ( String, String )
     -> Maybe ( Float, Float )
 lineGenerator width height maxValue firstDataTuple ( x, y ) =
-    Just
-        ( Scale.convert (xScale width firstDataTuple) x
-        , Scale.convert (yScale height maxValue) (String.toFloat y |> Result.withDefault 0)
-        )
+    let
+        ySantized =
+            String.toFloat (String.filter Char.isDigit y)
+                |> Result.withDefault 0
+
+        yScaleData =
+            Scale.convert
+                (yScale height maxValue)
+                ySantized
+
+        xScaleData =
+            Scale.convert (xScale width firstDataTuple) x
+    in
+        Just
+            ( xScaleData
+            , yScaleData
+            )
 
 
 xScale : Int -> List ( a1, a2 ) -> BandScale a1

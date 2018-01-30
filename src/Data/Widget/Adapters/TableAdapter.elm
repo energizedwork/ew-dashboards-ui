@@ -1,5 +1,6 @@
 module Data.Widget.Adapters.TableAdapter exposing (defaultConfig, adapt)
 
+import Char
 import Data.Widget.Adapters.CellRange as CellRange exposing (..)
 import Data.Widget.Adapters.Config as AdapterConfig
 import Data.Widget.Table as Table exposing (Cell, Data, Row)
@@ -56,14 +57,20 @@ adapt optionalConfig data =
                 Nothing ->
                     CellRange.extractRows data defaultBodyRange
 
-        rowToInt row =
-            List.map (\n -> String.toFloat n |> Result.withDefault 0) row
+        rowToNumber row =
+            List.map
+                (\n ->
+                    String.toFloat
+                        (String.filter Char.isDigit n)
+                        |> Result.withDefault 0
+                )
+                row
 
         rowMin row =
-            List.minimum (rowToInt row) |> Maybe.withDefault 0
+            List.minimum (rowToNumber row) |> Maybe.withDefault 0
 
         rowMax row =
-            List.maximum (rowToInt row) |> Maybe.withDefault 0
+            List.maximum (rowToNumber row) |> Maybe.withDefault 0
 
         bodyRowMins =
             List.map rowMin bodyRows
