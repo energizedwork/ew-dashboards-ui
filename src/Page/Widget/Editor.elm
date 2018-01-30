@@ -3,6 +3,7 @@ module Page.Widget.Editor exposing (Model, Msg, initEdit, initNew, update, view)
 import Data.Widget as Widget exposing (Widget, Body)
 import Data.Session as Session exposing (Session)
 import Data.User as User exposing (User)
+import Data.UUID as UUID
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, defaultValue, disabled, href, id, placeholder, type_)
 import Html.Events exposing (onInput, onSubmit)
@@ -22,9 +23,8 @@ import Views.Page as Page
 
 type alias Model =
     { errors : List Error
-    , editingWidget : Maybe Widget.UUID
+    , editingWidget : Maybe UUID.UUID
     , name : String
-    , body : String
     , description : String
     , tags : List String
     }
@@ -35,13 +35,12 @@ initNew =
     { errors = []
     , editingWidget = Nothing
     , name = ""
-    , body = ""
     , description = ""
     , tags = []
     }
 
 
-initEdit : Session -> Widget.UUID -> Task PageLoadError Model
+initEdit : Session -> UUID.UUID -> Task PageLoadError Model
 initEdit session slug =
     let
         maybeAuthToken =
@@ -56,7 +55,6 @@ initEdit session slug =
                     { errors = []
                     , editingWidget = Just slug
                     , name = widget.name
-                    , body = Widget.bodyToMarkdownString widget.body
                     , description = widget.description
                     , tags = widget.tags
                     }
@@ -111,8 +109,6 @@ viewForm model =
                 , Form.textarea
                     [ placeholder "Write your widget (in markdown)"
                     , attribute "rows" "8"
-                    , onInput SetBody
-                    , defaultValue model.body
                     ]
                     []
                 , Form.input
@@ -136,9 +132,8 @@ type Msg
     | SetName String
     | SetDescription String
     | SetTags String
-    | SetBody String
-    | CreateCompleted (Result Http.Error (Widget Body))
-    | EditCompleted (Result Http.Error (Widget Body))
+    | CreateCompleted (Result Http.Error Widget)
+    | EditCompleted (Result Http.Error Widget)
 
 
 update : User -> Msg -> Model -> ( Model, Cmd Msg )
@@ -172,9 +167,6 @@ update user msg model =
         SetTags tags ->
             { model | tags = tagsFromString tags } => Cmd.none
 
-        SetBody body ->
-            { model | body = body } => Cmd.none
-
         CreateCompleted (Ok widget) ->
             Route.Widget widget.uuid
                 |> Route.modifyUrl
@@ -201,7 +193,6 @@ update user msg model =
 type Field
     = Form
     | Name
-    | Body
 
 
 type alias Error =
@@ -212,7 +203,6 @@ validate : Model -> List Error
 validate =
     Validate.all
         [ .name >> ifBlank (Name => "name can't be blank.")
-        , .body >> ifBlank (Body => "body can't be blank.")
         ]
 
 
@@ -228,6 +218,6 @@ tagsFromString str =
         |> List.filter (not << String.isEmpty)
 
 
-redirectToWidget : Widget.UUID -> Cmd msg
+redirectToWidget : UUID.UUID -> Cmd msg
 redirectToWidget =
     Route.modifyUrl << Route.Widget

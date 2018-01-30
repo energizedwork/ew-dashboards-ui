@@ -2,16 +2,16 @@ module Views.Widget.Renderers.HeatMap exposing (render, colourScaleFrom)
 
 import Array exposing (..)
 import Color.Convert
-import Data.Widget as Widget exposing (Widget, Body)
-import Data.Widget.Table as Table exposing (Data, Cell)
+import Data.UUID as UUID
+import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.HeatMapAdapter as HeatMapAdapter
+import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
-import Html.Attributes exposing (title)
-import Html.Events exposing (onSubmit, onInput)
+import Html.Attributes exposing (attribute, defaultValue, placeholder)
+import Html.Events exposing (onInput, onSubmit)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Html.Attributes exposing (attribute, placeholder, defaultValue)
 import Views.Widget.Renderers.RendererMessage as RendererMessage exposing (Msg(..))
 import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
@@ -28,7 +28,7 @@ type alias Model =
     }
 
 
-render : Int -> Int -> Widget Body -> Table.Data -> Bool -> Html RendererMessage.Msg
+render : Int -> Int -> Widget -> Table.Data -> Bool -> Html RendererMessage.Msg
 render width height widget data updatable =
     case widget.adapter of
         HEAT_MAP ->
@@ -59,7 +59,7 @@ render width height widget data updatable =
                             div []
                                 [ Html.form
                                     [ Html.Attributes.class "hm-form"
-                                    , onSubmit <| UpdateDataSource (Widget.slugToString widget.uuid) primaryDataSource.uuid primaryDataSource.name
+                                    , onSubmit <| UpdateDataSource (UUID.slugToString widget.uuid) primaryDataSource.uuid primaryDataSource.name
                                     ]
                                     [ label [] [ Html.text "Current data source id: " ]
                                     , input

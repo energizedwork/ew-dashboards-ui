@@ -3,11 +3,12 @@ module Data.WidgetDecoderTest exposing (..)
 import Data.DataSource exposing (DataSource)
 import Data.User as User exposing (Username(..))
 import Data.UserPhoto as UserPhoto exposing (UserPhoto(..))
-import Data.Widget as Widget exposing (Body(..), UUID(..), decoder)
+import Data.Widget as Widget exposing (Body(..), decoder)
 import Data.Widget.Adapters.Adapter as Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.TableAdapter as TableAdapter
 import Data.Widget.Author as Author
 import Data.Widget.Renderer as Renderer exposing (Renderer(..))
+import Data.UUID as UUID
 import Date
 import Expect exposing (Expectation)
 import Json.Decode as Decode exposing (..)
@@ -25,7 +26,6 @@ widgetDecoderTest =
                         "widget": {
                             "uuid": "006f0092-5a11-468d-b822-ea57753f45c4",
                             "name": "12 months Table",
-                            "body": "12 months Table",
                             "description": "12 months of important data",
                             "dataSources": [{
                                 "uuid": "datasource-1234",
@@ -72,13 +72,13 @@ widgetDecoderTest =
                     }
 
                 decodedOutput =
-                    Decode.decodeString (Widget.decoderWithBody |> Decode.field "widget") input
+                    Decode.decodeString (Widget.decoder |> Decode.field "widget") input
             in
                 -- TODO - hmm, why do I need the toString :/
                 Expect.equal (toString decodedOutput)
                     (toString
                         (Ok
-                            { uuid = Widget.UUID "006f0092-5a11-468d-b822-ea57753f45c4"
+                            { uuid = UUID.UUID "006f0092-5a11-468d-b822-ea57753f45c4"
                             , name = "12 months Table"
                             , description = "12 months of important data"
                             , dataSources = expectedDatasources
@@ -91,7 +91,6 @@ widgetDecoderTest =
                             , favoritesCount = 0
                             , author = expectedAuthor
                             , data = { rows = [] }
-                            , body = Body "12 months Table"
                             }
                         )
                     )

@@ -15,7 +15,7 @@ import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 
 
-render : Int -> Int -> Widget Body -> Table.Data -> Html msg
+render : Int -> Int -> Widget -> Table.Data -> Html msg
 render width height widget data =
     case widget.adapter of
         LINE_AND_BAR_CHART optionalConfig ->

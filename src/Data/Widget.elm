@@ -2,21 +2,18 @@ module Data.Widget
     exposing
         ( Widget
         , Body(..)
-        , UUID(..)
         , Tag
         , bodyToHtml
         , bodyToMarkdownString
         , decoder
-        , decoderWithBody
         , init
         , primaryDataSource
-        , slugParser
-        , slugToString
         , tagDecoder
         , tagToString
         )
 
 import Data.DataSource as DataSource exposing (DataSource)
+import Data.UUID as UUID
 import Data.Widget.Adapters.Adapter as Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.TableAdapter as TableAdapter
 import Data.Widget.Author as Author exposing (Author)
@@ -31,31 +28,8 @@ import Markdown
 import UrlParser
 
 
-{-| An widget, optionally with an widget body.
-
-To see the difference between { body : body } and { body : Maybe Body },
-consider the difference between the "view individual widget" page (which
-renders one widget, including its body) and the "widget feed" -
-which displays multiple articles, but without bodies.
-
-This definition for `Widget` means we can write:
-
-viewWidget : Widget Body -> Html msg
-viewFeed : List (Widget ()) -> Html msg
-
-This indicates that `viewWidget` requires an widget *with a `body` present*,
-wereas `viewFeed` accepts articles with no bodies. (We could also have written
-it as `List (Widget a)` to specify that feeds can accept either articles that
-have `body` present or not. Either work, given that feeds do not attempt to
-read the `body` field from articles.)
-
-This is an important distinction, because in Request.Widget, the `feed`
-function produces `List (Widget ())` because the API does not return bodies.
-Those articles are useful to the feed, but not to the individual widget view.
-
--}
-type alias Widget a =
-    { uuid : UUID
+type alias Widget =
+    { uuid : UUID.UUID
     , name : String
     , description : String
     , dataSources : List DataSource
@@ -68,15 +42,14 @@ type alias Widget a =
     , favoritesCount : Int
     , author : Author
     , data : Data
-    , body : a
     }
 
 
-init : Widget Body
+init : Widget
 init =
     let
         uuid =
-            UUID "not-so-unique"
+            UUID.UUID "not-so-unique"
 
         name =
             "Init Widget"
@@ -113,33 +86,18 @@ init =
 
         data =
             Data []
-
-        body =
-            Body "Init Widget"
     in
-        Widget uuid name description dataSources adapter renderer tags createdAt updatedAt favorited favoritesCount author data body
+        Widget uuid name description dataSources adapter renderer tags createdAt updatedAt favorited favoritesCount author data
 
 
 
 -- SERIALIZATION --
 
 
-decoder : Decoder (Widget ())
+decoder : Decoder Widget
 decoder =
-    baseWidgetDecoder
-        |> hardcoded ()
-
-
-decoderWithBody : Decoder (Widget Body)
-decoderWithBody =
-    baseWidgetDecoder
-        |> required "body" bodyDecoder
-
-
-baseWidgetDecoder : Decoder (a -> Widget a)
-baseWidgetDecoder =
     decode Widget
-        |> required "uuid" (Decode.map UUID Decode.string)
+        |> required "uuid" (Decode.map UUID.UUID Decode.string)
         |> required "name" Decode.string
         |> required "description" (Decode.map (Maybe.withDefault "") (Decode.nullable Decode.string))
         |> required "dataSources" (Decode.list DataSource.decoder)
@@ -187,24 +145,6 @@ rendererDecoder =
 
 
 
--- IDENTIFIERS --
-
-
-type UUID
-    = UUID String
-
-
-slugParser : UrlParser.Parser (UUID -> a) a
-slugParser =
-    UrlParser.custom "SLUG" (Ok << UUID)
-
-
-slugToString : UUID -> String
-slugToString (UUID slug) =
-    slug
-
-
-
 -- TAGS --
 
 
@@ -249,6 +189,6 @@ bodyDecoder =
     Decode.map Body Decode.string
 
 
-primaryDataSource : Widget a -> DataSource
+primaryDataSource : Widget -> DataSource
 primaryDataSource widget =
     List.head widget.dataSources |> Maybe.withDefault DataSource.init

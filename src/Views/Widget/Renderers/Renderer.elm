@@ -15,7 +15,7 @@ import Views.Widget.Renderers.RendererMessage as RendererMessage exposing (Msg(.
 import Views.Widget.Renderers.Table as Table
 
 
-run : Int -> Int -> Widget Body -> Table.Data -> Html RendererMessage.Msg
+run : Int -> Int -> Widget -> Table.Data -> Html RendererMessage.Msg
 run width height widget data =
     case List.isEmpty data.rows of
         True ->

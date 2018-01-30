@@ -8,6 +8,7 @@ import Data.User as User exposing (User)
 import Data.UserPhoto as UserPhoto
 import Data.DataSource as DataSource exposing (..)
 import Data.DataSourceMessage as DataSourceMessage exposing (DataSourceMessage, decoder)
+import Data.UUID as UUID
 import Date exposing (Date)
 import Date.Format
 import Html exposing (..)
@@ -90,7 +91,7 @@ userParams =
     JE.object [ ( "user_id", JE.string user ) ]
 
 
-init : Session -> Widget.UUID -> Task PageLoadError Model
+init : Session -> UUID.UUID -> Task PageLoadError Model
 init session slug =
     let
         maybeAuthToken =
@@ -523,7 +524,7 @@ update session msg model =
                                     updatedWidgets =
                                         List.map
                                             (\widget ->
-                                                case Widget.slugToString widget.uuid == widgetUUID of
+                                                case UUID.slugToString widget.uuid == widgetUUID of
                                                     True ->
                                                         let
                                                             ( deleteMe, keepMe ) =

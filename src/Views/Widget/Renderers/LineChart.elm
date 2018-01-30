@@ -17,7 +17,7 @@ import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousS
 import Visualization.Shape as Shape
 
 
-render : Int -> Int -> Widget Body -> Table.Data -> Html msg
+render : Int -> Int -> Widget -> Table.Data -> Html msg
 render width height widget data =
     case widget.adapter of
         TABLE optionalConfig ->

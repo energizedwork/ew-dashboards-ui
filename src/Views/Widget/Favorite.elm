@@ -16,8 +16,8 @@ You pass it some configuration, followed by a `List (Attribute msg)` and a
 
 -}
 button :
-    (Widget a -> msg)
-    -> Widget a
+    (Widget -> msg)
+    -> Widget
     -> List (Attribute msg)
     -> List (Html msg)
     -> Html msg
