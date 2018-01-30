@@ -25,7 +25,6 @@ import Json.Decode as Decode exposing (Decoder, index, int, map2, maybe)
 import Json.Decode.Extra
 import Json.Decode.Pipeline as Pipeline exposing (custom, decode, hardcoded, optional, required)
 import Markdown
-import UrlParser
 
 
 type alias Widget =
