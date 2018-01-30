@@ -49,7 +49,7 @@ adapt optionalConfig data =
                 cleansedConfig
                 tempLineChartConfig
 
-        ( lineChartHeaderRow, lineChartRows, lineChartMinValue, lineChartMaxValue, lineChartXLabels ) =
+        ( lineChartHeaderRow, lineChartRows, lineChartMinValue, lineChartMaxValue, lineChartXLabels, lineChartSeriesLabels ) =
             TableAdapter.adapt lineChartConfig data
 
         tempBarChartConfig =
@@ -67,7 +67,7 @@ adapt optionalConfig data =
                 cleansedConfig
                 tempBarChartConfig
 
-        ( barChartHeaderRow, barChartRows, barChartMinValue, barChartMaxValue, barChartXLabels ) =
+        ( barChartHeaderRow, barChartRows, barChartMinValue, barChartMaxValue, barChartXLabels, barChartSeriesLabels ) =
             TableAdapter.adapt barChartConfig data
 
         lineData =
