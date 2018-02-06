@@ -1,7 +1,7 @@
-module Data.Widget.Adapters.TableAdapter exposing (defaultConfig, adapt)
+module Data.Widget.Adapters.TableAdapter exposing (adapt)
 
 import Data.Widget.Adapters.CellRange as CellRange exposing (..)
-import Data.Widget.Adapters.Config as AdapterConfig
+import Data.Widget.Config as AdapterConfig
 import Data.Widget.Table as Table exposing (Cell, Data, Row)
 import Dict exposing (Dict)
 import Json.Decode as Json exposing (Value)
@@ -11,14 +11,6 @@ import NumberParser
 -- Possible values:
 -- "bodyRows"
 -- "xLabels"
-
-
-defaultConfig : Dict String Json.Value
-defaultConfig =
-    Dict.empty
-
-
-
 -- TODO refactor to use Chart.Data
 
 

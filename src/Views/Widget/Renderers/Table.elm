@@ -1,11 +1,13 @@
 module Views.Widget.Renderers.Table exposing (render)
 
-import Data.Widget as Widget exposing (Widget, Body)
-import Data.Widget.Table as Table exposing (Data, Cell)
+import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.TableAdapter as TableAdapter
+import Data.Widget.Table as Table exposing (Cell, Data)
+import Dict exposing (Dict)
+import Json.Decode as Json exposing (Value)
 import Html exposing (..)
-import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src, title, style)
+import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src, style, title)
 import Views.Widget.Renderers.Utils as Utils
 
 

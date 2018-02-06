@@ -1,17 +1,22 @@
 module Data.WidgetDecoderTest exposing (..)
 
 import Data.DataSource exposing (DataSource)
+import Data.UUID as UUID
 import Data.User as User exposing (Username(..))
 import Data.UserPhoto as UserPhoto exposing (UserPhoto(..))
 import Data.Widget as Widget exposing (Body(..), decoder)
 import Data.Widget.Adapters.Adapter as Adapter exposing (Adapter(..))
+import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), decoder, encode)
+import Data.Widget.Adapters.CellRange as CellRange exposing (..)
 import Data.Widget.Adapters.TableAdapter as TableAdapter
 import Data.Widget.Author as Author
+import Data.Widget.Config as Config
 import Data.Widget.Renderer as Renderer exposing (Renderer(..))
-import Data.UUID as UUID
 import Date
+import Dict
 import Expect exposing (Expectation)
 import Json.Decode as Decode exposing (..)
+import Json.Encode exposing (encode)
 import Test exposing (..)
 
 
@@ -32,9 +37,24 @@ widgetDecoderTest =
                                 "name": "12 month financials"
                             }],
                             "adapter": {
-                                "type_":"TABLE"
+                                "type_":"TABLE",
+                                "config": {
+                                  "xLabels": {
+                                    "start": [4, 176],
+                                    "end": [15, 176]
+                                  },
+                                  "bodyRows": {
+                                    "start": [4, 177],
+                                    "end": [15, 178]
+                                  }
+                                }
                             },
-                            "renderer": "TABLE",
+                            "renderer": {
+                                "type_":"TABLE",
+                                "config": {
+                                  "colSpan": 12
+                                }
+                            },
                             "createdAt": "2017-09-04T16:03:55.948Z",
                             "updatedAt": "2017-09-04T16:03:55.948Z",
                             "tagList": [],
@@ -66,10 +86,28 @@ widgetDecoderTest =
                 expectedDatasources =
                     [ DataSource "datasource-1234" "12 month financials" ]
 
+                xLabelsRange =
+                    (CellRange
+                        (CellPosition ( 4, 176 ))
+                        (CellPosition ( 15, 176 ))
+                    )
+
+                bodyRowsRange =
+                    (CellRange
+                        (CellPosition ( 4, 177 ))
+                        (CellPosition ( 15, 178 ))
+                    )
+
                 expectedAdapterConfig =
-                    { sourceCell = ( 1, 0 )
-                    , targetCell = ( 1, 1 )
-                    }
+                    Dict.fromList
+                        [ ( "xLabels", CellRange.encode xLabelsRange )
+                        , ( "bodyRows", CellRange.encode bodyRowsRange )
+                        ]
+
+                expectedRendererConfig =
+                    Dict.fromList
+                        [ ( "colSpan", (Json.Encode.int 12) )
+                        ]
 
                 decodedOutput =
                     Decode.decodeString (Widget.decoder |> Decode.field "widget") input
@@ -82,8 +120,8 @@ widgetDecoderTest =
                             , name = "12 months Table"
                             , description = "12 months of important data"
                             , dataSources = expectedDatasources
-                            , adapter = Adapter.TABLE TableAdapter.defaultConfig
-                            , renderer = Renderer.TABLE
+                            , adapter = Adapter.TABLE expectedAdapterConfig
+                            , renderer = Renderer.TABLE expectedRendererConfig
                             , tags = []
                             , createdAt = expectedDate
                             , updatedAt = expectedDate
