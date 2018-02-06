@@ -30,7 +30,12 @@
           "targetCell": [2, 1]
         }
       },
-      "renderer": "METRIC",
+      "renderer": {
+        "type_": "METRIC",
+        "config": {
+          "colSpan": 4
+        }
+      },
       "createdAt": "2017-10-23T16:03:55.948Z",
       "updatedAt": "2017-10-23T16:03:55.948Z",
       "tagList": [],
@@ -61,7 +66,12 @@
           "targetCell": [3, 1]
         }
       },
-      "renderer": "METRIC",
+      "renderer": {
+        "type_": "METRIC",
+        "config": {
+          "colSpan": 4
+        }
+      },
       "createdAt": "2017-10-23T16:03:55.948Z",
       "updatedAt": "2017-10-23T16:03:55.948Z",
       "tagList": [],
@@ -92,7 +102,12 @@
           "targetCell": [6, 3]
         }
       },
-      "renderer": "METRIC",
+      "renderer": {
+        "type_": "METRIC",
+        "config": {
+          "colSpan": 4
+        }
+      },
       "createdAt": "2017-10-23T16:03:55.948Z",
       "updatedAt": "2017-10-23T16:03:55.948Z",
       "tagList": [],
@@ -119,7 +134,12 @@
       "adapter": {
         "type_": "BAR_CHART"
       },
-      "renderer": "BAR_CHART",
+      "renderer": {
+        "type_": "BAR_CHART",
+        "config": {
+          "colSpan": 6
+        }
+      },
       "createdAt": "2017-10-23T16:03:55.948Z",
       "updatedAt": "2017-10-23T16:03:55.948Z",
       "tagList": [],
@@ -160,7 +180,12 @@
           }
         }
       },
-      "renderer": "LINE_AND_BAR_CHART",
+      "renderer": {
+        "type_": "LINE_AND_BAR_CHART",
+        "config": {
+          "colSpan": 6
+        }
+      },
       "createdAt": "2017-10-23T16:03:55.948Z",
       "updatedAt": "2017-10-23T16:03:55.948Z",
       "tagList": [],
@@ -187,7 +212,12 @@
       "adapter": {
         "type_": "LINE_CHART"
       },
-      "renderer": "LINE_CHART",
+      "renderer": {
+        "type_": "LINE_CHART",
+        "config": {
+          "colSpan": 6
+        }
+      },
       "createdAt": "2017-10-23T16:03:55.948Z",
       "updatedAt": "2017-10-23T16:03:55.948Z",
       "tagList": [],
@@ -214,7 +244,12 @@
       "adapter": {
         "type_": "TABLE"
       },
-      "renderer": "TABLE",
+      "renderer": {
+        "type_": "TABLE",
+        "config": {
+          "colSpan": 6
+        }
+      },
       "createdAt": "2017-10-23T16:03:55.948Z",
       "updatedAt": "2017-10-23T16:03:55.948Z",
       "tagList": [],

@@ -26,7 +26,9 @@
                 "adapter": {
                   "type_": "HEAT_MAP"
                 },
-                "renderer": "HEAT_MAP",
+                "renderer": {
+                  "type_": "HEAT_MAP"
+                },
                 "createdAt": "2017-10-23T16:03:55.948Z",
                 "updatedAt": "2017-10-23T16:03:55.948Z",
                 "tagList": [],
@@ -53,7 +55,12 @@
                 "adapter": {
                   "type_": "LINE_CHART"
                 },
-                "renderer": "LINE_CHART",
+                "renderer": {
+                  "type_": "LINE_CHART",
+                  "config": {
+                    "colSpan": 12
+                  }
+                },
                 "createdAt": "2017-10-23T16:03:55.948Z",
                 "updatedAt": "2017-10-23T16:03:55.948Z",
                 "tagList": [],
@@ -81,7 +88,12 @@
                   "type_": "TABLE"
                 },
 
-                "renderer": "TABLE",
+                "renderer": {
+                  "type_": "TABLE",
+                  "config": {
+                    "colSpan": 12
+                  }
+                },
                 "createdAt": "2017-10-23T16:03:55.948Z",
                 "updatedAt": "2017-10-23T16:03:55.948Z",
                 "tagList": [],
