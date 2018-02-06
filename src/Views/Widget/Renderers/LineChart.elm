@@ -46,7 +46,7 @@ padding =
 
 lineColours : Array Color.Color
 lineColours =
-    Array.fromList Scale.category10
+    Array.fromList (List.reverse Scale.category10)
 
 
 getLineColour : Int -> String
