@@ -29,17 +29,17 @@ run width height widget data =
                     True
             in
                 case widget.renderer of
-                    TABLE ->
-                        Table.render width height widget data
+                    TABLE config ->
+                        Table.render config width height widget data
 
-                    LINE_CHART ->
-                        LineChart.render width height widget data
+                    LINE_CHART config ->
+                        LineChart.render config width height widget data
 
-                    BAR_CHART ->
-                        BarChart.render width height widget data
+                    BAR_CHART config ->
+                        BarChart.render config width height widget data
 
-                    LINE_AND_BAR_CHART ->
-                        LineAndBarChart.render width height widget data
+                    LINE_AND_BAR_CHART config ->
+                        LineAndBarChart.render config width height widget data
 
                     HEAT_MAP ->
                         HeatMap.render width height widget data (not updatable)
@@ -47,5 +47,5 @@ run width height widget data =
                     UPDATABLE_HEAT_MAP ->
                         HeatMap.render width height widget data updatable
 
-                    METRIC ->
-                        Metric.render width height widget data
+                    METRIC config ->
+                        Metric.render config width height widget data

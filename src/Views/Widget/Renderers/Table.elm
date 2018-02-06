@@ -3,28 +3,35 @@ module Views.Widget.Renderers.Table exposing (render)
 import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.TableAdapter as TableAdapter
+import Data.Widget.Config as RendererConfig
 import Data.Widget.Table as Table exposing (Cell, Data)
-import Dict exposing (Dict)
-import Json.Decode as Json exposing (Value)
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src, style, title)
+import Views.Widget.Renderers.Config as ViewConfig
 import Views.Widget.Renderers.Utils as Utils
 
 
-render : Int -> Int -> Widget -> Table.Data -> Html msg
-render width height widget data =
+render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
+render optionalRendererConfig width height widget data =
     case widget.adapter of
-        TABLE optionalConfig ->
+        TABLE optionalAdapterConfig ->
             let
                 ( headerRow, bodyRows, minValue, maxValue, xLabels ) =
-                    TableAdapter.adapt optionalConfig data
+                    TableAdapter.adapt optionalAdapterConfig data
+
+                calculatedHeight =
+                    ViewConfig.calculateHeight optionalRendererConfig height
             in
                 div
-                    [ class <| "col-md-12 widget" ]
+                    [ class <|
+                        ViewConfig.colSpanClass optionalRendererConfig
+                            ++ " widget"
+                    ]
                     [ h3 [ title widget.description, class "heading" ] [ Html.text widget.name ]
                     , div
                         [ style
                             [ ( "maxWidth", ((toString <| width - floor padding * 2) ++ "px") )
+                            , ( "minHeight", ((toString <| calculatedHeight) ++ "px") )
                             , ( "overflow", "auto" )
                             ]
                         ]

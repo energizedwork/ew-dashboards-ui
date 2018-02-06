@@ -1,11 +1,9 @@
 module Data.Widget.Adapters.Adapter exposing (Adapter(..), decoder)
 
 import Data.Widget.Config as AdapterConfig
-import Data.Widget.Adapters.LineAndBarAdapter as LineAndBarAdapter
 import Data.Widget.Adapters.MetricAdapter as MetricAdapter
 import Data.Widget.Definition as Definition exposing (decoder)
 import Json.Decode as Decode exposing (Decoder, Value, dict, maybe, string)
-import Json.Decode.Pipeline as Pipeline exposing (decode, optional, required)
 
 
 type Adapter

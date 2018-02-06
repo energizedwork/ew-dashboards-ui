@@ -6,32 +6,40 @@ import Color.Convert
 import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.TableAdapter as TableAdapter
+import Data.Widget.Config as RendererConfig
 import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
 import Html.Attributes exposing (title)
 import NumberParser
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
+import Views.Widget.Renderers.Config as ViewConfig
 import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
 import Visualization.Shape as Shape
 
 
-render : Int -> Int -> Widget -> Table.Data -> Html msg
-render width height widget data =
+render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
+render optionalRendererConfig width height widget data =
     case widget.adapter of
-        TABLE optionalConfig ->
+        TABLE optionalAdapterConfig ->
             let
                 ( headerRow, bodyRows, minValue, maxValue, xLabels ) =
-                    TableAdapter.adapt optionalConfig data
+                    TableAdapter.adapt optionalAdapterConfig data
 
                 dataAsHeaderValueTuples =
                     List.map (List.map2 (,) headerRow) bodyRows
+
+                calculatedWidth =
+                    ViewConfig.calculateWidth optionalRendererConfig width
+
+                calculatedHeight =
+                    ViewConfig.calculateHeight optionalRendererConfig height
             in
-                div [ class "col-md-12 widget" ]
+                div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ]
                     [ h3 [ Html.Attributes.title widget.description, Html.Attributes.class "heading" ] [ Html.text widget.name ]
-                    , view width (height // 2) dataAsHeaderValueTuples maxValue
+                    , view calculatedWidth calculatedHeight dataAsHeaderValueTuples maxValue
                     , Utils.renderDataSourceInfoFrom widget
                     ]
 

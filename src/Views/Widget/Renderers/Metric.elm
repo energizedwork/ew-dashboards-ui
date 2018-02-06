@@ -4,9 +4,11 @@ import Data.DataSource as DataSource exposing (toChannel)
 import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.MetricAdapter as MetricAdapter
+import Data.Widget.Config as RendererConfig
 import Data.Widget.Table as Table exposing (Data)
 import Html exposing (..)
 import Html.Attributes exposing (class, title)
+import Views.Widget.Renderers.Config as ViewConfig
 
 
 viewMetric : String -> String -> Html msg
@@ -23,26 +25,33 @@ viewMetric label metric =
         ]
 
 
-render : Int -> Int -> Widget -> Table.Data -> Html msg
-render width height widget data =
+render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
+render optionalRendererConfig width height widget data =
     case widget.adapter of
         METRIC config ->
             let
                 ( source, target ) =
                     MetricAdapter.adapt config data
+
+                calculatedWidth =
+                    ViewConfig.calculateWidth optionalRendererConfig width
+
+                calculatedHeight =
+                    ViewConfig.calculateHeight optionalRendererConfig height
             in
-                div
-                    [ class "col-md-3 widget container" ]
-                    [ h3
-                        [ title <|
-                            widget.description
-                                ++ " from "
-                                ++ (DataSource.toChannel <| Widget.primaryDataSource widget)
-                        , class "heading"
+                div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget container reduce-margin-top" ]
+                    [ div [ class "center-block" ]
+                        [ h3
+                            [ title <|
+                                widget.description
+                                    ++ " from "
+                                    ++ (DataSource.toChannel <| Widget.primaryDataSource widget)
+                            , class "heading"
+                            ]
+                            [ Html.text widget.name ]
+                        , viewMetric "Actual" source
+                        , viewMetric "Target" target
                         ]
-                        [ Html.text widget.name ]
-                    , viewMetric "Actual" source
-                    , viewMetric "Target" target
                     ]
 
         _ ->

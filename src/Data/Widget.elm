@@ -15,7 +15,6 @@ module Data.Widget
 import Data.DataSource as DataSource exposing (DataSource)
 import Data.UUID as UUID
 import Data.Widget.Adapters.Adapter as Adapter exposing (Adapter(..))
-import Data.Widget.Adapters.TableAdapter as TableAdapter
 import Data.Widget.Author as Author exposing (Author)
 import Data.Widget.Config as Config
 import Data.Widget.Renderer as Renderer exposing (..)

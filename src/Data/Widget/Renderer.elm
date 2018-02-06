@@ -8,12 +8,12 @@ import Json.Decode.Pipeline as Pipeline exposing (decode, optional, required)
 
 type Renderer
     = TABLE RendererConfig.Config
-    | LINE_CHART
-    | BAR_CHART
-    | LINE_AND_BAR_CHART
+    | LINE_CHART RendererConfig.Config
+    | BAR_CHART RendererConfig.Config
+    | LINE_AND_BAR_CHART RendererConfig.Config
     | HEAT_MAP
     | UPDATABLE_HEAT_MAP
-    | METRIC
+    | METRIC RendererConfig.Config
 
 
 decoder : Decoder Renderer
@@ -28,13 +28,19 @@ decoder =
                                 (definition.config |> Maybe.withDefault RendererConfig.default)
 
                     "LINE_CHART" ->
-                        Decode.succeed LINE_CHART
+                        Decode.succeed <|
+                            LINE_CHART
+                                (definition.config |> Maybe.withDefault RendererConfig.default)
 
                     "BAR_CHART" ->
-                        Decode.succeed BAR_CHART
+                        Decode.succeed <|
+                            BAR_CHART
+                                (definition.config |> Maybe.withDefault RendererConfig.default)
 
                     "LINE_AND_BAR_CHART" ->
-                        Decode.succeed LINE_AND_BAR_CHART
+                        Decode.succeed <|
+                            LINE_AND_BAR_CHART
+                                (definition.config |> Maybe.withDefault RendererConfig.default)
 
                     "HEAT_MAP" ->
                         Decode.succeed HEAT_MAP
@@ -43,7 +49,9 @@ decoder =
                         Decode.succeed UPDATABLE_HEAT_MAP
 
                     "METRIC" ->
-                        Decode.succeed METRIC
+                        Decode.succeed <|
+                            METRIC
+                                (definition.config |> Maybe.withDefault RendererConfig.default)
 
                     somethingElse ->
                         Decode.fail <| "Unknown renderer: " ++ somethingElse

@@ -8,6 +8,9 @@ import Dict exposing (Dict)
 import Json.Decode as Json exposing (Value)
 
 
+-- TODO These are flipped (y, x) and zero based which is unique amongst the adapters
+
+
 sourceCellPosition : CellPosition
 sourceCellPosition =
     CellPosition ( 0, 0 )
