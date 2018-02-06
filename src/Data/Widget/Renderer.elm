@@ -14,6 +14,7 @@ type Renderer
     | HEAT_MAP
     | UPDATABLE_HEAT_MAP
     | METRIC RendererConfig.Config
+    | PIE_CHART RendererConfig.Config
 
 
 decoder : Decoder Renderer
@@ -51,6 +52,11 @@ decoder =
                     "METRIC" ->
                         Decode.succeed <|
                             METRIC
+                                (definition.config |> Maybe.withDefault RendererConfig.default)
+
+                    "PIE_CHART" ->
+                        Decode.succeed <|
+                            PIE_CHART
                                 (definition.config |> Maybe.withDefault RendererConfig.default)
 
                     somethingElse ->

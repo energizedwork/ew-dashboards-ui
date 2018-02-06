@@ -290,6 +290,48 @@
       },
       {
         "uuid": "006f0092-5a11-468d-b822-ea57753f45c4",
+        "name": "Operating Expenses 2016-17",
+        "description": "Full Year Operating Expenses 2016/17",
+        "dataSources": [{
+          "uuid": "f6c73b1e-2636-45f9-a3b1-b4ae7eba6879",
+          "name": "sheets"
+        }],
+        "adapter": {
+          "type_": "TABLE",
+          "config": {
+            "xLabels": {
+              "start": [4, 279],
+              "end": [5, 279]
+            },
+            "bodyRows": {
+              "start": [4, 280],
+              "end": [5, 291]
+            }
+          }
+        },
+        "renderer": {
+          "type_": "PIE_CHART",
+          "config": {
+            "colSpan": 6
+          }
+        },
+        "createdAt": "2017-02-06T16:03:55.948Z",
+        "updatedAt": "2017-02-06T16:03:55.948Z",
+        "tagList": [],
+        "author": {
+          "username": "msp",
+          "bio": "beautifully flawed creation .. \n\n",
+          "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
+          "following": false
+        },
+        "favorited": false,
+        "favoritesCount": 0,
+        "data": {
+          "data": []
+        }
+      },
+      {
+        "uuid": "006f0092-5a11-468d-b822-ea57753f45c4",
         "name": "Cash Position and Threshold",
         "description": "Cash Position and Threshold as a line chart",
         "dataSources": [{
@@ -311,6 +353,48 @@
         },
         "renderer": {
           "type_": "LINE_CHART",
+          "config": {
+            "colSpan": 6
+          }
+        },
+        "createdAt": "2017-02-06T16:03:55.948Z",
+        "updatedAt": "2017-02-06T16:03:55.948Z",
+        "tagList": [],
+        "author": {
+          "username": "msp",
+          "bio": "beautifully flawed creation .. \n\n",
+          "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
+          "following": false
+        },
+        "favorited": false,
+        "favoritesCount": 0,
+        "data": {
+          "data": []
+        }
+      },
+      {
+        "uuid": "006f0092-5a11-468d-b822-ea57753f45c4",
+        "name": "Operating Expenses 2016-17",
+        "description": "Full Year Operating Expenses 2016/17",
+        "dataSources": [{
+          "uuid": "f6c73b1e-2636-45f9-a3b1-b4ae7eba6879",
+          "name": "sheets"
+        }],
+        "adapter": {
+          "type_": "TABLE",
+          "config": {
+            "xLabels": {
+              "start": [4, 279],
+              "end": [5, 279]
+            },
+            "bodyRows": {
+              "start": [4, 280],
+              "end": [5, 291]
+            }
+          }
+        },
+        "renderer": {
+          "type_": "TABLE",
           "config": {
             "colSpan": 6
           }

@@ -11,6 +11,7 @@ import Views.Widget.Renderers.HeatMap as HeatMap
 import Views.Widget.Renderers.LineAndBarChart as LineAndBarChart
 import Views.Widget.Renderers.LineChart as LineChart
 import Views.Widget.Renderers.Metric as Metric
+import Views.Widget.Renderers.PieChart as PieChart
 import Views.Widget.Renderers.RendererMessage as RendererMessage exposing (Msg(..))
 import Views.Widget.Renderers.Table as Table
 
@@ -49,3 +50,6 @@ run width height widget data =
 
                     METRIC config ->
                         Metric.render config width height widget data
+
+                    PIE_CHART config ->
+                        PieChart.render config width height widget data
