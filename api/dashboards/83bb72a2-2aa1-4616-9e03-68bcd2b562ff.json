@@ -210,11 +210,17 @@
       "body": "Turnover",
       "description": "12 months financial data as a line chart",
       "dataSources": [{
-        "uuid": "bf1a974e-c506-482b-8f6a-169c3635ce53",
+        "uuid": "be5614ef-67b6-4fe5-9659-af1f7bf71642",
         "name": "sheets"
       }],
       "adapter": {
-        "type_": "LINE_CHART"
+        "type_": "LINE_CHART",
+        "config": {
+          "seriesLabels": {
+            "start": [13, 2],
+            "end": [13, 7]
+          }
+        }
       },
       "renderer": {
         "type_": "LINE_CHART",

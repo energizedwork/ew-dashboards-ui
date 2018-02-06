@@ -16,8 +16,8 @@ import Color
 import Color.Convert
 import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
-import Data.Widget.Adapters.TableAdapter as TableAdapter
 import Data.Widget.Config as RendererConfig
+import Data.Widget.Adapters.ChartAdapter as ChartAdapter
 import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
 import Html.Attributes exposing (title)
@@ -34,10 +34,10 @@ import Visualization.Shape as Shape
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
 render optionalRendererConfig width height widget data =
     case widget.adapter of
-        TABLE optionalAdapterConfig ->
+        LINE_CHART optionalAdapterConfig ->
             let
-                ( headerRow, bodyRows, minValue, maxValue, xLabels ) =
-                    TableAdapter.adapt optionalAdapterConfig data
+                ( headerRow, bodyRows, minValue, maxValue, xLabels, seriesLabels ) =
+                    ChartAdapter.adapt optionalAdapterConfig data
 
                 dataAsLabelValueTuples =
                     List.map (List.map2 (,) headerRow) bodyRows
@@ -58,7 +58,7 @@ render optionalRendererConfig width height widget data =
                         , Html.Attributes.class "heading"
                         ]
                         [ Html.text widget.name ]
-                    , view calculatedWidth calculatedHeight dataAsLabelValueTuples maxValue
+                    , view calculatedWidth calculatedHeight dataAsLabelValueTuples maxValue seriesLabels
                     , Utils.renderDataSourceInfoFrom widget
                     ]
 
@@ -83,8 +83,8 @@ getLineColour index =
         |> Color.Convert.colorToHex
 
 
-view : Int -> Int -> List (List ( Cell, Cell )) -> Float -> Svg msg
-view w h data maxValue =
+view : Int -> Int -> List (List ( Cell, Cell )) -> Float -> Maybe (List String) -> Svg msg
+view w h data maxValue seriesLabels =
     let
         firstRow =
             List.head data
@@ -116,6 +116,7 @@ view w h data maxValue =
                   , renderYGrid w h maxValue <| Scale.ticks (yScale h maxValue) yTicksCount
                   ]
                 , renderLines w h maxValue firstRow indexedData
+                , renderLegend (h - 5) seriesLabels
                 ]
             )
 
