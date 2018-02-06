@@ -1,7 +1,6 @@
 module Views.Widget.Renderers.BarChart exposing (render, renderColumn, renderColumns, renderXAxis, renderYAxis)
 
 import Array exposing (..)
-import Char
 import Color
 import Color.Convert
 import Data.Widget as Widget exposing (Body, Widget)
@@ -10,6 +9,7 @@ import Data.Widget.Adapters.TableAdapter as TableAdapter
 import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
 import Html.Attributes exposing (title)
+import NumberParser
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Views.Widget.Renderers.Utils as Utils exposing (..)
@@ -88,8 +88,7 @@ column height index totalRows colour xScaleBand maxValue ( header, value ) =
             (Scale.convert (Scale.toRenderable xScaleBand) header) + (colWidth * (toFloat index))
 
         valueSantized =
-            String.toFloat (String.filter Char.isDigit value)
-                |> Result.withDefault 0
+            NumberParser.fromString value
 
         ypos =
             Scale.convert (yScale height maxValue) valueSantized
