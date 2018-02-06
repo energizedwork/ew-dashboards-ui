@@ -8,7 +8,7 @@ import Json.Decode as Decode exposing (Decoder, Value, dict, maybe, string)
 
 type Adapter
     = TABLE AdapterConfig.Config
-    | LINE_CHART AdapterConfig.Config
+    | CHART AdapterConfig.Config
     | LINE_AND_BAR_CHART AdapterConfig.Config
     | HEAT_MAP
     | METRIC AdapterConfig.Config
@@ -27,12 +27,12 @@ decoder =
 
                     "LINE_CHART" ->
                         Decode.succeed <|
-                            LINE_CHART
+                            CHART
                                 (definition.config |> Maybe.withDefault AdapterConfig.default)
 
                     "BAR_CHART" ->
                         Decode.succeed <|
-                            TABLE
+                            CHART
                                 (definition.config |> Maybe.withDefault AdapterConfig.default)
 
                     "LINE_AND_BAR_CHART" ->

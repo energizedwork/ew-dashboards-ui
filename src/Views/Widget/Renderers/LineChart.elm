@@ -29,12 +29,13 @@ import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
 import Visualization.Shape as Shape
+import Views.Widget.Renderers.ChartLegend as ChartLegend
 
 
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
 render optionalRendererConfig width height widget data =
     case widget.adapter of
-        LINE_CHART optionalAdapterConfig ->
+        CHART optionalAdapterConfig ->
             let
                 ( headerRow, bodyRows, minValue, maxValue, xLabels, seriesLabels ) =
                     ChartAdapter.adapt optionalAdapterConfig data
@@ -63,7 +64,7 @@ render optionalRendererConfig width height widget data =
                     ]
 
         _ ->
-            p [ class "data" ] [ Html.text "Sorry, I can only render line charts from a TABLE adapter right now" ]
+            p [ class "data" ] [ Html.text "Sorry, I can only render line charts from a CHART adapter right now" ]
 
 
 padding : Float
@@ -230,7 +231,7 @@ renderYAxis width height continuousScale opts =
 
 renderLegendLabel : Int -> String -> Svg msg
 renderLegendLabel index labelText =
-    tspan [ Svg.Attributes.dx "10", fill (getLineColour index) ] [ Svg.text ("― " ++ labelText) ]
+    ChartLegend.renderLabel index labelText "―" getLineColour
 
 
 renderLegend :
@@ -238,31 +239,7 @@ renderLegend :
     -> Maybe (List String)
     -> List (Svg msg)
 renderLegend top seriesLabels =
-    case seriesLabels of
-        Nothing ->
-            []
-
-        Just seriesLabels ->
-            let
-                spans =
-                    List.indexedMap renderLegendLabel seriesLabels
-
-                xPosition =
-                    toString padding
-
-                yPosition =
-                    toString top
-
-                transformAttribute =
-                    "translate(" ++ xPosition ++ ", " ++ yPosition ++ ")"
-            in
-                [ Svg.text_
-                    [ transform transformAttribute
-                    , Svg.Attributes.fontSize "12"
-                    , Svg.Attributes.fontWeight "bold"
-                    ]
-                    spans
-                ]
+    ChartLegend.render top seriesLabels renderLegendLabel padding
 
 
 generateSVGPathDesc :

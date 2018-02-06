@@ -5,8 +5,8 @@ import Color
 import Color.Convert
 import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
-import Data.Widget.Adapters.TableAdapter as TableAdapter
 import Data.Widget.Config as RendererConfig
+import Data.Widget.Adapters.ChartAdapter as ChartAdapter
 import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
 import Html.Attributes exposing (title)
@@ -17,15 +17,16 @@ import Views.Widget.Renderers.Config as ViewConfig
 import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
+import Views.Widget.Renderers.ChartLegend as ChartLegend
 
 
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
 render optionalRendererConfig width height widget data =
     case widget.adapter of
-        TABLE optionalConfig ->
+        CHART optionalConfig ->
             let
-                ( headerRow, bodyRows, minValue, maxValue, xLabels ) =
-                    TableAdapter.adapt optionalConfig data
+                ( headerRow, bodyRows, minValue, maxValue, xLabels, seriesLabels ) =
+                    ChartAdapter.adapt optionalConfig data
 
                 dataAsHeaderValueTuples =
                     List.map (List.map2 (,) headerRow) bodyRows
@@ -38,12 +39,12 @@ render optionalRendererConfig width height widget data =
             in
                 div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ]
                     [ h3 [ Html.Attributes.title widget.description, Html.Attributes.class "heading" ] [ Html.text widget.name ]
-                    , view calculatedWidth calculatedHeight dataAsHeaderValueTuples maxValue
+                    , view calculatedWidth calculatedHeight dataAsHeaderValueTuples maxValue seriesLabels
                     , Utils.renderDataSourceInfoFrom widget
                     ]
 
         _ ->
-            p [ class "data" ] [ Html.text "Sorry, I can only render bar charts from a TABLE adapter right now" ]
+            p [ class "data" ] [ Html.text "Sorry, I can only render bar charts from a CHART adapter right now" ]
 
 
 padding : Float
@@ -119,18 +120,19 @@ column height index totalRows colour xScaleBand maxValue ( header, value ) =
                 , fill colour
                 ]
                 []
-              -- TODO: Fix layering
-              -- , text_
-              --     [ x <| toString <| xposText
-              --     , y <| toString <| yposText
-              --     , textAnchor "middle"
-              --     ]
-              --     [ Svg.text <| toString value ]
+
+            -- TODO: Fix layering
+            -- , text_
+            --     [ x <| toString <| xposText
+            --     , y <| toString <| yposText
+            --     , textAnchor "middle"
+            --     ]
+            --     [ Svg.text <| toString value ]
             ]
 
 
-view : Int -> Int -> List (List ( Cell, Cell )) -> Float -> Svg msg
-view width height data maxValue =
+view : Int -> Int -> List (List ( Cell, Cell )) -> Float -> Maybe (List String) -> Svg msg
+view width height data maxValue seriesLabels =
     let
         firstDataTuple =
             List.head data |> Maybe.withDefault []
@@ -153,6 +155,7 @@ view width height data maxValue =
                   , renderYAxis width height maxValue
                   ]
                 , renderColumns width height maxValue totalRows indexedData
+                , renderLegend (height - 5) seriesLabels
                 ]
             )
 
@@ -195,3 +198,16 @@ renderYAxis : Int -> Int -> Float -> Svg msg
 renderYAxis width height maxValue =
     g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString padding ++ ")") ]
         [ (yAxis height maxValue) ]
+
+
+renderLegendLabel : Int -> String -> Svg msg
+renderLegendLabel index labelText =
+    ChartLegend.renderLabel index labelText "■" getBarColour
+
+
+renderLegend :
+    Int
+    -> Maybe (List String)
+    -> List (Svg msg)
+renderLegend top seriesLabels =
+    ChartLegend.render top seriesLabels renderLegendLabel padding
