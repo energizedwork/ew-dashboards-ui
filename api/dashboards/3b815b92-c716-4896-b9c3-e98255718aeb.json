@@ -86,6 +86,82 @@
       "data": {
         "data": []
       }
+    }, {
+      "uuid": "006f0092-5a11-468d-b822-ea57753f45c4",
+      "name": "Profitability Trend",
+      "description": "Profitability Trend as a combo chart",
+      "dataSources": [{
+        "uuid": "13551d22-ef5b-4a04-baf3-f98a8c983ba0",
+        "name": "sheets"
+      }],
+      "adapter": {
+        "type_": "LINE_AND_BAR_CHART",
+        "config": {
+          "xLabels": {
+            "start": [2, 43],
+            "end": [9, 43]
+          },
+          "barRows": {
+            "start": [2, 44],
+            "end": [9, 46]
+          },
+          "lineRows": {
+            "start": [2, 47],
+            "end": [9, 48]
+          }
+        }
+      },
+      "renderer": "LINE_AND_BAR_CHART",
+      "createdAt": "2017-02-06T16:03:55.948Z",
+      "updatedAt": "2017-02-06T16:03:55.948Z",
+      "tagList": [],
+      "author": {
+        "username": "msp",
+        "bio": "beautifully flawed creation .. \n\n",
+        "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
+        "following": false
+      },
+      "favorited": false,
+      "favoritesCount": 0,
+      "data": {
+        "data": []
+      }
+    }, {
+      "uuid": "006f0092-5a11-468d-b822-ea57753f45c4",
+      "name": "Profitability Trend",
+      "description": "Profitability Trend as a table",
+      "dataSources": [{
+        "uuid": "13551d22-ef5b-4a04-baf3-f98a8c983ba0",
+        "name": "sheets"
+      }],
+      "adapter": {
+        "type_": "TABLE",
+        "config": {
+          "xLabels": {
+            "start": [4, 176],
+            "end": [15, 176]
+          },
+          "bodyRows": {
+            "start": [1, 44],
+            "end": [9, 48]
+          }
+        }
+      },
+      "renderer": "TABLE",
+      "createdAt": "2017-02-06T16:03:55.948Z",
+      "updatedAt": "2017-02-06T16:03:55.948Z",
+      "tagList": [],
+      "author": {
+        "username": "msp",
+        "bio": "beautifully flawed creation .. \n\n",
+        "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
+        "following": false
+      },
+      "favorited": false,
+      "favoritesCount": 0,
+      "data": {
+        "data": []
+      }
     }]
   }
 }

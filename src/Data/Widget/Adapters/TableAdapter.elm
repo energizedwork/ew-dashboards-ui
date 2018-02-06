@@ -1,11 +1,11 @@
 module Data.Widget.Adapters.TableAdapter exposing (defaultConfig, adapt)
 
-import Char
 import Data.Widget.Adapters.CellRange as CellRange exposing (..)
 import Data.Widget.Adapters.Config as AdapterConfig
 import Data.Widget.Table as Table exposing (Cell, Data, Row)
 import Dict exposing (Dict)
 import Json.Decode as Json exposing (Value)
+import NumberParser
 
 
 -- Possible values:
@@ -58,13 +58,7 @@ adapt optionalConfig data =
                     CellRange.extractRows data defaultBodyRange
 
         rowToNumber row =
-            List.map
-                (\n ->
-                    String.toFloat
-                        (String.filter Char.isDigit n)
-                        |> Result.withDefault 0
-                )
-                row
+            List.map NumberParser.fromString row
 
         rowMin row =
             List.minimum (rowToNumber row) |> Maybe.withDefault 0

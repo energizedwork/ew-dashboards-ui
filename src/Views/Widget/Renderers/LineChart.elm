@@ -1,7 +1,6 @@
 module Views.Widget.Renderers.LineChart exposing (render, renderLines, renderLine, renderXAxis, renderYAxis, xScale, yScale)
 
 import Array exposing (..)
-import Char
 import Color
 import Color.Convert
 import Data.Widget as Widget exposing (Body, Widget)
@@ -10,6 +9,7 @@ import Data.Widget.Adapters.TableAdapter as TableAdapter
 import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
 import Html.Attributes exposing (title)
+import NumberParser
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Views.Widget.Renderers.Utils as Utils exposing (..)
@@ -46,7 +46,7 @@ padding =
 
 lineColours : Array Color.Color
 lineColours =
-    Array.fromList Scale.category10
+    Array.fromList (List.reverse Scale.category10)
 
 
 getLineColour : Int -> String
@@ -191,8 +191,7 @@ lineGenerator :
 lineGenerator width height maxValue firstDataTuple ( x, y ) =
     let
         ySantized =
-            String.toFloat (String.filter Char.isDigit y)
-                |> Result.withDefault 0
+            NumberParser.fromString y
 
         yScaleData =
             Scale.convert
