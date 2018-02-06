@@ -100,5 +100,6 @@ view w h lineChart barChart =
                     lineChart.maxValue
                     firstLineDataTuple
                     lineChart.indexedData
+                , LineChart.renderLegend (h - 10) lineChart.seriesLabels
                 ]
             )

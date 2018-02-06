@@ -160,7 +160,7 @@
       "body": "Actuals Combo",
       "description": "12 months financial data as a bar chart",
       "dataSources": [{
-        "uuid": "bf1a974e-c506-482b-8f6a-169c3635ce53",
+        "uuid": "be5614ef-67b6-4fe5-9659-af1f7bf71642",
         "name": "sheets"
       }],
       "adapter": {
@@ -173,6 +173,10 @@
           "lineRows": {
             "start": [1, 3],
             "end": [12, 7]
+          },
+          "lineSeriesLabels": {
+            "start": [13, 3],
+            "end": [13, 7]
           },
           "barRows": {
             "start": [1, 2],

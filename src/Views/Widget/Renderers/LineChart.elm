@@ -8,6 +8,7 @@ module Views.Widget.Renderers.LineChart
         , renderYGrid
         , xScale
         , yScale
+        , renderLegend
         )
 
 import Array exposing (..)
@@ -138,7 +139,8 @@ yGridLine width height maxValue index tick =
             , y2 yPos
             , stroke "#ccc"
             , strokeWidth "1"
-              -- , strokeWidth (toString (Basics.max (toFloat (index % 2)) 0.5))
+
+            -- , strokeWidth (toString (Basics.max (toFloat (index % 2)) 0.5))
             ]
             []
 
@@ -223,6 +225,43 @@ renderYAxis width height continuousScale opts =
                 )
             ]
             [ yAxis ]
+
+
+renderLegendLabel : Int -> String -> Svg msg
+renderLegendLabel index labelText =
+    tspan [ Svg.Attributes.dx "10", fill (getLineColour index) ] [ Svg.text ("― " ++ labelText) ]
+
+
+renderLegend :
+    Int
+    -> Maybe (List String)
+    -> List (Svg msg)
+renderLegend top seriesLabels =
+    case seriesLabels of
+        Nothing ->
+            []
+
+        Just seriesLabels ->
+            let
+                spans =
+                    List.indexedMap renderLegendLabel seriesLabels
+
+                xPosition =
+                    toString padding
+
+                yPosition =
+                    toString top
+
+                transformAttribute =
+                    "translate(" ++ xPosition ++ ", " ++ yPosition ++ ")"
+            in
+                [ Svg.text_
+                    [ transform transformAttribute
+                    , Svg.Attributes.fontSize "12"
+                    , Svg.Attributes.fontWeight "bold"
+                    ]
+                    spans
+                ]
 
 
 generateSVGPathDesc :
