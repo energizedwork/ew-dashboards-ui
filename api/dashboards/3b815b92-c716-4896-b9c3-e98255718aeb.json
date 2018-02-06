@@ -128,6 +128,42 @@
       }
     }, {
       "uuid": "006f0092-5a11-468d-b822-ea57753f45c4",
+      "name": "Cash Position and Threshold",
+      "description": "Cash Position and Threshold as a line chart",
+      "dataSources": [{
+        "uuid": "f6c73b1e-2636-45f9-a3b1-b4ae7eba6879",
+        "name": "sheets"
+      }],
+      "adapter": {
+        "type_": "LINE_CHART",
+        "config": {
+          "xLabels": {
+            "start": [2, 271],
+            "end": [13, 271]
+          },
+          "bodyRows": {
+            "start": [2, 272],
+            "end": [13, 273]
+          }
+        }
+      },
+      "renderer": "LINE_CHART",
+      "createdAt": "2017-02-06T16:03:55.948Z",
+      "updatedAt": "2017-02-06T16:03:55.948Z",
+      "tagList": [],
+      "author": {
+        "username": "msp",
+        "bio": "beautifully flawed creation .. \n\n",
+        "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
+        "following": false
+      },
+      "favorited": false,
+      "favoritesCount": 0,
+      "data": {
+        "data": []
+      }
+    }, {
+      "uuid": "006f0092-5a11-468d-b822-ea57753f45c4",
       "name": "Profitability Trend",
       "description": "Profitability Trend as a table",
       "dataSources": [{
