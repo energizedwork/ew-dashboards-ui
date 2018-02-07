@@ -92,23 +92,61 @@ view width height data =
                 )
                 data
 
+        labels =
+            List.map Tuple.first data
+
         pieData =
             Shape.pie { defaultPieConfig | outerRadius = (radius width height) } values
 
         makeSlice index datum =
-            Svg.path [ d (Shape.arc datum), Svg.Attributes.style ("fill:" ++ (getLineColour index) ++ "; stroke: #fff;") ] []
+            Svg.path
+                [ d (Shape.arc datum)
+                , Svg.Attributes.style ("fill:" ++ (getLineColour index) ++ "; stroke: #fff;")
+                , Svg.Attributes.class "segment"
+                ]
+                [ Svg.title []
+                    [ Svg.text <|
+                        (makeTitle index)
+                    ]
+                ]
+
+        makeTitle index =
+            let
+                ( label, amount ) =
+                    List.Extra.getAt index data
+                        |> Maybe.withDefault ( "??", "--" )
+            in
+                label ++ ": " ++ amount
 
         -- makeLabel slice ( label, value ) =
         --     text_
-        --         [ transform ("translate" ++ toString (Shape.centroid { slice | innerRadius = (radius width height) - 40, outerRadius = (radius width height) - 40 }))
+        --         [ transform
+        --             ("translate"
+        --                 ++ toString
+        --                     (Shape.centroid
+        --                         { slice
+        --                             | innerRadius = (radius width height) - 40
+        --                             , outerRadius = (radius width height) - 20
+        --                         }
+        --                     )
+        --             )
         --         , dy ".35em"
         --         , textAnchor "middle"
         --         ]
         --         [ Svg.text label ]
     in
-        svg [ Svg.Attributes.width (toString width ++ "px"), Svg.Attributes.height (toString height ++ "px") ]
-            [ g [ transform ("translate(" ++ toString (width // 2) ++ "," ++ toString (height // 2) ++ ")") ]
-                [ g [] <| List.indexedMap makeSlice pieData
-                  -- , g [] <| List.map2 makeLabel pieData data
+        svg [ Svg.Attributes.width (toString width ++ "px"), Svg.Attributes.height (toString height ++ "px") ] <|
+            List.concat
+                [ [ Svg.style []
+                        [ Svg.text """
+                            .segment text { display: none; }
+                            .segment:hover { opacity: 0.7; }
+                            .segment:hover text { display: inline; z-index: 9999; }
+                          """ ]
+                  ]
+                , [ g [ transform ("translate(" ++ toString (width // 2) ++ "," ++ toString (height // 2) ++ ")") ]
+                        [ g [] <| List.indexedMap makeSlice pieData
+                          -- , g [] <| List.map2 makeLabel pieData data
+                        ]
+                  ]
                 ]
-            ]
