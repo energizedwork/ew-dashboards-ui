@@ -15,9 +15,9 @@ module Data.Widget
 import Data.DataSource as DataSource exposing (DataSource)
 import Data.UUID as UUID
 import Data.Widget.Adapters.Adapter as Adapter exposing (Adapter(..))
-import Data.Widget.Adapters.TableAdapter as TableAdapter
 import Data.Widget.Author as Author exposing (Author)
-import Data.Widget.Renderer as Renderer exposing (Renderer(..))
+import Data.Widget.Config as Config
+import Data.Widget.Renderer as Renderer exposing (..)
 import Data.Widget.Table as Table exposing (Data)
 import Date exposing (Date)
 import Html exposing (Attribute, Html)
@@ -60,10 +60,10 @@ init =
             [ DataSource.init ]
 
         adapter =
-            Adapter.TABLE TableAdapter.defaultConfig
+            Adapter.TABLE Config.default
 
         renderer =
-            Renderer.TABLE
+            Renderer.TABLE Config.default
 
         tags =
             []
@@ -101,7 +101,7 @@ decoder =
         |> required "description" (Decode.map (Maybe.withDefault "") (Decode.nullable Decode.string))
         |> required "dataSources" (Decode.list DataSource.decoder)
         |> required "adapter" Adapter.decoder
-        |> required "renderer" rendererDecoder
+        |> required "renderer" Renderer.decoder
         |> required "tagList" (Decode.list Decode.string)
         |> required "createdAt" Json.Decode.Extra.date
         |> required "updatedAt" Json.Decode.Extra.date
@@ -109,38 +109,6 @@ decoder =
         |> required "favoritesCount" Decode.int
         |> required "author" Author.decoder
         |> required "data" Table.decoder
-
-
-rendererDecoder : Decoder Renderer
-rendererDecoder =
-    Decode.string
-        |> Decode.andThen
-            (\str ->
-                case str of
-                    "TABLE" ->
-                        Decode.succeed Renderer.TABLE
-
-                    "LINE_CHART" ->
-                        Decode.succeed Renderer.LINE_CHART
-
-                    "BAR_CHART" ->
-                        Decode.succeed Renderer.BAR_CHART
-
-                    "LINE_AND_BAR_CHART" ->
-                        Decode.succeed Renderer.LINE_AND_BAR_CHART
-
-                    "HEAT_MAP" ->
-                        Decode.succeed Renderer.HEAT_MAP
-
-                    "UPDATABLE_HEAT_MAP" ->
-                        Decode.succeed Renderer.UPDATABLE_HEAT_MAP
-
-                    "METRIC" ->
-                        Decode.succeed Renderer.METRIC
-
-                    somethingElse ->
-                        Decode.fail <| "Unknown renderer: " ++ somethingElse
-            )
 
 
 

@@ -1,11 +1,14 @@
 module Data.Widget.Adapters.MetricAdapter exposing (defaultConfig, adapt)
 
 import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder)
-import Data.Widget.Adapters.Config as AdapterConfig
+import Data.Widget.Config as AdapterConfig
 import Data.Widget.Table as Table exposing (Data)
 import Array
 import Dict exposing (Dict)
 import Json.Decode as Json exposing (Value)
+
+
+-- TODO These are flipped (y, x) and zero based which is unique amongst the adapters
 
 
 sourceCellPosition : CellPosition

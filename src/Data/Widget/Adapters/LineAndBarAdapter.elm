@@ -1,7 +1,7 @@
 module Data.Widget.Adapters.LineAndBarAdapter exposing (defaultConfig, adapt)
 
 import Array
-import Data.Widget.Adapters.Config as AdapterConfig
+import Data.Widget.Config as AdapterConfig
 import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (..)
 import Data.Widget.Chart as Chart exposing (Data)
 import Data.Widget.Table as Table exposing (Cell, Data, Row)

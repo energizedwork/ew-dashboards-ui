@@ -1,17 +1,9 @@
 module Data.Widget.Adapters.Adapter exposing (Adapter(..), decoder)
 
-import Data.Widget.Adapters.Config as AdapterConfig
-import Data.Widget.Adapters.LineAndBarAdapter as LineAndBarAdapter
+import Data.Widget.Config as AdapterConfig
 import Data.Widget.Adapters.MetricAdapter as MetricAdapter
-import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (defaultConfig)
+import Data.Widget.Definition as Definition exposing (decoder)
 import Json.Decode as Decode exposing (Decoder, Value, dict, maybe, string)
-import Json.Decode.Pipeline as Pipeline exposing (decode, optional, required)
-
-
-type alias Definition =
-    { type_ : String
-    , config : Maybe AdapterConfig.Config
-    }
 
 
 type Adapter
@@ -23,29 +15,29 @@ type Adapter
 
 decoder : Decoder Adapter
 decoder =
-    definitionDecoder
+    Definition.decoder
         |> Decode.andThen
             (\definition ->
                 case definition.type_ of
                     "TABLE" ->
                         Decode.succeed <|
                             TABLE
-                                (definition.config |> Maybe.withDefault TableAdapter.defaultConfig)
+                                (definition.config |> Maybe.withDefault AdapterConfig.default)
 
                     "LINE_CHART" ->
                         Decode.succeed <|
                             TABLE
-                                (definition.config |> Maybe.withDefault TableAdapter.defaultConfig)
+                                (definition.config |> Maybe.withDefault AdapterConfig.default)
 
                     "BAR_CHART" ->
                         Decode.succeed <|
                             TABLE
-                                (definition.config |> Maybe.withDefault TableAdapter.defaultConfig)
+                                (definition.config |> Maybe.withDefault AdapterConfig.default)
 
                     "LINE_AND_BAR_CHART" ->
                         Decode.succeed <|
                             LINE_AND_BAR_CHART
-                                (definition.config |> Maybe.withDefault LineAndBarAdapter.defaultConfig)
+                                (definition.config |> Maybe.withDefault AdapterConfig.default)
 
                     "HEAT_MAP" ->
                         Decode.succeed HEAT_MAP
@@ -58,14 +50,3 @@ decoder =
                     somethingElse ->
                         Decode.fail <| "Unknown adapter: " ++ somethingElse
             )
-
-
-definitionDecoder : Decoder Definition
-definitionDecoder =
-    decode Definition
-        |> required "type_" Decode.string
-        |> optional "config"
-            (maybe
-                (Decode.dict Decode.value)
-            )
-            Nothing

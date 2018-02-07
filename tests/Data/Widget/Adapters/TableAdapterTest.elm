@@ -1,8 +1,9 @@
 module Data.Widget.Adapters.TableAdapterTest exposing (..)
 
 import Data.Widget.Adapters.AdapterTestData as TD
-import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder)
+import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), decoder, encode)
 import Data.Widget.Adapters.CellRange as CellRange exposing (CellRange, encode)
+import Data.Widget.Config as TableConfig
 import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (adapt)
 import Data.Widget.Table as Table exposing (Data)
 import Dict exposing (Dict)
@@ -27,7 +28,7 @@ adapterConfigTest =
                 ]
 
         defaultConfig =
-            TableAdapter.defaultConfig
+            TableConfig.default
 
         suppliedConfig =
             Dict.fromList

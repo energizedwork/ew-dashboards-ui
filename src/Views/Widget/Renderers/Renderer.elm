@@ -11,6 +11,7 @@ import Views.Widget.Renderers.HeatMap as HeatMap
 import Views.Widget.Renderers.LineAndBarChart as LineAndBarChart
 import Views.Widget.Renderers.LineChart as LineChart
 import Views.Widget.Renderers.Metric as Metric
+import Views.Widget.Renderers.PieChart as PieChart
 import Views.Widget.Renderers.RendererMessage as RendererMessage exposing (Msg(..))
 import Views.Widget.Renderers.Table as Table
 
@@ -29,17 +30,17 @@ run width height widget data =
                     True
             in
                 case widget.renderer of
-                    TABLE ->
-                        Table.render width height widget data
+                    TABLE config ->
+                        Table.render config width height widget data
 
-                    LINE_CHART ->
-                        LineChart.render width height widget data
+                    LINE_CHART config ->
+                        LineChart.render config width height widget data
 
-                    BAR_CHART ->
-                        BarChart.render width height widget data
+                    BAR_CHART config ->
+                        BarChart.render config width height widget data
 
-                    LINE_AND_BAR_CHART ->
-                        LineAndBarChart.render width height widget data
+                    LINE_AND_BAR_CHART config ->
+                        LineAndBarChart.render config width height widget data
 
                     HEAT_MAP ->
                         HeatMap.render width height widget data (not updatable)
@@ -47,5 +48,8 @@ run width height widget data =
                     UPDATABLE_HEAT_MAP ->
                         HeatMap.render width height widget data updatable
 
-                    METRIC ->
-                        Metric.render width height widget data
+                    METRIC config ->
+                        Metric.render config width height widget data
+
+                    PIE_CHART config ->
+                        PieChart.render config width height widget data
