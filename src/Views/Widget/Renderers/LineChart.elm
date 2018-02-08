@@ -1,4 +1,14 @@
-module Views.Widget.Renderers.LineChart exposing (render, renderLines, renderLine, renderXAxis, renderYAxis, xScale, yScale)
+module Views.Widget.Renderers.LineChart
+    exposing
+        ( render
+        , renderLines
+        , renderLine
+        , renderXAxis
+        , renderYAxis
+        , renderYGrid
+        , xScale
+        , yScale
+        )
 
 import Array exposing (..)
 import Color
@@ -37,8 +47,16 @@ render optionalRendererConfig width height widget data =
                 calculatedHeight =
                     ViewConfig.calculateHeight optionalRendererConfig height
             in
-                div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ]
-                    [ h3 [ Html.Attributes.title widget.description, Html.Attributes.class "heading" ] [ Html.text widget.name ]
+                div
+                    [ class <|
+                        ViewConfig.colSpanClass optionalRendererConfig
+                            ++ " widget"
+                    ]
+                    [ h3
+                        [ Html.Attributes.title widget.description
+                        , Html.Attributes.class "heading"
+                        ]
+                        [ Html.text widget.name ]
                     , view calculatedWidth calculatedHeight dataAsLabelValueTuples maxValue
                     , Utils.renderDataSourceInfoFrom widget
                     ]
@@ -65,7 +83,7 @@ getLineColour index =
 
 
 view : Int -> Int -> List (List ( Cell, Cell )) -> Float -> Svg msg
-view width height data maxValue =
+view w h data maxValue =
     let
         firstRow =
             List.head data
@@ -74,8 +92,11 @@ view width height data maxValue =
         indexedData =
             Array.toIndexedList (Array.fromList data)
 
-        numTicks =
+        xTicksCount =
             List.length firstRow
+
+        yTicksCount =
+            5
 
         defaultOptions =
             Axis.defaultOptions
@@ -83,17 +104,43 @@ view width height data maxValue =
         opts =
             { defaultOptions
                 | orientation = Axis.Left
-                , tickCount = 5
+                , tickCount = yTicksCount
+                , tickSizeOuter = 0
             }
     in
-        svg [ Svg.Attributes.width (toString width ++ "px"), Svg.Attributes.height (toString height ++ "px") ]
+        svg [ Svg.Attributes.width (toString w ++ "px"), Svg.Attributes.height (toString h ++ "px") ]
             (List.concat
-                [ [ renderXAxis width height numTicks (xScale width firstRow)
-                  , renderYAxis width height (yScale height maxValue) opts
+                [ [ renderXAxis w h xTicksCount (xScale w firstRow)
+                  , renderYAxis w h (yScale h maxValue) opts
+                  , renderYGrid w h maxValue <| Scale.ticks (yScale h maxValue) yTicksCount
                   ]
-                , renderLines width height maxValue firstRow indexedData
+                , renderLines w h maxValue firstRow indexedData
                 ]
             )
+
+
+renderYGrid : Int -> Int -> Float -> List Float -> Svg msg
+renderYGrid width height maxValue ticks =
+    g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (padding) ++ ")") ] <|
+        List.indexedMap (yGridLine width height maxValue) ticks
+
+
+yGridLine : Int -> Int -> Float -> Int -> Float -> Svg msg
+yGridLine width height maxValue index tick =
+    let
+        yPos =
+            (toString (Scale.convert (yScale height maxValue) tick))
+    in
+        line
+            [ x1 "0"
+            , y1 yPos
+            , x2 <| toString (toFloat width - 2 * padding)
+            , y2 yPos
+            , stroke "#ccc"
+            , strokeWidth "1"
+              -- , strokeWidth (toString (Basics.max (toFloat (index % 2)) 0.5))
+            ]
+            []
 
 
 renderLines :
@@ -132,6 +179,7 @@ renderXAxis width height numTicks bandScale =
                     | orientation = Axis.Bottom
                     , tickFormat = Just Utils.formatStringTick
                     , tickCount = numTicks
+                    , tickSizeOuter = 0
                 }
                 (Scale.toRenderable <| bandScale)
     in
