@@ -28,7 +28,7 @@ render optionalRendererConfig width height widget data =
                 ( headerRow, bodyRows, minValue, maxValue, xLabels ) =
                     TableAdapter.adapt optionalAdapterConfig data
 
-                dataAsHeaderValueTuples =
+                dataAsLabelValueTuples =
                     List.map (List.map2 (,) headerRow) bodyRows
 
                 calculatedWidth =
@@ -39,7 +39,7 @@ render optionalRendererConfig width height widget data =
             in
                 div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ]
                     [ h3 [ Html.Attributes.title widget.description, Html.Attributes.class "heading" ] [ Html.text widget.name ]
-                    , view calculatedWidth calculatedHeight dataAsHeaderValueTuples maxValue
+                    , view calculatedWidth calculatedHeight dataAsLabelValueTuples maxValue
                     , Utils.renderDataSourceInfoFrom widget
                     ]
 
@@ -67,7 +67,7 @@ getLineColour index =
 view : Int -> Int -> List (List ( Cell, Cell )) -> Float -> Svg msg
 view width height data maxValue =
     let
-        firstDataTuple =
+        firstRow =
             List.head data
                 |> Maybe.withDefault []
 
@@ -75,20 +75,23 @@ view width height data maxValue =
             Array.toIndexedList (Array.fromList data)
 
         numTicks =
-            List.length firstDataTuple
+            List.length firstRow
 
         defaultOptions =
             Axis.defaultOptions
 
         opts =
-            { defaultOptions | orientation = Axis.Left, tickCount = 5 }
+            { defaultOptions
+                | orientation = Axis.Left
+                , tickCount = 5
+            }
     in
         svg [ Svg.Attributes.width (toString width ++ "px"), Svg.Attributes.height (toString height ++ "px") ]
             (List.concat
-                [ [ renderXAxis width height numTicks (xScale width firstDataTuple)
+                [ [ renderXAxis width height numTicks (xScale width firstRow)
                   , renderYAxis width height (yScale height maxValue) opts
                   ]
-                , renderLines width height maxValue firstDataTuple indexedData
+                , renderLines width height maxValue firstRow indexedData
                 ]
             )
 
@@ -100,10 +103,10 @@ renderLines :
     -> List ( Cell, Cell )
     -> List ( Int, List ( Cell, Cell ) )
     -> List (Svg msg)
-renderLines width height maxValue firstDataTuple indexedData =
+renderLines width height maxValue firstRow indexedData =
     List.map
-        (\( index, dataTuple ) ->
-            generateLineData width height maxValue firstDataTuple dataTuple
+        (\( index, rowTuple ) ->
+            generateSVGPathDesc width height maxValue firstRow rowTuple
                 |> renderLine (getLineColour (index))
         )
         indexedData
@@ -116,11 +119,7 @@ renderLine colour lineData =
         ]
 
 
-
--- TODO somethings up with the type of this scale, tho it seems to work without type defs :/
--- renderXAxis : Int -> Int -> Int -> BandScale a1 -> Svg msg
-
-
+renderXAxis : Int -> Int -> Int -> BandScale a1 -> Svg msg
 renderXAxis width height numTicks bandScale =
     let
         opts =
@@ -140,11 +139,12 @@ renderXAxis width height numTicks bandScale =
             [ xAxis ]
 
 
-
--- TODO somethings up with the type of this scale, tho it seems to work without type defs :/
--- renderYAxis : Int -> Int -> Scale.ContinuousScale -> Axis.Options a -> Svg msg
-
-
+renderYAxis :
+    Int
+    -> b
+    -> Axis.RenderableScale a domain range value
+    -> Axis.Options value
+    -> Svg msg
 renderYAxis width height continuousScale opts =
     let
         yAxis : Svg msg
@@ -177,26 +177,26 @@ renderYAxis width height continuousScale opts =
             [ yAxis ]
 
 
-generateLineData :
+generateSVGPathDesc :
     Int
     -> Int
     -> Float
     -> List ( Cell, Cell )
     -> List ( Cell, Cell )
     -> String
-generateLineData width height maxValue firstDataTuple dataTuple =
-    List.map (lineGenerator width height maxValue firstDataTuple) dataTuple
+generateSVGPathDesc width height maxValue firstRow rowTuple =
+    List.map (pointGenerator width height maxValue firstRow) rowTuple
         |> Shape.line Shape.linearCurve
 
 
-lineGenerator :
+pointGenerator :
     Int
     -> Int
     -> Float
     -> List ( Cell, Cell )
     -> ( String, String )
     -> Maybe ( Float, Float )
-lineGenerator width height maxValue firstDataTuple ( x, y ) =
+pointGenerator width height maxValue firstRow ( x, y ) =
     let
         ySantized =
             NumberParser.fromString y
@@ -207,7 +207,7 @@ lineGenerator width height maxValue firstDataTuple ( x, y ) =
                 ySantized
 
         xScaleData =
-            Scale.convert (xScale width firstDataTuple) x
+            Scale.convert (xScale width firstRow) x
     in
         Just
             ( xScaleData
@@ -216,12 +216,13 @@ lineGenerator width height maxValue firstDataTuple ( x, y ) =
 
 
 xScale : Int -> List ( a1, a2 ) -> BandScale a1
-xScale width firstDataTuple =
+xScale width firstRow =
     Scale.band { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 }
-        (List.map Tuple.first firstDataTuple)
+        (List.map Tuple.first firstRow)
         ( 0, toFloat width - 2 * padding )
 
 
 yScale : Int -> Float -> ContinuousScale
 yScale height maxValue =
-    Scale.linear ( 0, maxValue ) ( (toFloat height) - 2 * padding, 0 )
+    Scale.linear ( 0, maxValue )
+        ( (toFloat height) - 2 * padding, 0 )

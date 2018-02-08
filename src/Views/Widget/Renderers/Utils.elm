@@ -9,12 +9,14 @@ module Views.Widget.Renderers.Utils
         , renderDataSourceInfoFrom
         , rowToFloats
         , formatStringTick
+        , toStr
         )
 
 import Data.DataSource as DataSource
-import Data.Widget as Widget exposing (Widget, Body)
+import Data.Widget as Widget exposing (Body, Widget)
 import Html exposing (..)
 import Html.Attributes exposing (class)
+import String exposing (..)
 
 
 mediumWidth : Float
@@ -57,6 +59,22 @@ rowToFloats row =
     List.map (\n -> String.toFloat n |> Result.withDefault 0) row
 
 
-formatStringTick : String -> String
+formatStringTick : a -> String
 formatStringTick tick =
-    tick
+    toStr tick
+
+
+
+--https://github.com/elm-lang/core/issues/657
+
+
+toStr : a -> String
+toStr v =
+    let
+        str =
+            toString v
+    in
+        if left 1 str == "\"" then
+            dropRight 1 (dropLeft 1 str)
+        else
+            str
