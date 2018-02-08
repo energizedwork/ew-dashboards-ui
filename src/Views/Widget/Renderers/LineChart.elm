@@ -116,11 +116,7 @@ renderLine colour lineData =
         ]
 
 
-
--- TODO somethings up with the type of this scale, tho it seems to work without type defs :/
--- renderXAxis : Int -> Int -> Int -> BandScale a1 -> Svg msg
-
-
+renderXAxis : Int -> Int -> Int -> BandScale a1 -> Svg msg
 renderXAxis width height numTicks bandScale =
     let
         opts =
@@ -140,11 +136,12 @@ renderXAxis width height numTicks bandScale =
             [ xAxis ]
 
 
-
--- TODO somethings up with the type of this scale, tho it seems to work without type defs :/
--- renderYAxis : Int -> Int -> Scale.ContinuousScale -> Axis.Options a -> Svg msg
-
-
+renderYAxis :
+    Int
+    -> b
+    -> Axis.RenderableScale a domain range value
+    -> Axis.Options value
+    -> Svg msg
 renderYAxis width height continuousScale opts =
     let
         yAxis : Svg msg
