@@ -72,6 +72,9 @@ adapt optionalConfig data =
                 cleansedConfig
                 tempBarChartConfig
 
+        barChartSeriesLabels =
+            ChartAdapter.extractSeriesLabels "barSeriesLabels" optionalConfig data
+
         ( barChartHeaderRow, barChartRows, barChartMinValue, barChartMaxValue, barChartXLabels ) =
             TableAdapter.adapt barChartConfig data
 
@@ -104,6 +107,6 @@ adapt optionalConfig data =
                 barChartMinValue
                 barChartMaxValue
                 barChartXLabels
-                Nothing
+                barChartSeriesLabels
     in
         ( lineChartData, barChartData )

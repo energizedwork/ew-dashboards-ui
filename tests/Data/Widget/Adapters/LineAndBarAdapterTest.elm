@@ -58,6 +58,12 @@ adapterConfigTest =
                             (CellPosition ( 5, 4 ))
                             (CellPosition ( 10, 5 ))
                   )
+                , ( "barSeriesLabels"
+                  , CellRange.encode <|
+                        CellRange
+                            (CellPosition ( 13, 2 ))
+                            (CellPosition ( 13, 5 ))
+                  )
                 , ( "xLabels"
                   , CellRange.encode <|
                         CellRange
@@ -100,6 +106,12 @@ adapterConfigTest =
                         , TD.forthRow
                         ]
 
+        defaultBarSeriesLabels =
+            \_ ->
+                defaultBarChart.seriesLabels
+                    |> Expect.equal
+                        Nothing
+
         defaultLineMinValue =
             \_ -> defaultLineChart.minValue |> Expect.equal 101
 
@@ -139,6 +151,14 @@ adapterConfigTest =
                         , [ "405", "406", "407", "408", "409", "410" ]
                         ]
 
+        suppliedBarSeriesLabels =
+            \_ ->
+                suppliedBarChart.seriesLabels
+                    |> Expect.equal
+                        (Just
+                            [ "Label 1", "Label 2", "Label 3", "Label 4" ]
+                        )
+
         suppliedLineMinValue =
             \_ -> suppliedLineChart.minValue |> Expect.equal 105
 
@@ -161,6 +181,7 @@ adapterConfigTest =
             [ Test.describe "with default Config"
                 [ Test.test "line chart rows are all body rows" defaultLineChartRows
                 , Test.test "line chart series labels are empty" defaultLineSeriesLabels
+                , Test.test "bar chart series labels are empty" defaultBarSeriesLabels
                 , Test.test "bar chart rows are sll body rows" defaultBarChartRows
                 , Test.test "min value is extracted from line rows" defaultLineMinValue
                 , Test.test "max value is extracted from line rows" defaultLineMaxValue
@@ -171,6 +192,7 @@ adapterConfigTest =
             , Test.describe "with supplied Config"
                 [ Test.test "line chart rows are as specified" suppliedLineChartRows
                 , Test.test "line chart series labels are as specified" suppliedLineSeriesLabels
+                , Test.test "bar chart series labels are as specified" suppliedBarSeriesLabels
                 , Test.test "bar chart rows are as specified" suppliedBarChartRows
                 , Test.test "min value is extracted from line rows" suppliedLineMinValue
                 , Test.test "max value is extracted from line rows" suppliedLineMaxValue

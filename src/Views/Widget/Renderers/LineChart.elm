@@ -9,6 +9,7 @@ module Views.Widget.Renderers.LineChart
         , xScale
         , yScale
         , renderLegend
+        , renderLegendLabel
         )
 
 import Array exposing (..)
@@ -114,7 +115,7 @@ view w h data maxValue seriesLabels =
                   , renderYGrid w h maxValue <| Scale.ticks (yScale h maxValue) yTicksCount
                   ]
                 , renderLines w h maxValue firstRow indexedData
-                , renderLegend (h - 5) seriesLabels
+                , renderLegend h seriesLabels
                 ]
             )
 
@@ -236,7 +237,11 @@ renderLegend :
     -> Maybe (List String)
     -> List (Svg msg)
 renderLegend top seriesLabels =
-    ChartLegend.render top seriesLabels renderLegendLabel padding
+    let
+        labels =
+            ChartLegend.renderLabels seriesLabels renderLegendLabel
+    in
+        ChartLegend.render top labels padding
 
 
 generateSVGPathDesc :

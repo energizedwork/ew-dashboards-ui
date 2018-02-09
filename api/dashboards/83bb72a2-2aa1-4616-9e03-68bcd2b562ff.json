@@ -187,6 +187,10 @@
           "barRows": {
             "start": [1, 2],
             "end": [12, 2]
+          },
+          "barSeriesLabels": {
+            "start": [13, 3],
+            "end": [13, 3]
           }
         }
       },

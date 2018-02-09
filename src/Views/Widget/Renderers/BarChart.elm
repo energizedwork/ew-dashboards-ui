@@ -1,4 +1,13 @@
-module Views.Widget.Renderers.BarChart exposing (render, renderColumn, renderColumns, renderXAxis, renderYAxis)
+module Views.Widget.Renderers.BarChart
+    exposing
+        ( render
+        , renderColumn
+        , renderColumns
+        , renderXAxis
+        , renderYAxis
+        , renderLegend
+        , renderLegendLabel
+        )
 
 import Array exposing (..)
 import Color
@@ -207,4 +216,8 @@ renderLegend :
     -> Maybe (List String)
     -> List (Svg msg)
 renderLegend top seriesLabels =
-    ChartLegend.render top seriesLabels renderLegendLabel padding
+    let
+        labels =
+            ChartLegend.renderLabels seriesLabels renderLegendLabel
+    in
+        ChartLegend.render top labels padding

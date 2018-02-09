@@ -1,4 +1,4 @@
-module Views.Widget.Renderers.ChartLegend exposing (renderLabel, render)
+module Views.Widget.Renderers.ChartLegend exposing (renderLabel, renderLabels, render)
 
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -10,41 +10,45 @@ renderLabel index labelText labelPrefix getLabelColour =
         labelColour =
             getLabelColour index
 
+        key =
+            tspan [ Svg.Attributes.fontSize "38", Svg.Attributes.baselineShift "middle" ] [ Svg.text labelPrefix ]
+
         label =
-            labelPrefix ++ " " ++ labelText
+            tspan [ Svg.Attributes.baselineShift "super" ] [ Svg.text labelText ]
     in
-        tspan [ Svg.Attributes.dx "10", fill labelColour ] [ Svg.text label ]
+        tspan [ Svg.Attributes.dx "10", fill labelColour, Svg.Attributes.baselineShift "super" ] [ key, label ]
 
 
-render :
-    Int
-    -> Maybe (List String)
-    -> (Int -> String -> Svg msg)
-    -> Float
-    -> List (Svg msg)
-render top seriesLabels renderLabels padding =
+renderLabels : Maybe (List String) -> (Int -> String -> Svg msg) -> List (Svg msg)
+renderLabels seriesLabels renderLabel =
     case seriesLabels of
         Nothing ->
             []
 
         Just seriesLabels ->
-            let
-                labels =
-                    List.indexedMap renderLabels seriesLabels
+            List.indexedMap renderLabel seriesLabels
 
-                xPosition =
-                    toString padding
 
-                yPosition =
-                    toString top
+render :
+    Int
+    -> List (Svg msg)
+    -> Float
+    -> List (Svg msg)
+render top labels padding =
+    let
+        xPosition =
+            toString padding
 
-                transformAttribute =
-                    "translate(" ++ xPosition ++ ", " ++ yPosition ++ ")"
-            in
-                [ Svg.text_
-                    [ transform transformAttribute
-                    , Svg.Attributes.fontSize "12"
-                    , Svg.Attributes.fontWeight "bold"
-                    ]
-                    labels
-                ]
+        yPosition =
+            toString top
+
+        transformAttribute =
+            "translate(" ++ xPosition ++ ", " ++ yPosition ++ ")"
+    in
+        [ Svg.text_
+            [ transform transformAttribute
+            , Svg.Attributes.fontSize "12"
+            , Svg.Attributes.fontWeight "bold"
+            ]
+            labels
+        ]

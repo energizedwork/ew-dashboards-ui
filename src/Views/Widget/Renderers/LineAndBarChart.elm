@@ -13,9 +13,16 @@ import Svg.Attributes exposing (..)
 import Views.Widget.Renderers.BarChart as BarChart
 import Views.Widget.Renderers.Config as ViewConfig
 import Views.Widget.Renderers.LineChart as LineChart
+import Views.Widget.Renderers.BarChart as BarChart
 import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (..)
+import Views.Widget.Renderers.ChartLegend as ChartLegend
+
+
+padding : Float
+padding =
+    Utils.mediumPadding
 
 
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
@@ -78,6 +85,12 @@ view w h lineChart barChart =
 
         numBarRows =
             List.length barChart.rows
+
+        renderedBarSeriesLabels =
+            ChartLegend.renderLabels barChart.seriesLabels BarChart.renderLegendLabel
+
+        renderedLineSeriesLabels =
+            ChartLegend.renderLabels lineChart.seriesLabels LineChart.renderLegendLabel
     in
         svg
             [ Svg.Attributes.width (toString w ++ "px")
@@ -100,6 +113,6 @@ view w h lineChart barChart =
                     lineChart.maxValue
                     firstLineDataTuple
                     lineChart.indexedData
-                , LineChart.renderLegend (h - 10) lineChart.seriesLabels
+                , ChartLegend.render (h - 10) (List.concat [ renderedLineSeriesLabels, renderedBarSeriesLabels ]) padding
                 ]
             )
