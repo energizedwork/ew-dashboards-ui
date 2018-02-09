@@ -6,6 +6,8 @@ import Data.Widget.Config as AdapterConfig
 import Json.Decode as Json exposing (Value)
 import Data.Widget.Adapters.CellRange as CellRange exposing (..)
 import Dict exposing (Dict)
+import Data.Widget.Chart as Chart
+import Array
 
 
 defaultConfig : Dict String Json.Value
@@ -35,13 +37,26 @@ extractSeriesLabels key config data =
                 Nothing
 
 
-adapt : AdapterConfig.Config -> Data -> ( Row, List Row, Float, Float, Row, Maybe (List String) )
+adapt : AdapterConfig.Config -> Data -> Chart.Data
 adapt optionalConfig data =
     let
         ( headerRow, bodyRows, minValue, maxValue, xLabels ) =
             TableAdapter.adapt optionalConfig data
 
+        chartData =
+            List.map (List.map2 (,) headerRow) bodyRows
+
+        indexedChartData =
+            Array.toIndexedList (Array.fromList chartData)
+
         seriesLabels =
             extractSeriesLabels "seriesLabels" optionalConfig data
     in
-        ( headerRow, bodyRows, minValue, maxValue, xLabels, seriesLabels )
+        Chart.Data
+            bodyRows
+            chartData
+            indexedChartData
+            minValue
+            maxValue
+            xLabels
+            seriesLabels

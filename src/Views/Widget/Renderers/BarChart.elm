@@ -25,11 +25,8 @@ render optionalRendererConfig width height widget data =
     case widget.adapter of
         CHART optionalConfig ->
             let
-                ( headerRow, bodyRows, minValue, maxValue, xLabels, seriesLabels ) =
+                chartData =
                     ChartAdapter.adapt optionalConfig data
-
-                dataAsHeaderValueTuples =
-                    List.map (List.map2 (,) headerRow) bodyRows
 
                 calculatedWidth =
                     ViewConfig.calculateWidth optionalRendererConfig width
@@ -39,7 +36,7 @@ render optionalRendererConfig width height widget data =
             in
                 div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ]
                     [ h3 [ Html.Attributes.title widget.description, Html.Attributes.class "heading" ] [ Html.text widget.name ]
-                    , view calculatedWidth calculatedHeight dataAsHeaderValueTuples maxValue seriesLabels
+                    , view calculatedWidth calculatedHeight chartData.data chartData.maxValue chartData.seriesLabels
                     , Utils.renderDataSourceInfoFrom widget
                     ]
 
