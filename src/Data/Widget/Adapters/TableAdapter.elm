@@ -52,9 +52,6 @@ adapt optionalConfig data =
         rowToNumber row =
             List.map NumberParser.fromString row
 
-        rowToInt row =
-            List.map (\n -> String.toFloat n |> Result.withDefault 0) row
-
         rowMin row =
             List.minimum (rowToNumber row) |> Maybe.withDefault 0
 
