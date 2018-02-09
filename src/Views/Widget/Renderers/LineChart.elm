@@ -229,7 +229,7 @@ renderYAxis width height continuousScale opts =
 
 renderLegendLabel : Int -> String -> Svg msg
 renderLegendLabel index labelText =
-    ChartLegend.renderLabel index labelText "―" getLineColour
+    ChartLegend.renderHorizontalLabel index labelText "―" getLineColour
 
 
 renderLegend :

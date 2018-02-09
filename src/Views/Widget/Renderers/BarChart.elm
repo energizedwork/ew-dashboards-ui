@@ -208,7 +208,7 @@ renderYAxis width height maxValue =
 
 renderLegendLabel : Int -> String -> Svg msg
 renderLegendLabel index labelText =
-    ChartLegend.renderLabel index labelText "■" getBarColour
+    ChartLegend.renderHorizontalLabel index labelText "■" getBarColour
 
 
 renderLegend :
