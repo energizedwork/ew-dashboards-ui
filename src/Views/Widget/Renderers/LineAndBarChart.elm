@@ -10,11 +10,12 @@ import Html exposing (..)
 import Html.Attributes exposing (title)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Views.Widget.Renderers.Config as ViewConfig
 import Views.Widget.Renderers.BarChart as BarChart
+import Views.Widget.Renderers.Config as ViewConfig
 import Views.Widget.Renderers.LineChart as LineChart
 import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
+import Visualization.Scale as Scale exposing (..)
 
 
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
@@ -49,7 +50,7 @@ render optionalRendererConfig width height widget data =
 
 
 view : Int -> Int -> Chart.Data -> Chart.Data -> Html msg
-view width height lineChart barChart =
+view w h lineChart barChart =
     let
         firstLineDataTuple =
             List.head lineChart.data |> Maybe.withDefault []
@@ -57,34 +58,47 @@ view width height lineChart barChart =
         firstBarDataTuple =
             List.head barChart.data |> Maybe.withDefault []
 
-        numTicks =
+        xTicksCount =
             List.length firstLineDataTuple
+
+        yTicksCount =
+            5
 
         defaultOptions =
             Axis.defaultOptions
 
         opts =
-            { defaultOptions | orientation = Axis.Right, tickCount = 10 }
+            { defaultOptions | orientation = Axis.Right, tickCount = yTicksCount }
 
         xAxisScale =
-            (LineChart.xScale width firstLineDataTuple)
+            (LineChart.xScale w firstLineDataTuple)
 
         yAxisScale =
-            (LineChart.yScale height lineChart.maxValue)
+            (LineChart.yScale h lineChart.maxValue)
 
         numBarRows =
             List.length barChart.rows
     in
         svg
-            [ Svg.Attributes.width (toString width ++ "px")
-            , Svg.Attributes.height (toString height ++ "px")
+            [ Svg.Attributes.width (toString w ++ "px")
+            , Svg.Attributes.height (toString h ++ "px")
             ]
             (List.concat
-                [ [ LineChart.renderXAxis width height numTicks xAxisScale
-                  , BarChart.renderYAxis width height barChart.maxValue
-                  , LineChart.renderYAxis width height yAxisScale opts
+                [ [ LineChart.renderXAxis w h xTicksCount xAxisScale
+                  , BarChart.renderYAxis w h barChart.maxValue
+                  , LineChart.renderYAxis w h yAxisScale opts
+                  , LineChart.renderYGrid w h lineChart.maxValue <|
+                        Scale.ticks yAxisScale yTicksCount
                   ]
-                , BarChart.renderColumns width height barChart.maxValue numBarRows barChart.indexedData
-                , LineChart.renderLines width height lineChart.maxValue firstLineDataTuple lineChart.indexedData
+                , BarChart.renderColumns w
+                    h
+                    barChart.maxValue
+                    numBarRows
+                    barChart.indexedData
+                , LineChart.renderLines w
+                    h
+                    lineChart.maxValue
+                    firstLineDataTuple
+                    lineChart.indexedData
                 ]
             )
