@@ -111,7 +111,7 @@ view width height data =
                 data
 
         labels =
-            List.map Tuple.first data
+            List.map (\d -> Tuple.first d ++ ": " ++ Tuple.second d) data
 
         pieData =
             Shape.pie { defaultPieConfig | outerRadius = (radius width height) } values
