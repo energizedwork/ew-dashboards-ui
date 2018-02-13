@@ -77,6 +77,9 @@ view w h lineChart barChart =
         yAxisScale =
             (LineChart.yScale h lineChart.maxValue)
 
+        yGridTicks =
+            Scale.ticks (LineChart.yScale h lineChart.maxValue) yTicksCount
+
         numBarRows =
             List.length barChart.rows
 
@@ -94,8 +97,12 @@ view w h lineChart barChart =
                 [ [ LineChart.renderXAxis w h xTicksCount xAxisScale
                   , BarChart.renderYAxis w h barChart.maxValue
                   , LineChart.renderYAxis w h yAxisScale opts
-                  , LineChart.renderYGrid w h lineChart.maxValue <|
-                        Scale.ticks yAxisScale yTicksCount
+                  , Utils.renderYGrid w
+                        h
+                        padding
+                        lineChart.maxValue
+                        (LineChart.yScale h lineChart.maxValue)
+                        yGridTicks
                   ]
                 , BarChart.renderColumns w
                     h

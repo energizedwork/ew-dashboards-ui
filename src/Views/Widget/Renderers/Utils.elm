@@ -7,6 +7,7 @@ module Views.Widget.Renderers.Utils
         , largeHeight
         , largePadding
         , renderTitleFrom
+        , renderYGrid
         , rowToFloats
         , formatStringTick
         , toStr
@@ -17,6 +18,9 @@ import Data.Widget as Widget exposing (Body, Widget)
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import String exposing (..)
+import Svg exposing (..)
+import Svg.Attributes exposing (..)
+import Visualization.Scale as Scale exposing (ContinuousScale)
 
 
 mediumWidth : Float
@@ -51,7 +55,31 @@ largePadding =
 
 renderDataSourceInfoFrom : Widget -> Html msg
 renderDataSourceInfoFrom widget =
-    p [ class "small data-source-info" ] [ text <| DataSource.toChannel <| Widget.primaryDataSource widget ]
+    p [ Html.Attributes.class "small data-source-info" ] [ Html.text <| DataSource.toChannel <| Widget.primaryDataSource widget ]
+
+
+yGridLine : Int -> Int -> Float -> ContinuousScale -> Int -> Float -> Svg msg
+yGridLine w h padding scale index tick =
+    let
+        yPos =
+            toString <| Scale.convert scale tick
+    in
+        line
+            [ x1 "0"
+            , y1 yPos
+            , x2 <| toString (Basics.toFloat w - 2 * padding)
+            , y2 yPos
+            , stroke "#ccc"
+            , strokeWidth "1"
+              -- , strokeWidth (toString (Basics.max (toFloat (index % 2)) 0.5))
+            ]
+            []
+
+
+renderYGrid : Int -> Int -> Float -> Float -> ContinuousScale -> List Float -> Svg msg
+renderYGrid w h padding maxValue scale ticks =
+    g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (padding) ++ ")") ] <|
+        List.indexedMap (yGridLine w h padding scale) ticks
 
 
 createDataSourceHoverTitleFrom : Widget -> String
