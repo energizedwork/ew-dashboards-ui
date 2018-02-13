@@ -1,14 +1,8 @@
 module Views.Widget.Renderers.Utils
     exposing
-        ( mediumWidth
-        , mediumHeight
-        , mediumPadding
-        , largeWidth
-        , largeHeight
-        , largePadding
+        ( rowToFloats
         , renderTitleFrom
         , renderYGrid
-        , rowToFloats
         , formatStringTick
         , toStr
         )
@@ -21,36 +15,6 @@ import String exposing (..)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Visualization.Scale as Scale exposing (ContinuousScale)
-
-
-mediumWidth : Float
-mediumWidth =
-    740
-
-
-mediumHeight : Float
-mediumHeight =
-    370
-
-
-mediumPadding : Float
-mediumPadding =
-    50
-
-
-largeWidth : Float
-largeWidth =
-    1320
-
-
-largeHeight : Float
-largeHeight =
-    880
-
-
-largePadding : Float
-largePadding =
-    50
 
 
 renderDataSourceInfoFrom : Widget -> Html msg
@@ -71,7 +35,8 @@ yGridLine w h padding scale index tick =
             , y2 yPos
             , stroke "#ccc"
             , strokeWidth "1"
-              -- , strokeWidth (toString (Basics.max (toFloat (index % 2)) 0.5))
+
+            -- , strokeWidth (toString (Basics.max (toFloat (index % 2)) 0.5))
             ]
             []
 

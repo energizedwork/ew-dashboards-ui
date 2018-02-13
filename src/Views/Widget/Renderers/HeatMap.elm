@@ -16,6 +16,7 @@ import Views.Widget.Renderers.RendererMessage as RendererMessage exposing (Msg(.
 import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
+import Views.Widget.Renderers.Config as ViewConfig
 
 
 type alias Model =
@@ -42,13 +43,13 @@ render width height widget data updatable =
                 initWidth =
                     case width of
                         0 ->
-                            Utils.largeWidth
+                            ViewConfig.largeWidth
 
                         _ ->
                             (width |> toFloat) - (padding * 2)
 
                 initHeight =
-                    Utils.largeHeight
+                    ViewConfig.largeHeight
 
                 primaryDataSource =
                     (Widget.primaryDataSource widget)
@@ -97,17 +98,17 @@ render width height widget data updatable =
 
 w : Float
 w =
-    Utils.largeWidth
+    ViewConfig.largeWidth
 
 
 h : Float
 h =
-    Utils.largeHeight
+    ViewConfig.largeHeight
 
 
 padding : Float
 padding =
-    Utils.largePadding
+    ViewConfig.mediumPadding
 
 
 getCellColour : Float -> String

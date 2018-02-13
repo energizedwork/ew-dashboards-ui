@@ -1,9 +1,53 @@
-module Views.Widget.Renderers.Config exposing (calculateWidth, calculateHeight, colSpan, colSpanClass, defaultColSpan, totalCols)
+module Views.Widget.Renderers.Config
+    exposing
+        ( calculateWidth
+        , mediumWidth
+        , mediumHeight
+        , mediumPadding
+        , largeWidth
+        , largeHeight
+        , largePadding
+        , calculateHeight
+        , colSpan
+        , colSpanClass
+        , defaultColSpan
+        , totalCols
+        )
 
 import Data.Widget.Config as WidgetConfig
 import Dict
 import Json.Decode as Decode exposing (..)
 import Json.Encode as Encode exposing (..)
+
+
+mediumWidth : Float
+mediumWidth =
+    740
+
+
+mediumHeight : Float
+mediumHeight =
+    370
+
+
+mediumPadding : Float
+mediumPadding =
+    50
+
+
+largeWidth : Float
+largeWidth =
+    1320
+
+
+largeHeight : Float
+largeHeight =
+    880
+
+
+largePadding : Float
+largePadding =
+    100
 
 
 defaultColSpan : Int

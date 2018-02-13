@@ -21,7 +21,7 @@ import Views.Widget.Renderers.ChartLegend as ChartLegend
 
 padding : Float
 padding =
-    Utils.mediumPadding
+    ViewConfig.mediumPadding
 
 
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
