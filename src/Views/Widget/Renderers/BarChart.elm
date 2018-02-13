@@ -1,12 +1,21 @@
-module Views.Widget.Renderers.BarChart exposing (render, renderColumn, renderColumns, renderXAxis, renderYAxis)
+module Views.Widget.Renderers.BarChart
+    exposing
+        ( render
+        , renderColumn
+        , renderColumns
+        , renderXAxis
+        , renderYAxis
+        , renderLegend
+        , legendLabel
+        )
 
 import Array exposing (..)
 import Color
 import Color.Convert
 import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
-import Data.Widget.Adapters.TableAdapter as TableAdapter
 import Data.Widget.Config as RendererConfig
+import Data.Widget.Adapters.ChartAdapter as ChartAdapter
 import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
 import Html.Attributes exposing (title)
@@ -17,18 +26,16 @@ import Views.Widget.Renderers.Config as ViewConfig
 import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
+import Views.Widget.Renderers.ChartLegend as ChartLegend
 
 
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
 render optionalRendererConfig width height widget data =
     case widget.adapter of
-        TABLE optionalConfig ->
+        CHART optionalConfig ->
             let
-                ( headerRow, bodyRows, minValue, maxValue, xLabels ) =
-                    TableAdapter.adapt optionalConfig data
-
-                dataAsHeaderValueTuples =
-                    List.map (List.map2 (,) headerRow) bodyRows
+                chartData =
+                    ChartAdapter.adapt optionalConfig data
 
                 calculatedWidth =
                     ViewConfig.calculateWidth optionalRendererConfig width
@@ -38,12 +45,12 @@ render optionalRendererConfig width height widget data =
             in
                 div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ]
                     [ h3 [ Html.Attributes.title widget.description, Html.Attributes.class "heading" ] [ Html.text widget.name ]
-                    , view calculatedWidth calculatedHeight dataAsHeaderValueTuples maxValue
+                    , view calculatedWidth calculatedHeight chartData.data chartData.maxValue chartData.seriesLabels
                     , Utils.renderDataSourceInfoFrom widget
                     ]
 
         _ ->
-            p [ class "data" ] [ Html.text "Sorry, I can only render bar charts from a TABLE adapter right now" ]
+            p [ class "data" ] [ Html.text "Sorry, I can only render bar charts from a CHART adapter right now" ]
 
 
 padding : Float
@@ -129,8 +136,8 @@ column height index totalRows colour xScaleBand maxValue ( header, value ) =
             ]
 
 
-view : Int -> Int -> List (List ( Cell, Cell )) -> Float -> Svg msg
-view width height data maxValue =
+view : Int -> Int -> List (List ( Cell, Cell )) -> Float -> Maybe (List String) -> Svg msg
+view width height data maxValue seriesLabels =
     let
         firstDataTuple =
             List.head data |> Maybe.withDefault []
@@ -153,6 +160,7 @@ view width height data maxValue =
                   , renderYAxis width height maxValue
                   ]
                 , renderColumns width height maxValue totalRows indexedData
+                , renderLegend height width seriesLabels
                 ]
             )
 
@@ -195,3 +203,21 @@ renderYAxis : Int -> Int -> Float -> Svg msg
 renderYAxis width height maxValue =
     g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString padding ++ ")") ]
         [ (yAxis height maxValue) ]
+
+
+legendLabel : Int -> String -> Svg msg
+legendLabel index labelText =
+    ChartLegend.createHorizontalLabel index labelText "■" getBarColour
+
+
+renderLegend :
+    Int
+    -> Int
+    -> Maybe (List String)
+    -> List (Svg msg)
+renderLegend height width seriesLabels =
+    let
+        labels =
+            ChartLegend.createLabels seriesLabels legendLabel
+    in
+        ChartLegend.renderBottomCenterAligned width height labels

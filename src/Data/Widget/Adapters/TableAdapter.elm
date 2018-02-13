@@ -14,7 +14,7 @@ import NumberParser
 -- TODO refactor to use Chart.Data
 
 
-adapt : AdapterConfig.Config -> Data -> ( Row, List Row, Float, Float, List String )
+adapt : AdapterConfig.Config -> Data -> ( Row, List Row, Float, Float, Row )
 adapt optionalConfig data =
     let
         defaultHeaderRange =

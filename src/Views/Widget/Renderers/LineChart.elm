@@ -8,6 +8,8 @@ module Views.Widget.Renderers.LineChart
         , renderYGrid
         , xScale
         , yScale
+        , renderLegend
+        , legendLabel
         )
 
 import Array exposing (..)
@@ -15,8 +17,8 @@ import Color
 import Color.Convert
 import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
-import Data.Widget.Adapters.TableAdapter as TableAdapter
 import Data.Widget.Config as RendererConfig
+import Data.Widget.Adapters.ChartAdapter as ChartAdapter
 import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
 import Html.Attributes exposing (title)
@@ -28,18 +30,16 @@ import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
 import Visualization.Shape as Shape
+import Views.Widget.Renderers.ChartLegend as ChartLegend
 
 
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
 render optionalRendererConfig width height widget data =
     case widget.adapter of
-        TABLE optionalAdapterConfig ->
+        CHART optionalAdapterConfig ->
             let
-                ( headerRow, bodyRows, minValue, maxValue, xLabels ) =
-                    TableAdapter.adapt optionalAdapterConfig data
-
-                dataAsLabelValueTuples =
-                    List.map (List.map2 (,) headerRow) bodyRows
+                chartData =
+                    ChartAdapter.adapt optionalAdapterConfig data
 
                 calculatedWidth =
                     ViewConfig.calculateWidth optionalRendererConfig width
@@ -57,12 +57,12 @@ render optionalRendererConfig width height widget data =
                         , Html.Attributes.class "heading"
                         ]
                         [ Html.text widget.name ]
-                    , view calculatedWidth calculatedHeight dataAsLabelValueTuples maxValue
+                    , view calculatedWidth calculatedHeight chartData.data chartData.maxValue chartData.seriesLabels
                     , Utils.renderDataSourceInfoFrom widget
                     ]
 
         _ ->
-            p [ class "data" ] [ Html.text "Sorry, I can only render line charts from a TABLE adapter right now" ]
+            p [ class "data" ] [ Html.text "Sorry, I can only render line charts from a CHART adapter right now" ]
 
 
 padding : Float
@@ -82,8 +82,8 @@ getLineColour index =
         |> Color.Convert.colorToHex
 
 
-view : Int -> Int -> List (List ( Cell, Cell )) -> Float -> Svg msg
-view w h data maxValue =
+view : Int -> Int -> List (List ( Cell, Cell )) -> Float -> Maybe (List String) -> Svg msg
+view w h data maxValue seriesLabels =
     let
         firstRow =
             List.head data
@@ -115,6 +115,7 @@ view w h data maxValue =
                   , renderYGrid w h maxValue <| Scale.ticks (yScale h maxValue) yTicksCount
                   ]
                 , renderLines w h maxValue firstRow indexedData
+                , renderLegend h w seriesLabels
                 ]
             )
 
@@ -223,6 +224,24 @@ renderYAxis width height continuousScale opts =
                 )
             ]
             [ yAxis ]
+
+
+legendLabel : Int -> String -> Svg msg
+legendLabel index labelText =
+    ChartLegend.createHorizontalLabel index labelText "―" getLineColour
+
+
+renderLegend :
+    Int
+    -> Int
+    -> Maybe (List String)
+    -> List (Svg msg)
+renderLegend height width seriesLabels =
+    let
+        labels =
+            ChartLegend.createLabels seriesLabels legendLabel
+    in
+        ChartLegend.renderBottomCenterAligned width height labels
 
 
 generateSVGPathDesc :

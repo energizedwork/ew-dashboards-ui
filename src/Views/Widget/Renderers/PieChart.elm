@@ -18,6 +18,7 @@ import Views.Widget.Renderers.Config as ViewConfig
 import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Scale as Scale exposing (category10)
 import Visualization.Shape as Shape exposing (defaultPieConfig)
+import Views.Widget.Renderers.ChartLegend as ChartLegend
 
 
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
@@ -82,6 +83,23 @@ radius width height =
         |> toFloat
 
 
+legendLabel : Int -> String -> Svg msg
+legendLabel index labelText =
+    ChartLegend.createVerticalLabel index labelText "■" getLineColour
+
+
+renderLegend :
+    Int
+    -> Maybe (List String)
+    -> List (Svg msg)
+renderLegend top seriesLabels =
+    let
+        labels =
+            ChartLegend.createLabels seriesLabels legendLabel
+    in
+        ChartLegend.renderTopLeftAligned top (round padding) labels
+
+
 view : Int -> Int -> List ( Cell, Cell ) -> Svg msg
 view width height data =
     let
@@ -93,7 +111,7 @@ view width height data =
                 data
 
         labels =
-            List.map Tuple.first data
+            List.map (\d -> Tuple.first d ++ ": " ++ Tuple.second d) data
 
         pieData =
             Shape.pie { defaultPieConfig | outerRadius = (radius width height) } values
@@ -146,7 +164,9 @@ view width height data =
                   ]
                 , [ g [ transform ("translate(" ++ toString (width // 2) ++ "," ++ toString (height // 2) ++ ")") ]
                         [ g [] <| List.indexedMap makeSlice pieData
-                          -- , g [] <| List.map2 makeLabel pieData data
+
+                        -- , g [] <| List.map2 makeLabel pieData data
                         ]
                   ]
+                , renderLegend 50 (Just labels)
                 ]

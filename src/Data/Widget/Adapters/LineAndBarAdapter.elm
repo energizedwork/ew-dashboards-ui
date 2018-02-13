@@ -1,8 +1,7 @@
 module Data.Widget.Adapters.LineAndBarAdapter exposing (defaultConfig, adapt)
 
-import Array
 import Data.Widget.Config as AdapterConfig
-import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (..)
+import Data.Widget.Adapters.ChartAdapter as ChartAdapter exposing (..)
 import Data.Widget.Chart as Chart exposing (Data)
 import Data.Widget.Table as Table exposing (Cell, Data, Row)
 import Dict exposing (Dict)
@@ -11,7 +10,9 @@ import Json.Decode as Json exposing (Value)
 
 -- Possible values:
 -- "lineRows"
+-- "lineSeriesLabels"
 -- "barRows"
+-- "barSeriesLabels"
 -- "xLabels"
 
 
@@ -20,83 +21,72 @@ defaultConfig =
     Dict.empty
 
 
-adapt : AdapterConfig.Config -> Table.Data -> ( Chart.Data, Chart.Data )
-adapt optionalConfig data =
-    let
-        lineRowsRange =
-            Dict.get "lineRows" optionalConfig
+cleanseConfig : AdapterConfig.Config -> AdapterConfig.Config
+cleanseConfig optionalConfig =
+    optionalConfig
+        |> Dict.remove "lineRows"
+        |> Dict.remove "lineSeriesLabels"
+        |> Dict.remove "barRows"
+        |> Dict.remove "barSeriesLabels"
 
-        barRowsRange =
-            Dict.get "barRows" optionalConfig
+
+normalizeLineChartConfig : AdapterConfig.Config -> Dict String Value
+normalizeLineChartConfig combinedConfig =
+    extractChartConfig combinedConfig "lineRows" "lineSeriesLabels"
+
+
+normalizeBarChartConfig : AdapterConfig.Config -> Dict String Value
+normalizeBarChartConfig combinedConfig =
+    extractChartConfig combinedConfig "barRows" "barSeriesLabels"
+
+
+tempConfig : Maybe Value -> String -> Dict String Value
+tempConfig configValue configKey =
+    case configValue of
+        Just configValue ->
+            Dict.fromList
+                [ ( configKey, configValue )
+                ]
+
+        Nothing ->
+            Dict.empty
+
+
+extractChartConfig : AdapterConfig.Config -> String -> String -> Dict String Value
+extractChartConfig combinedConfig rowsKey seriesLabelKey =
+    let
+        rowsRange =
+            Dict.get rowsKey combinedConfig
+
+        seriesLabelsRange =
+            Dict.get seriesLabelKey combinedConfig
 
         cleansedConfig =
-            optionalConfig
-                |> Dict.remove "lineRows"
-                |> Dict.remove "barRows"
+            cleanseConfig combinedConfig
 
-        tempLineChartConfig =
-            case lineRowsRange of
-                Just lineRowsRange ->
-                    Dict.fromList
-                        [ ( "bodyRows", lineRowsRange )
-                        ]
+        tempRowConfig =
+            tempConfig rowsRange "bodyRows"
 
-                Nothing ->
-                    Dict.empty
+        tempSeriesLabelConfig =
+            tempConfig seriesLabelsRange "seriesLabels"
 
-        lineChartConfig =
+        tempChartConfig =
             Dict.union
-                cleansedConfig
-                tempLineChartConfig
+                tempRowConfig
+                tempSeriesLabelConfig
+    in
+        Dict.union
+            tempChartConfig
+            cleansedConfig
 
-        ( lineChartHeaderRow, lineChartRows, lineChartMinValue, lineChartMaxValue, lineChartXLabels ) =
-            TableAdapter.adapt lineChartConfig data
 
-        tempBarChartConfig =
-            case barRowsRange of
-                Just barRowsRange ->
-                    Dict.fromList
-                        [ ( "bodyRows", barRowsRange )
-                        ]
-
-                Nothing ->
-                    Dict.empty
-
-        barChartConfig =
-            Dict.union
-                cleansedConfig
-                tempBarChartConfig
-
-        ( barChartHeaderRow, barChartRows, barChartMinValue, barChartMaxValue, barChartXLabels ) =
-            TableAdapter.adapt barChartConfig data
-
-        lineData =
-            List.map (List.map2 (,) lineChartHeaderRow) lineChartRows
-
-        barData =
-            List.map (List.map2 (,) barChartHeaderRow) barChartRows
-
-        indexedLineData =
-            Array.toIndexedList (Array.fromList lineData)
-
-        indexedBarData =
-            Array.toIndexedList (Array.fromList barData)
-
+adapt : AdapterConfig.Config -> Table.Data -> ( Chart.Data, Chart.Data )
+adapt combinedConfig data =
+    let
         lineChartData =
-            Chart.Data lineChartRows
-                lineData
-                indexedLineData
-                lineChartMinValue
-                lineChartMaxValue
-                lineChartXLabels
+            ChartAdapter.adapt (normalizeLineChartConfig combinedConfig) data
 
         barChartData =
-            Chart.Data
-                barChartRows
-                barData
-                indexedBarData
-                barChartMinValue
-                barChartMaxValue
-                barChartXLabels
+            ChartAdapter.adapt (normalizeBarChartConfig combinedConfig) data
     in
         ( lineChartData, barChartData )

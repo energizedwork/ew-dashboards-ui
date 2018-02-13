@@ -1,4 +1,4 @@
-module Data.Widget.Adapters.CellRange exposing (CellRange, encode, decoder, extractRow, extractRows, firstRowRange, remainingRowsRange)
+module Data.Widget.Adapters.CellRange exposing (CellRange, encode, decoder, extractRow, extractRows, firstRowRange, remainingRowsRange, emptyRange)
 
 import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder)
 import Data.Widget.Table exposing (..)
@@ -14,6 +14,13 @@ type alias CellRange =
     { start : CellPosition
     , end : CellPosition
     }
+
+
+emptyRange : CellRange
+emptyRange =
+    CellRange
+        (CellPosition ( 0, 0 ))
+        (CellPosition ( 0, 0 ))
 
 
 decoder : Decoder CellRange

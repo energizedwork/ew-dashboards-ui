@@ -138,9 +138,17 @@
               "start": [2, 19],
               "end": [9, 21]
             },
+            "barSeriesLabels": {
+              "start": [1, 19],
+              "end": [1, 21]
+            },
             "lineRows": {
               "start": [2, 22],
               "end": [9, 23]
+            },
+            "lineSeriesLabels": {
+              "start": [1, 22],
+              "end": [1, 23]
             }
           }
         },
@@ -183,9 +191,17 @@
               "start": [2, 59],
               "end": [13, 61]
             },
+            "barSeriesLabels": {
+              "start": [1, 59],
+              "end": [1, 61]
+            },
             "lineRows": {
               "start": [2, 62],
               "end": [13, 63]
+            },
+            "lineSeriesLabels": {
+              "start": [1, 62],
+              "end": [1, 63]
             }
           }
         },
@@ -228,9 +244,17 @@
               "start": [2, 104],
               "end": [5, 106]
             },
+            "barSeriesLabels": {
+              "start": [1, 104],
+              "end": [1, 106]
+            },
             "lineRows": {
               "start": [2, 107],
               "end": [5, 108]
+            },
+            "lineSeriesLabels": {
+              "start": [1, 107],
+              "end": [1, 108]
             }
           }
         },
@@ -357,6 +381,10 @@
             "bodyRows": {
               "start": [2, 242],
               "end": [13, 243]
+            },
+            "seriesLabels": {
+              "start": [1, 242],
+              "end": [1, 243]
             }
           }
         },
@@ -399,6 +427,10 @@
             "bodyRows": {
               "start": [2, 288],
               "end": [12, 288]
+            },
+            "seriesLabels": {
+              "start": [1, 288],
+              "end": [1, 288]
             }
           }
         },
