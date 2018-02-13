@@ -6,7 +6,7 @@ module Views.Widget.Renderers.BarChart
         , renderXAxis
         , renderYAxis
         , renderLegend
-        , renderLegendLabel
+        , legendLabel
         )
 
 import Array exposing (..)
@@ -206,9 +206,9 @@ renderYAxis width height maxValue =
         [ (yAxis height maxValue) ]
 
 
-renderLegendLabel : Int -> String -> Svg msg
-renderLegendLabel index labelText =
-    ChartLegend.renderHorizontalLabel index labelText "■" getBarColour
+legendLabel : Int -> String -> Svg msg
+legendLabel index labelText =
+    ChartLegend.createHorizontalLabel index labelText "■" getBarColour
 
 
 renderLegend :
@@ -218,6 +218,6 @@ renderLegend :
 renderLegend top seriesLabels =
     let
         labels =
-            ChartLegend.renderLabels seriesLabels renderLegendLabel
+            ChartLegend.createLabels seriesLabels legendLabel
     in
         ChartLegend.render top labels padding

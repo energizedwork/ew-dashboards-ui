@@ -9,7 +9,7 @@ module Views.Widget.Renderers.LineChart
         , xScale
         , yScale
         , renderLegend
-        , renderLegendLabel
+        , legendLabel
         )
 
 import Array exposing (..)
@@ -227,9 +227,9 @@ renderYAxis width height continuousScale opts =
             [ yAxis ]
 
 
-renderLegendLabel : Int -> String -> Svg msg
-renderLegendLabel index labelText =
-    ChartLegend.renderHorizontalLabel index labelText "―" getLineColour
+legendLabel : Int -> String -> Svg msg
+legendLabel index labelText =
+    ChartLegend.createHorizontalLabel index labelText "―" getLineColour
 
 
 renderLegend :
@@ -239,7 +239,7 @@ renderLegend :
 renderLegend top seriesLabels =
     let
         labels =
-            ChartLegend.renderLabels seriesLabels renderLegendLabel
+            ChartLegend.createLabels seriesLabels legendLabel
     in
         ChartLegend.render top labels padding
 

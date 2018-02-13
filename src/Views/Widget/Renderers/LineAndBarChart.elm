@@ -87,10 +87,10 @@ view w h lineChart barChart =
             List.length barChart.rows
 
         renderedBarSeriesLabels =
-            ChartLegend.renderLabels barChart.seriesLabels BarChart.renderLegendLabel
+            ChartLegend.createLabels barChart.seriesLabels BarChart.legendLabel
 
         renderedLineSeriesLabels =
-            ChartLegend.renderLabels lineChart.seriesLabels LineChart.renderLegendLabel
+            ChartLegend.createLabels lineChart.seriesLabels LineChart.legendLabel
     in
         svg
             [ Svg.Attributes.width (toString w ++ "px")

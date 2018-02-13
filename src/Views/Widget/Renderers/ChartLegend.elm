@@ -1,11 +1,11 @@
-module Views.Widget.Renderers.ChartLegend exposing (renderHorizontalLabel, renderVerticalLabel, renderLabels, render)
+module Views.Widget.Renderers.ChartLegend exposing (createHorizontalLabel, createVerticalLabel, createLabels, render)
 
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 
 
-renderLabel : Int -> String -> String -> (Int -> String) -> List (Attribute msg) -> Svg msg
-renderLabel index labelText labelPrefix getLabelColour attributes =
+createLabel : Int -> String -> String -> (Int -> String) -> List (Attribute msg) -> Svg msg
+createLabel index labelText labelPrefix getLabelColour attributes =
     let
         labelColour =
             getLabelColour index
@@ -22,18 +22,18 @@ renderLabel index labelText labelPrefix getLabelColour attributes =
         tspan tspanAttributes [ key, label ]
 
 
-renderHorizontalLabel : Int -> String -> String -> (Int -> String) -> Svg msg
-renderHorizontalLabel index labelText labelPrefix getLabelColor =
-    renderLabel index labelText labelPrefix getLabelColor [ Svg.Attributes.dx "10" ]
+createHorizontalLabel : Int -> String -> String -> (Int -> String) -> Svg msg
+createHorizontalLabel index labelText labelPrefix getLabelColor =
+    createLabel index labelText labelPrefix getLabelColor [ Svg.Attributes.dx "10" ]
 
 
-renderVerticalLabel : Int -> String -> String -> (Int -> String) -> Svg msg
-renderVerticalLabel index labelText labelPrefix getLabelColor =
-    renderLabel index labelText labelPrefix getLabelColor [ Svg.Attributes.dy "20", Svg.Attributes.x "10" ]
+createVerticalLabel : Int -> String -> String -> (Int -> String) -> Svg msg
+createVerticalLabel index labelText labelPrefix getLabelColor =
+    createLabel index labelText labelPrefix getLabelColor [ Svg.Attributes.dy "20", Svg.Attributes.x "10" ]
 
 
-renderLabels : Maybe (List String) -> (Int -> String -> Svg msg) -> List (Svg msg)
-renderLabels seriesLabels renderLabel =
+createLabels : Maybe (List String) -> (Int -> String -> Svg msg) -> List (Svg msg)
+createLabels seriesLabels renderLabel =
     case seriesLabels of
         Nothing ->
             []

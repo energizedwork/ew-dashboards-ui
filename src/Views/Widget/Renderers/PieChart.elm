@@ -83,9 +83,9 @@ radius width height =
         |> toFloat
 
 
-renderLegendLabel : Int -> String -> Svg msg
-renderLegendLabel index labelText =
-    ChartLegend.renderVerticalLabel index labelText "■" getLineColour
+legendLabel : Int -> String -> Svg msg
+legendLabel index labelText =
+    ChartLegend.createVerticalLabel index labelText "■" getLineColour
 
 
 renderLegend :
@@ -95,7 +95,7 @@ renderLegend :
 renderLegend top seriesLabels =
     let
         labels =
-            ChartLegend.renderLabels seriesLabels renderLegendLabel
+            ChartLegend.createLabels seriesLabels legendLabel
     in
         ChartLegend.render top labels padding
 
