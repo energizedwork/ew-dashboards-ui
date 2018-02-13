@@ -115,7 +115,7 @@ view w h data maxValue seriesLabels =
                   , renderYGrid w h maxValue <| Scale.ticks (yScale h maxValue) yTicksCount
                   ]
                 , renderLines w h maxValue firstRow indexedData
-                , renderLegend h seriesLabels
+                , renderLegend h w seriesLabels
                 ]
             )
 
@@ -234,14 +234,15 @@ legendLabel index labelText =
 
 renderLegend :
     Int
+    -> Int
     -> Maybe (List String)
     -> List (Svg msg)
-renderLegend top seriesLabels =
+renderLegend height width seriesLabels =
     let
         labels =
             ChartLegend.createLabels seriesLabels legendLabel
     in
-        ChartLegend.render top labels padding
+        ChartLegend.renderBottomCenterAligned height width labels
 
 
 generateSVGPathDesc :

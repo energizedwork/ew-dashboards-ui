@@ -161,7 +161,7 @@ view width height data maxValue seriesLabels =
                   , renderYAxis width height maxValue
                   ]
                 , renderColumns width height maxValue totalRows indexedData
-                , renderLegend (height - 5) seriesLabels
+                , renderLegend height width seriesLabels
                 ]
             )
 
@@ -213,11 +213,12 @@ legendLabel index labelText =
 
 renderLegend :
     Int
+    -> Int
     -> Maybe (List String)
     -> List (Svg msg)
-renderLegend top seriesLabels =
+renderLegend height width seriesLabels =
     let
         labels =
             ChartLegend.createLabels seriesLabels legendLabel
     in
-        ChartLegend.render top labels padding
+        ChartLegend.renderBottomCenterAligned height width labels

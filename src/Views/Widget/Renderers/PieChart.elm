@@ -97,7 +97,7 @@ renderLegend top seriesLabels =
         labels =
             ChartLegend.createLabels seriesLabels legendLabel
     in
-        ChartLegend.render top labels padding
+        ChartLegend.renderTopLeftAligned top (round padding) labels
 
 
 view : Int -> Int -> List ( Cell, Cell ) -> Svg msg
