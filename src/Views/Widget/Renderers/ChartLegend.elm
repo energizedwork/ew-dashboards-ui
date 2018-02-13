@@ -86,7 +86,7 @@ renderBottomCenterAligned :
     -> Int
     -> List (Svg msg)
     -> List (Svg msg)
-renderBottomCenterAligned height width labels =
+renderBottomCenterAligned width height labels =
     createLegend (height + 5) ((width // 2) - labelOffset) "middle" labels
 
 

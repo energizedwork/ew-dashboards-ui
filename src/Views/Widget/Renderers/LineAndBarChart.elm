@@ -113,6 +113,12 @@ view w h lineChart barChart =
                     lineChart.maxValue
                     firstLineDataTuple
                     lineChart.indexedData
-                , ChartLegend.renderBottomCenterAligned h w (List.concat [ renderedLineSeriesLabels, renderedBarSeriesLabels ])
+                , ChartLegend.renderBottomCenterAligned w
+                    h
+                    (List.concat
+                        [ renderedLineSeriesLabels
+                        , renderedBarSeriesLabels
+                        ]
+                    )
                 ]
             )

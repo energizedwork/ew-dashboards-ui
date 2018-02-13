@@ -126,14 +126,13 @@ column height index totalRows colour xScaleBand maxValue ( header, value ) =
                 , fill colour
                 ]
                 []
-
-            -- TODO: Fix layering
-            -- , text_
-            --     [ x <| toString <| xposText
-            --     , y <| toString <| yposText
-            --     , textAnchor "middle"
-            --     ]
-            --     [ Svg.text <| toString value ]
+              -- TODO: Fix layering
+              -- , text_
+              --     [ x <| toString <| xposText
+              --     , y <| toString <| yposText
+              --     , textAnchor "middle"
+              --     ]
+              --     [ Svg.text <| toString value ]
             ]
 
 
@@ -221,4 +220,4 @@ renderLegend height width seriesLabels =
         labels =
             ChartLegend.createLabels seriesLabels legendLabel
     in
-        ChartLegend.renderBottomCenterAligned height width labels
+        ChartLegend.renderBottomCenterAligned width height labels

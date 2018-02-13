@@ -139,8 +139,7 @@ yGridLine width height maxValue index tick =
             , y2 yPos
             , stroke "#ccc"
             , strokeWidth "1"
-
-            -- , strokeWidth (toString (Basics.max (toFloat (index % 2)) 0.5))
+              -- , strokeWidth (toString (Basics.max (toFloat (index % 2)) 0.5))
             ]
             []
 
@@ -242,7 +241,7 @@ renderLegend height width seriesLabels =
         labels =
             ChartLegend.createLabels seriesLabels legendLabel
     in
-        ChartLegend.renderBottomCenterAligned height width labels
+        ChartLegend.renderBottomCenterAligned width height labels
 
 
 generateSVGPathDesc :
