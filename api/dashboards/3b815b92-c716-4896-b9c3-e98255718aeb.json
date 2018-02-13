@@ -238,11 +238,11 @@
           "config": {
             "xLabels": {
               "start": [2, 103],
-              "end": [5, 103]
+              "end": [6, 103]
             },
             "barRows": {
               "start": [2, 104],
-              "end": [5, 106]
+              "end": [6, 106]
             },
             "barSeriesLabels": {
               "start": [1, 104],
@@ -250,7 +250,7 @@
             },
             "lineRows": {
               "start": [2, 107],
-              "end": [5, 108]
+              "end": [6, 108]
             },
             "lineSeriesLabels": {
               "start": [1, 107],

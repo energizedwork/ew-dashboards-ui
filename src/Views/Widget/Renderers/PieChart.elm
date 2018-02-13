@@ -9,7 +9,6 @@ import Data.Widget.Adapters.TableAdapter as TableAdapter
 import Data.Widget.Config as RendererConfig
 import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
-import Html.Attributes exposing (title)
 import List.Extra
 import NumberParser
 import Svg exposing (..)
@@ -50,9 +49,8 @@ render optionalRendererConfig width height widget data =
                     ViewConfig.calculateHeight optionalRendererConfig height
             in
                 div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ]
-                    [ h3 [ Html.Attributes.title widget.description, Html.Attributes.class "heading" ] [ Html.text widget.name ]
+                    [ Utils.renderTitleFrom widget
                     , view calculatedWidth calculatedHeight dataAsLabelValueTuples
-                    , Utils.renderDataSourceInfoFrom widget
                     ]
 
         _ ->
@@ -158,14 +156,13 @@ view width height data =
                 [ [ Svg.style []
                         [ Svg.text """
                             .segment text { display: none; }
-                            .segment:hover { opacity: 0.7; }
+                            .segment:hover { opacity: 0.7; cursor: crosshair; }
                             .segment:hover text { display: inline; z-index: 9999; }
                           """ ]
                   ]
                 , [ g [ transform ("translate(" ++ toString (width // 2) ++ "," ++ toString (height // 2) ++ ")") ]
                         [ g [] <| List.indexedMap makeSlice pieData
-
-                        -- , g [] <| List.map2 makeLabel pieData data
+                          -- , g [] <| List.map2 makeLabel pieData data
                         ]
                   ]
                 , renderLegend 50 (Just labels)

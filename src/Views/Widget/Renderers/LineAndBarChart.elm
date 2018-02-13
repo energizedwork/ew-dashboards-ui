@@ -7,7 +7,6 @@ import Data.Widget.Chart as Chart exposing (Data)
 import Data.Widget.Config as RendererConfig
 import Data.Widget.Table as Table exposing (..)
 import Html exposing (..)
-import Html.Attributes exposing (title)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Views.Widget.Renderers.BarChart as BarChart
@@ -40,13 +39,8 @@ render optionalRendererConfig width height widget data =
                     ViewConfig.calculateHeight optionalRendererConfig height
             in
                 div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ]
-                    [ h3
-                        [ Html.Attributes.title widget.description
-                        , Html.Attributes.class "heading"
-                        ]
-                        [ Html.text widget.name ]
+                    [ Utils.renderTitleFrom widget
                     , view calculatedWidth calculatedHeight lineChart barChart
-                    , Utils.renderDataSourceInfoFrom widget
                     ]
 
         _ ->
@@ -83,6 +77,9 @@ view w h lineChart barChart =
         yAxisScale =
             (LineChart.yScale h lineChart.maxValue)
 
+        yGridTicks =
+            Scale.ticks (LineChart.yScale h lineChart.maxValue) yTicksCount
+
         numBarRows =
             List.length barChart.rows
 
@@ -100,8 +97,12 @@ view w h lineChart barChart =
                 [ [ LineChart.renderXAxis w h xTicksCount xAxisScale
                   , BarChart.renderYAxis w h barChart.maxValue
                   , LineChart.renderYAxis w h yAxisScale opts
-                  , LineChart.renderYGrid w h lineChart.maxValue <|
-                        Scale.ticks yAxisScale yTicksCount
+                  , Utils.renderYGrid w
+                        h
+                        padding
+                        lineChart.maxValue
+                        (LineChart.yScale h lineChart.maxValue)
+                        yGridTicks
                   ]
                 , BarChart.renderColumns w
                     h

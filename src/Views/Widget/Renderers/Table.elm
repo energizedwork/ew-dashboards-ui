@@ -27,7 +27,7 @@ render optionalRendererConfig width height widget data =
                         ViewConfig.colSpanClass optionalRendererConfig
                             ++ " widget"
                     ]
-                    [ h3 [ title widget.description, class "heading" ] [ Html.text widget.name ]
+                    [ Utils.renderTitleFrom widget
                     , div
                         [ style
                             [ ( "maxWidth", ((toString <| width - floor padding * 2) ++ "px") )
@@ -42,7 +42,6 @@ render optionalRendererConfig width height widget data =
                                 ]
                             , tbody [] <| renderBodyFrom bodyRows
                             ]
-                        , Utils.renderDataSourceInfoFrom widget
                         ]
                     ]
 
