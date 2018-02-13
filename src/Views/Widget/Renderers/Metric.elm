@@ -1,6 +1,5 @@
 module Views.Widget.Renderers.Metric exposing (render)
 
-import Data.DataSource as DataSource exposing (toChannel)
 import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.MetricAdapter as MetricAdapter
@@ -9,6 +8,7 @@ import Data.Widget.Table as Table exposing (Data)
 import Html exposing (..)
 import Html.Attributes exposing (class, title)
 import Views.Widget.Renderers.Config as ViewConfig
+import Views.Widget.Renderers.Utils as Utils
 
 
 viewMetric : String -> String -> Html msg
@@ -39,16 +39,13 @@ render optionalRendererConfig width height widget data =
                 calculatedHeight =
                     ViewConfig.calculateHeight optionalRendererConfig height
             in
-                div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget container reduce-margin-top" ]
-                    [ div [ class "center-block" ]
-                        [ h3
-                            [ title <|
-                                widget.description
-                                    ++ " from "
-                                    ++ (DataSource.toChannel <| Widget.primaryDataSource widget)
-                            , class "heading"
-                            ]
-                            [ Html.text widget.name ]
+                div
+                    [ class <|
+                        ViewConfig.colSpanClass optionalRendererConfig
+                            ++ " widget container reduce-margin-top"
+                    ]
+                    [ div [ class "" ]
+                        [ Utils.renderTitleFrom widget
                         , viewMetric "Actual" source
                         , viewMetric "Target" target
                         ]

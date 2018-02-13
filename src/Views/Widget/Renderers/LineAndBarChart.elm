@@ -7,7 +7,6 @@ import Data.Widget.Chart as Chart exposing (Data)
 import Data.Widget.Config as RendererConfig
 import Data.Widget.Table as Table exposing (..)
 import Html exposing (..)
-import Html.Attributes exposing (title)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Views.Widget.Renderers.BarChart as BarChart
@@ -40,13 +39,8 @@ render optionalRendererConfig width height widget data =
                     ViewConfig.calculateHeight optionalRendererConfig height
             in
                 div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ]
-                    [ h3
-                        [ Html.Attributes.title widget.description
-                        , Html.Attributes.class "heading"
-                        ]
-                        [ Html.text widget.name ]
+                    [ Utils.renderTitleFrom widget
                     , view calculatedWidth calculatedHeight lineChart barChart
-                    , Utils.renderDataSourceInfoFrom widget
                     ]
 
         _ ->

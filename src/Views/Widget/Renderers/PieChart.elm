@@ -50,9 +50,8 @@ render optionalRendererConfig width height widget data =
                     ViewConfig.calculateHeight optionalRendererConfig height
             in
                 div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ]
-                    [ h3 [ Html.Attributes.title widget.description, Html.Attributes.class "heading" ] [ Html.text widget.name ]
+                    [ Utils.renderTitleFrom widget
                     , view calculatedWidth calculatedHeight dataAsLabelValueTuples
-                    , Utils.renderDataSourceInfoFrom widget
                     ]
 
         _ ->
@@ -164,8 +163,7 @@ view width height data =
                   ]
                 , [ g [ transform ("translate(" ++ toString (width // 2) ++ "," ++ toString (height // 2) ++ ")") ]
                         [ g [] <| List.indexedMap makeSlice pieData
-
-                        -- , g [] <| List.map2 makeLabel pieData data
+                          -- , g [] <| List.map2 makeLabel pieData data
                         ]
                   ]
                 , renderLegend 50 (Just labels)

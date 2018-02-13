@@ -83,18 +83,12 @@ render width height widget data updatable =
                 div [ class "col-md-12 widget" ]
                     [ div [ class "row" ]
                         [ div [ class "col-md-5" ]
-                            [ h3
-                                [ Html.Attributes.title widget.description
-                                , Html.Attributes.class "heading"
-                                ]
-                                [ Html.text widget.name ]
-                            ]
+                            [ Utils.renderTitleFrom widget ]
                         , div [ class "col-md-5 col-md-offset-2" ]
                             [ renderOptionalInputField
                             ]
                         ]
                     , draw initModel
-                    , Utils.renderDataSourceInfoFrom widget
                     ]
 
         _ ->

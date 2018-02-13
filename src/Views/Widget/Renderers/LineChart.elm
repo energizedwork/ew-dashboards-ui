@@ -21,7 +21,6 @@ import Data.Widget.Config as RendererConfig
 import Data.Widget.Adapters.ChartAdapter as ChartAdapter
 import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
-import Html.Attributes exposing (title)
 import NumberParser
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -52,13 +51,8 @@ render optionalRendererConfig width height widget data =
                         ViewConfig.colSpanClass optionalRendererConfig
                             ++ " widget"
                     ]
-                    [ h3
-                        [ Html.Attributes.title widget.description
-                        , Html.Attributes.class "heading"
-                        ]
-                        [ Html.text widget.name ]
+                    [ Utils.renderTitleFrom widget
                     , view calculatedWidth calculatedHeight chartData.data chartData.maxValue chartData.seriesLabels
-                    , Utils.renderDataSourceInfoFrom widget
                     ]
 
         _ ->

@@ -44,9 +44,8 @@ render optionalRendererConfig width height widget data =
                     ViewConfig.calculateHeight optionalRendererConfig height
             in
                 div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ]
-                    [ h3 [ Html.Attributes.title widget.description, Html.Attributes.class "heading" ] [ Html.text widget.name ]
+                    [ Utils.renderTitleFrom widget
                     , view calculatedWidth calculatedHeight chartData.data chartData.maxValue chartData.seriesLabels
-                    , Utils.renderDataSourceInfoFrom widget
                     ]
 
         _ ->

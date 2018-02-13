@@ -6,7 +6,7 @@ module Views.Widget.Renderers.Utils
         , largeWidth
         , largeHeight
         , largePadding
-        , renderDataSourceInfoFrom
+        , renderTitleFrom
         , rowToFloats
         , formatStringTick
         , toStr
@@ -52,6 +52,22 @@ largePadding =
 renderDataSourceInfoFrom : Widget -> Html msg
 renderDataSourceInfoFrom widget =
     p [ class "small data-source-info" ] [ text <| DataSource.toChannel <| Widget.primaryDataSource widget ]
+
+
+createDataSourceHoverTitleFrom : Widget -> String
+createDataSourceHoverTitleFrom widget =
+    widget.description ++ ": \n\n" ++ (DataSource.toChannel <| Widget.primaryDataSource widget)
+
+
+renderTitleFrom : Widget -> Html msg
+renderTitleFrom widget =
+    h3
+        [ Html.Attributes.title <| createDataSourceHoverTitleFrom widget
+        , Html.Attributes.class "heading"
+        ]
+        [ span [ Html.Attributes.class "ion-information-circled data-source-info" ] []
+        , span [] [ Html.text widget.name ]
+        ]
 
 
 rowToFloats : List String -> List Float
