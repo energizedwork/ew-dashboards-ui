@@ -23,7 +23,6 @@ import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Views.Widget.Renderers.ChartLegend as ChartLegend
 import Views.Widget.Renderers.Config as ViewConfig
-import Views.Widget.Renderers.LineChart as LineChart
 import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
@@ -173,8 +172,7 @@ view w h data maxValue seriesLabels =
                   , Utils.renderYGrid w h padding maxValue (yScale h maxValue) yGridTicks
                   ]
                 , renderColumns w h maxValue totalRows indexedData
-                  -- TODO FLip me
-                , renderLegend h w seriesLabels
+                , renderLegend w h seriesLabels
                 ]
             )
 
@@ -229,7 +227,7 @@ renderLegend :
     -> Int
     -> Maybe (List String)
     -> List (Svg msg)
-renderLegend height width seriesLabels =
+renderLegend width height seriesLabels =
     let
         labels =
             ChartLegend.createLabels seriesLabels legendLabel

@@ -111,7 +111,7 @@ view w h data maxValue seriesLabels =
                   , Utils.renderYGrid w h padding maxValue (yScale h maxValue) yGridTicks
                   ]
                 , renderLines w h maxValue firstRow indexedData
-                , renderLegend h w seriesLabels
+                , renderLegend w h seriesLabels
                 ]
             )
 
@@ -208,7 +208,7 @@ renderLegend :
     -> Int
     -> Maybe (List String)
     -> List (Svg msg)
-renderLegend height width seriesLabels =
+renderLegend width height seriesLabels =
     let
         labels =
             ChartLegend.createLabels seriesLabels legendLabel
