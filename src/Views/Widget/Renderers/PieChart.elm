@@ -9,7 +9,6 @@ import Data.Widget.Adapters.TableAdapter as TableAdapter
 import Data.Widget.Config as RendererConfig
 import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
-import Html.Attributes exposing (title)
 import List.Extra
 import NumberParser
 import Svg exposing (..)
@@ -157,7 +156,7 @@ view width height data =
                 [ [ Svg.style []
                         [ Svg.text """
                             .segment text { display: none; }
-                            .segment:hover { opacity: 0.7; }
+                            .segment:hover { opacity: 0.7; cursor: crosshair; }
                             .segment:hover text { display: inline; z-index: 9999; }
                           """ ]
                   ]

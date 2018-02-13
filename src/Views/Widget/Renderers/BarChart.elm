@@ -18,7 +18,6 @@ import Data.Widget.Config as RendererConfig
 import Data.Widget.Adapters.ChartAdapter as ChartAdapter
 import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
-import Html.Attributes exposing (title)
 import NumberParser
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -115,6 +114,9 @@ column height index totalRows colour xScaleBand maxValue ( header, value ) =
 
         colHeight =
             toFloat height - Scale.convert (yScale height maxValue) valueSantized - 2 * padding
+
+        makeTitle =
+            value
     in
         g [ class "column" ]
             [ rect
@@ -124,14 +126,10 @@ column height index totalRows colour xScaleBand maxValue ( header, value ) =
                 , Svg.Attributes.height <| toString colHeight
                 , fill colour
                 ]
-                []
-              -- TODO: Fix layering
-              -- , text_
-              --     [ x <| toString <| xposText
-              --     , y <| toString <| yposText
-              --     , textAnchor "middle"
-              --     ]
-              --     [ Svg.text <| toString value ]
+                [ Svg.title []
+                    [ Svg.text makeTitle
+                    ]
+                ]
             ]
 
 
@@ -152,7 +150,7 @@ view width height data maxValue seriesLabels =
                 [ [ Svg.style []
                         [ Svg.text """
                             .column text { display: none; }
-                            .column:hover rect { opacity: 0.7; }
+                            .column:hover rect { opacity: 0.7; cursor: crosshair; }
                             .column:hover text { display: inline; z-index: 9999; }
                           """ ]
                   , renderXAxis width height firstDataTuple
