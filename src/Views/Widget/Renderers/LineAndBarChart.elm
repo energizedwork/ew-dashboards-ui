@@ -10,7 +10,7 @@ import Html exposing (..)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Views.Widget.Renderers.BarChart as BarChart
-import Views.Widget.Renderers.Config as ViewConfig
+import Views.Widget.Renderers.Config as ViewConfig exposing (defaultChartPadding)
 import Views.Widget.Renderers.LineChart as LineChart
 import Views.Widget.Renderers.BarChart as BarChart
 import Views.Widget.Renderers.Utils as Utils exposing (..)
@@ -18,11 +18,6 @@ import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (..)
 import Views.Widget.Renderers.ChartLegend as ChartLegend
 import Views.Widget.Renderers.ChartAxisLabels as ChartAxisLabels
-
-
-padding : Float
-padding =
-    ViewConfig.largePadding
 
 
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
@@ -100,7 +95,7 @@ view w h lineChart barChart xAxisLabel yAxisLabel =
                   , LineChart.renderYAxis w h yAxisScale opts
                   , Utils.renderYGrid w
                         h
-                        padding
+                        defaultChartPadding
                         lineChart.maxValue
                         (LineChart.yScale h lineChart.maxValue)
                         yGridTicks
@@ -122,7 +117,7 @@ view w h lineChart barChart xAxisLabel yAxisLabel =
                         , renderedBarSeriesLabels
                         ]
                     )
-                , [ ChartAxisLabels.renderXAxisLabel w h xAxisLabel ]
-                , [ ChartAxisLabels.renderYAxisLabel h yAxisLabel ]
+                , [ ChartAxisLabels.renderXAxisLabel w h xAxisLabel defaultChartPadding ]
+                , [ ChartAxisLabels.renderYAxisLabel h yAxisLabel defaultChartPadding ]
                 ]
             )

@@ -23,7 +23,7 @@ import Html exposing (..)
 import NumberParser
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Views.Widget.Renderers.Config as ViewConfig
+import Views.Widget.Renderers.Config as ViewConfig exposing (defaultChartPadding)
 import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
@@ -58,11 +58,6 @@ render optionalRendererConfig width height widget data =
 
         _ ->
             p [ class "data" ] [ Html.text "Sorry, I can only render line charts from a CHART adapter right now" ]
-
-
-padding : Float
-padding =
-    ViewConfig.largePadding
 
 
 lineColours : Array Color.Color
@@ -110,12 +105,12 @@ view w h chartData =
             (List.concat
                 [ [ renderXAxis w h xTicksCount (xScale w firstRow)
                   , renderYAxis w h (yScale h chartData.maxValue) opts
-                  , Utils.renderYGrid w h padding chartData.maxValue (yScale h chartData.maxValue) yGridTicks
+                  , Utils.renderYGrid w h defaultChartPadding chartData.maxValue (yScale h chartData.maxValue) yGridTicks
                   ]
                 , renderLines w h chartData.maxValue firstRow indexedData
                 , renderLegend w h chartData.seriesLabels
-                , [ ChartAxisLabels.renderXAxisLabel w h chartData.xAxisLabel ]
-                , [ ChartAxisLabels.renderYAxisLabel h chartData.yAxisLabel ]
+                , [ ChartAxisLabels.renderXAxisLabel w h chartData.xAxisLabel defaultChartPadding ]
+                , [ ChartAxisLabels.renderYAxisLabel h chartData.yAxisLabel defaultChartPadding ]
                 ]
             )
 
@@ -138,7 +133,7 @@ renderLines width height maxValue firstRow indexedData =
 
 renderLine : String -> String -> Svg msg
 renderLine colour lineData =
-    g [ transform ("translate(78" ++ ", " ++ toString padding ++ ")"), class "series" ]
+    g [ transform ("translate(78" ++ ", " ++ toString defaultChartPadding.top ++ ")"), class "series" ]
         [ Svg.path [ d lineData, stroke colour, strokeWidth "3px", fill "none" ] []
         ]
 
@@ -160,7 +155,7 @@ renderXAxis width height numTicks bandScale =
                 }
                 (Scale.toRenderable <| bandScale)
     in
-        g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (toFloat height - padding) ++ ")") ]
+        g [ transform ("translate(" ++ toString (defaultChartPadding.left - 1) ++ ", " ++ toString (toFloat height - defaultChartPadding.bottom) ++ ")") ]
             [ xAxis ]
 
 
@@ -179,23 +174,23 @@ renderYAxis width height continuousScale opts =
         xTranslate =
             case opts.orientation of
                 Axis.Left ->
-                    floor <| padding - 1
+                    floor <| defaultChartPadding.left - 1
 
                 Axis.Right ->
-                    width - (floor (padding) + 1)
+                    width - (floor (defaultChartPadding.right) + 1)
 
                 Axis.Top ->
-                    floor <| padding - 1
+                    floor <| defaultChartPadding.top - 1
 
                 Axis.Bottom ->
-                    floor <| padding - 1
+                    floor <| defaultChartPadding.top - 1
     in
         g
             [ transform
                 ("translate("
                     ++ toString (xTranslate)
                     ++ ", "
-                    ++ toString padding
+                    ++ toString defaultChartPadding.top
                     ++ ")"
                 )
             ]
@@ -262,10 +257,10 @@ xScale : Int -> List ( a1, a2 ) -> BandScale a1
 xScale width firstRow =
     Scale.band { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 }
         (List.map Tuple.first firstRow)
-        ( 0, toFloat width - 2 * padding )
+        ( 0, toFloat width - defaultChartPadding.totalHorizontal )
 
 
 yScale : Int -> Float -> ContinuousScale
 yScale height maxValue =
     Scale.linear ( 0, maxValue )
-        ( (toFloat height) - 2 * padding, 0 )
+        ( (toFloat height) - defaultChartPadding.totalHorizontal, 0 )

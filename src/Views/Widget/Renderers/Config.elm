@@ -12,12 +12,24 @@ module Views.Widget.Renderers.Config
         , colSpanClass
         , defaultColSpan
         , totalCols
+        , defaultChartPadding
+        , ChartPadding
         )
 
 import Data.Widget.Config as WidgetConfig
 import Dict
 import Json.Decode as Decode exposing (..)
 import Json.Encode as Encode exposing (..)
+
+
+type alias ChartPadding =
+    { bottom : Float
+    , left : Float
+    , right : Float
+    , top : Float
+    , totalVertical : Float
+    , totalHorizontal : Float
+    }
 
 
 mediumWidth : Float
@@ -53,6 +65,17 @@ largePadding =
 defaultColSpan : Int
 defaultColSpan =
     totalCols
+
+
+defaultChartPadding : ChartPadding
+defaultChartPadding =
+    { top = mediumPadding
+    , right = mediumPadding
+    , bottom = largePadding
+    , left = largePadding
+    , totalVertical = mediumPadding + largePadding
+    , totalHorizontal = mediumPadding + largePadding
+    }
 
 
 totalCols : Int

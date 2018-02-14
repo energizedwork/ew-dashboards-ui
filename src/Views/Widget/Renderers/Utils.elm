@@ -15,6 +15,7 @@ import String exposing (..)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Visualization.Scale as Scale exposing (ContinuousScale)
+import Views.Widget.Renderers.Config as ViewConfig exposing (ChartPadding)
 
 
 renderDataSourceInfoFrom : Widget -> Html msg
@@ -31,7 +32,7 @@ yGridLine w h padding scale index tick =
         line
             [ x1 "0"
             , y1 yPos
-            , x2 <| toString (Basics.toFloat w - 2 * padding)
+            , x2 <| toString (Basics.toFloat w - padding)
             , y2 yPos
             , stroke "#ccc"
             , strokeWidth "1"
@@ -41,10 +42,10 @@ yGridLine w h padding scale index tick =
             []
 
 
-renderYGrid : Int -> Int -> Float -> Float -> ContinuousScale -> List Float -> Svg msg
-renderYGrid w h padding maxValue scale ticks =
-    g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (padding) ++ ")") ] <|
-        List.indexedMap (yGridLine w h padding scale) ticks
+renderYGrid : Int -> Int -> ChartPadding -> Float -> ContinuousScale -> List Float -> Svg msg
+renderYGrid w h chartPadding maxValue scale ticks =
+    g [ transform ("translate(" ++ toString (chartPadding.left - 1) ++ ", " ++ toString (chartPadding.top) ++ ")") ] <|
+        List.indexedMap (yGridLine w h chartPadding.totalVertical scale) ticks
 
 
 createDataSourceHoverTitleFrom : Widget -> String
