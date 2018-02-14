@@ -47,7 +47,7 @@ largeHeight =
 
 largePadding : Float
 largePadding =
-    100
+    70
 
 
 defaultColSpan : Int

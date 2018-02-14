@@ -26,6 +26,9 @@ import Views.Widget.Renderers.Config as ViewConfig
 import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
+import Views.Widget.Renderers.ChartLegend as ChartLegend
+import Views.Widget.Renderers.ChartAxisLabels as ChartAxisLabels
+import Data.Widget.Chart as Chart
 
 
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
@@ -44,7 +47,7 @@ render optionalRendererConfig width height widget data =
             in
                 div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ]
                     [ Utils.renderTitleFrom widget
-                    , view calculatedWidth calculatedHeight chartData.data chartData.maxValue chartData.seriesLabels
+                    , view calculatedWidth calculatedHeight chartData
                     ]
 
         _ ->
@@ -53,7 +56,7 @@ render optionalRendererConfig width height widget data =
 
 padding : Float
 padding =
-    ViewConfig.mediumPadding
+    ViewConfig.largePadding
 
 
 barColours : Array Color.Color
@@ -138,14 +141,14 @@ column height index totalRows colour xScaleBand maxValue ( header, value ) =
             ]
 
 
-view : Int -> Int -> List (List ( Cell, Cell )) -> Float -> Maybe (List String) -> Svg msg
-view w h data maxValue seriesLabels =
+view : Int -> Int -> Chart.Data -> Svg msg
+view w h chartData =
     let
         firstDataTuple =
-            List.head data |> Maybe.withDefault []
+            List.head chartData.data |> Maybe.withDefault []
 
         indexedData =
-            Array.toIndexedList (Array.fromList data)
+            Array.toIndexedList (Array.fromList chartData.data)
 
         totalRows =
             List.length indexedData
@@ -154,10 +157,10 @@ view w h data maxValue seriesLabels =
             5
 
         yAxisScale =
-            (yScale h maxValue)
+            (yScale h chartData.maxValue)
 
         yGridTicks =
-            Scale.ticks (yScale h maxValue) yTicksCount
+            Scale.ticks (yScale h chartData.maxValue) yTicksCount
     in
         svg [ Svg.Attributes.width (toString w ++ "px"), Svg.Attributes.height (toString h ++ "px") ]
             (List.concat
@@ -168,11 +171,13 @@ view w h data maxValue seriesLabels =
                             .column:hover text { display: inline; z-index: 9999; }
                           """ ]
                   , renderXAxis w h firstDataTuple
-                  , renderYAxis w h maxValue
-                  , Utils.renderYGrid w h padding maxValue (yScale h maxValue) yGridTicks
+                  , renderYAxis w h chartData.maxValue
+                  , Utils.renderYGrid w h padding chartData.maxValue (yScale h chartData.maxValue) yGridTicks
                   ]
-                , renderColumns w h maxValue totalRows indexedData
-                , renderLegend w h seriesLabels
+                , renderColumns w h chartData.maxValue totalRows indexedData
+                , renderLegend w h chartData.seriesLabels
+                , [ ChartAxisLabels.renderXAxisLabel w h chartData.xAxisLabel ]
+                , [ ChartAxisLabels.renderYAxisLabel h chartData.yAxisLabel ]
                 ]
             )
 

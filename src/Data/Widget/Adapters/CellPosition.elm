@@ -1,4 +1,4 @@
-module Data.Widget.Adapters.CellPosition exposing (CellPosition(..), x, y, encode, decoder)
+module Data.Widget.Adapters.CellPosition exposing (CellPosition(..), x, y, encode, decoder, defaultPosition)
 
 import Json.Decode as Decode exposing (Decoder, Value, index, int, map2)
 import Json.Encode as Encode exposing (int)
@@ -7,6 +7,11 @@ import Tuple exposing (..)
 
 type CellPosition
     = CellPosition ( Int, Int )
+
+
+defaultPosition : CellPosition
+defaultPosition =
+    CellPosition ( 1, 1 )
 
 
 decoder : Decoder CellPosition

@@ -17,11 +17,12 @@ import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (..)
 import Views.Widget.Renderers.ChartLegend as ChartLegend
+import Views.Widget.Renderers.ChartAxisLabels as ChartAxisLabels
 
 
 padding : Float
 padding =
-    ViewConfig.mediumPadding
+    ViewConfig.largePadding
 
 
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
@@ -29,7 +30,7 @@ render optionalRendererConfig width height widget data =
     case widget.adapter of
         LINE_AND_BAR_CHART optionalConfig ->
             let
-                ( lineChart, barChart ) =
+                ( lineChart, barChart, xAxisLabel, yAxisLabel ) =
                     LineAndBarAdapter.adapt optionalConfig data
 
                 calculatedWidth =
@@ -40,7 +41,7 @@ render optionalRendererConfig width height widget data =
             in
                 div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ]
                     [ Utils.renderTitleFrom widget
-                    , view calculatedWidth calculatedHeight lineChart barChart
+                    , view calculatedWidth calculatedHeight lineChart barChart xAxisLabel yAxisLabel
                     ]
 
         _ ->
@@ -50,8 +51,8 @@ render optionalRendererConfig width height widget data =
                 ]
 
 
-view : Int -> Int -> Chart.Data -> Chart.Data -> Html msg
-view w h lineChart barChart =
+view : Int -> Int -> Chart.Data -> Chart.Data -> Maybe String -> Maybe String -> Html msg
+view w h lineChart barChart xAxisLabel yAxisLabel =
     let
         firstLineDataTuple =
             List.head lineChart.data |> Maybe.withDefault []
@@ -121,5 +122,7 @@ view w h lineChart barChart =
                         , renderedBarSeriesLabels
                         ]
                     )
+                , [ ChartAxisLabels.renderXAxisLabel w h xAxisLabel ]
+                , [ ChartAxisLabels.renderYAxisLabel h yAxisLabel ]
                 ]
             )

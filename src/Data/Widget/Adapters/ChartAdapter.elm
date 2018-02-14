@@ -1,6 +1,14 @@
-module Data.Widget.Adapters.ChartAdapter exposing (adapt, defaultConfig, extractSeriesLabels)
+module Data.Widget.Adapters.ChartAdapter
+    exposing
+        ( adapt
+        , defaultConfig
+        , extractSeriesLabels
+        , extractXAxisLabel
+        , extractYAxisLabel
+        )
 
 import Data.Widget.Adapters.TableAdapter as TableAdapter
+import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder, defaultPosition)
 import Data.Widget.Table as Table exposing (Cell, Data, Row)
 import Data.Widget.Config as AdapterConfig
 import Json.Decode as Json exposing (Value)
@@ -15,13 +23,13 @@ defaultConfig =
     Dict.empty
 
 
-extractSeriesLabels : String -> Dict String Json.Value -> Table.Data -> Maybe (List String)
-extractSeriesLabels key config data =
+extractSeriesLabels : Dict String Json.Value -> Table.Data -> Maybe (List String)
+extractSeriesLabels config data =
     let
         defaultSeriesLabelsRange =
-            CellRange.emptyRange
+            CellRange.defaultRange
     in
-        case Dict.get key config of
+        case Dict.get "seriesLabels" config of
             Just seriesLabels ->
                 let
                     labels =
@@ -37,6 +45,35 @@ extractSeriesLabels key config data =
                 Nothing
 
 
+extractXAxisLabel : Dict String Json.Value -> Table.Data -> Maybe Cell
+extractXAxisLabel config data =
+    extractAxisLabel "xAxisLabel" config data
+
+
+extractYAxisLabel : Dict String Json.Value -> Table.Data -> Maybe Cell
+extractYAxisLabel config data =
+    extractAxisLabel "yAxisLabel" config data
+
+
+extractAxisLabel : String -> Dict String Json.Value -> Table.Data -> Maybe Cell
+extractAxisLabel configKey config data =
+    case Dict.get configKey config of
+        Just labelPosition ->
+            let
+                position =
+                    labelPosition
+                        |> Json.decodeValue CellPosition.decoder
+                        |> Result.withDefault CellPosition.defaultPosition
+
+                cell =
+                    CellRange.extractCell data position
+            in
+                Just cell
+
+        Nothing ->
+            Nothing
+
+
 adapt : AdapterConfig.Config -> Data -> Chart.Data
 adapt optionalConfig data =
     let
@@ -50,7 +87,13 @@ adapt optionalConfig data =
             Array.toIndexedList (Array.fromList chartData)
 
         seriesLabels =
-            extractSeriesLabels "seriesLabels" optionalConfig data
+            extractSeriesLabels optionalConfig data
+
+        xAxisLabel =
+            extractXAxisLabel optionalConfig data
+
+        yAxisLabel =
+            extractYAxisLabel optionalConfig data
     in
         Chart.Data
             bodyRows
@@ -60,3 +103,5 @@ adapt optionalConfig data =
             maxValue
             xLabels
             seriesLabels
+            xAxisLabel
+            yAxisLabel

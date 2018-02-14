@@ -14,6 +14,8 @@ import Json.Decode as Json exposing (Value)
 -- "barRows"
 -- "barSeriesLabels"
 -- "xLabels"
+-- "xAxisLabel"
+-- "yAxisLabel"
 
 
 defaultConfig : Dict String Json.Value
@@ -80,7 +82,7 @@ extractChartConfig combinedConfig rowsKey seriesLabelKey =
             cleansedConfig
 
 
-adapt : AdapterConfig.Config -> Table.Data -> ( Chart.Data, Chart.Data )
+adapt : AdapterConfig.Config -> Table.Data -> ( Chart.Data, Chart.Data, Maybe String, Maybe String )
 adapt combinedConfig data =
     let
         lineChartData =
@@ -88,5 +90,11 @@ adapt combinedConfig data =
 
         barChartData =
             ChartAdapter.adapt (normalizeBarChartConfig combinedConfig) data
+
+        xAxisLabel =
+            ChartAdapter.extractXAxisLabel combinedConfig data
+
+        yAxisLabel =
+            ChartAdapter.extractYAxisLabel combinedConfig data
     in
-        ( lineChartData, barChartData )
+        ( lineChartData, barChartData, xAxisLabel, yAxisLabel )

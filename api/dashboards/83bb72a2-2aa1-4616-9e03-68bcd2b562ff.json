@@ -137,7 +137,9 @@
           "seriesLabels": {
             "start": [13, 2],
             "end": [13, 7]
-          }
+          },
+          "xAxisLabel": [13,2],
+          "yAxisLabel": [13,2]
         }
       },
       "renderer": {
@@ -191,7 +193,9 @@
           "barSeriesLabels": {
             "start": [13, 3],
             "end": [13, 3]
-          }
+          },
+          "xAxisLabel": [13,2],
+          "yAxisLabel": [13,2]
         }
       },
       "renderer": {
@@ -229,7 +233,9 @@
           "seriesLabels": {
             "start": [13, 2],
             "end": [13, 7]
-          }
+          },
+          "xAxisLabel": [13,2],
+          "yAxisLabel": [13,2]
         }
       },
       "renderer": {

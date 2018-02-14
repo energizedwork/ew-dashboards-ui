@@ -25,7 +25,7 @@ adapterConfigTest =
 
         labelledInput =
             Data
-                [ TD.headerRow
+                [ TD.headerRow ++ [ "X Axis Label" ]
                 , TD.firstRow ++ [ "Label 1" ]
                 , TD.secondRow ++ [ "Label 2" ]
                 , TD.thirdRow ++ [ "Label 3" ]
@@ -48,6 +48,14 @@ adapterConfigTest =
                         CellRange
                             (CellPosition ( 5, 3 ))
                             (CellPosition ( 10, 3 ))
+                  )
+                , ( "xAxisLabel"
+                  , CellPosition.encode <|
+                        CellPosition ( 13, 1 )
+                  )
+                , ( "yAxisLabel"
+                  , CellPosition.encode <|
+                        CellPosition ( 13, 2 )
                   )
                 , ( "seriesLabels"
                   , CellRange.encode <|
@@ -90,6 +98,18 @@ adapterConfigTest =
                     |> Expect.equal
                         Nothing
 
+        defaultXAxisLabel =
+            \_ ->
+                defaultActualChartData.xAxisLabel
+                    |> Expect.equal
+                        Nothing
+
+        defaultYAxisLabel =
+            \_ ->
+                defaultActualChartData.yAxisLabel
+                    |> Expect.equal
+                        Nothing
+
         suppliedLineChartRows =
             \_ ->
                 suppliedActualChartData.rows
@@ -114,6 +134,18 @@ adapterConfigTest =
                         (Just
                             [ "Label 1", "Label 2", "Label 3", "Label 4" ]
                         )
+
+        suppliedXAxisLabel =
+            \_ ->
+                suppliedActualChartData.xAxisLabel
+                    |> Expect.equal
+                        (Just "X Axis Label")
+
+        suppliedYAxisLabel =
+            \_ ->
+                suppliedActualChartData.yAxisLabel
+                    |> Expect.equal
+                        (Just "Label 1")
     in
         Test.describe "ChartAdapter.adapt"
             [ Test.describe "with default Config"
@@ -122,6 +154,8 @@ adapterConfigTest =
                 , Test.test "max value is extracted from body rows" defaultMaxValue
                 , Test.test "x-axis labels are the first row" defaultXLabels
                 , Test.test "series labels are empty" defaultSeriesLabels
+                , Test.test "x-axis label is nothing" defaultXAxisLabel
+                , Test.test "y-axis label is nothing" defaultYAxisLabel
                 ]
             , Test.describe "with supplied Config"
                 [ Test.test "body rows are as specified" suppliedLineChartRows
@@ -129,5 +163,7 @@ adapterConfigTest =
                 , Test.test "max value is extracted from body rows" suppliedMaxValue
                 , Test.test "x-axis labels are as specified" suppliedXLabels
                 , Test.test "series labels are as specified" suppliedSeriesLabels
+                , Test.test "x-axis label is as specified" suppliedXAxisLabel
+                , Test.test "y-axis label is as specified" suppliedYAxisLabel
                 ]
             ]
