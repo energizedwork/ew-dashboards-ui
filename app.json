@@ -1,10 +1,13 @@
 {
     "name": "EW Dashboards",
-    "repository": "https://github.com/energizedwork/ew-dashboards-u",
+    "repository": "https://github.com/energizedwork/ew-dashboards-ui",
     "env": {
         "ELM_COMPILE": "elm make src/Main.elm --output elm.js"
     },
     "buildpacks": [
+        {
+            "url": "https://github.com/heroku/heroku-buildpack-nodejs#v118"
+        },
         {
             "url": "https://github.com/srid/heroku-buildpack-elm.git"
         },
