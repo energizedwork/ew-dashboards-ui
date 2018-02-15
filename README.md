@@ -21,8 +21,11 @@ Assuming you have a [Node](https://nodejs.org/en/download/) install.
 # run the dev server + local CI
 $ npm run start:test:watch
 
-# run the tests only
+# run the tests only & rerun on file changes
 $ npm run test:watch
+
+# run the tests
+$ npm run test
 ```
 
 
@@ -32,8 +35,20 @@ Elm is whitespace sensitive so elm-live uses [elm-format](https://atom.io/packag
 
 
 ## Deploy
-``` $ git remote add heroku https://git.heroku.com/ew-dashboards-ui.git ```
 
-``` $ git push heroku master ```
+Deploys are automatic on pushes to master and a green CI run on Heroku so just push to Github or merge a PR.
 
-``` $ open https://ew-dashboards-ui.herokuapp.com ```
+```bash
+$ git push origin master
+
+$ open http://dashboards.energizedwork.com/
+```
+
+If you need to do a manual deploy:
+
+```bash
+$ git remote add heroku https://git.heroku.com/ew-dashboards-ui.git
+$ git push heroku master
+
+$ open http://dashboards.energizedwork.com/
+```
