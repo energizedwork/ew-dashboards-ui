@@ -45,7 +45,7 @@ yGridLine w h padding scale index tick =
 renderYGrid : Int -> Int -> ChartPadding -> Float -> ContinuousScale -> List Float -> Svg msg
 renderYGrid w h chartPadding maxValue scale ticks =
     g [ transform ("translate(" ++ toString (chartPadding.left - 1) ++ ", " ++ toString (chartPadding.top) ++ ")") ] <|
-        List.indexedMap (yGridLine w h chartPadding.totalVertical scale) ticks
+        List.indexedMap (yGridLine w h chartPadding.totalHorizontal scale) ticks
 
 
 createDataSourceHoverTitleFrom : Widget -> String

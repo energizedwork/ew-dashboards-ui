@@ -194,8 +194,9 @@
             "start": [13, 3],
             "end": [13, 3]
           },
-          "xAxisLabel": [13,2],
-          "yAxisLabel": [13,2]
+          "lineXAxisLabel": [13,3],
+          "lineYAxisLabel": [13,4],
+          "barYAxisLabel": [13,5]
         }
       },
       "renderer": {

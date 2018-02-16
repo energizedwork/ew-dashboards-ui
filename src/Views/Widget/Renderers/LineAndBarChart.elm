@@ -10,7 +10,7 @@ import Html exposing (..)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Views.Widget.Renderers.BarChart as BarChart
-import Views.Widget.Renderers.Config as ViewConfig exposing (defaultChartPadding)
+import Views.Widget.Renderers.Config as ViewConfig exposing (defaultChartPadding, ChartPadding)
 import Views.Widget.Renderers.LineChart as LineChart
 import Views.Widget.Renderers.BarChart as BarChart
 import Views.Widget.Renderers.Utils as Utils exposing (..)
@@ -20,12 +20,20 @@ import Views.Widget.Renderers.ChartLegend as ChartLegend
 import Views.Widget.Renderers.ChartAxisLabels as ChartAxisLabels
 
 
+chartPadding : ChartPadding
+chartPadding =
+    { defaultChartPadding
+        | right = ViewConfig.largePadding
+        , totalHorizontal = ViewConfig.largePadding * 2
+    }
+
+
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
 render optionalRendererConfig width height widget data =
     case widget.adapter of
         LINE_AND_BAR_CHART optionalConfig ->
             let
-                ( lineChart, barChart, xAxisLabel, yAxisLabel ) =
+                ( lineChart, barChart ) =
                     LineAndBarAdapter.adapt optionalConfig data
 
                 calculatedWidth =
@@ -36,7 +44,7 @@ render optionalRendererConfig width height widget data =
             in
                 div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ]
                     [ Utils.renderTitleFrom widget
-                    , view calculatedWidth calculatedHeight lineChart barChart xAxisLabel yAxisLabel
+                    , view calculatedWidth calculatedHeight lineChart barChart
                     ]
 
         _ ->
@@ -46,8 +54,8 @@ render optionalRendererConfig width height widget data =
                 ]
 
 
-view : Int -> Int -> Chart.Data -> Chart.Data -> Maybe String -> Maybe String -> Html msg
-view w h lineChart barChart xAxisLabel yAxisLabel =
+view : Int -> Int -> Chart.Data -> Chart.Data -> Html msg
+view w h lineChart barChart =
     let
         firstLineDataTuple =
             List.head lineChart.data |> Maybe.withDefault []
@@ -68,13 +76,13 @@ view w h lineChart barChart xAxisLabel yAxisLabel =
             { defaultOptions | orientation = Axis.Right, tickCount = yTicksCount }
 
         xAxisScale =
-            (LineChart.xScale w firstLineDataTuple)
+            (LineChart.xScale w firstLineDataTuple chartPadding)
 
         yAxisScale =
-            (LineChart.yScale h lineChart.maxValue)
+            (LineChart.yScale h lineChart.maxValue chartPadding)
 
         yGridTicks =
-            Scale.ticks (LineChart.yScale h lineChart.maxValue) yTicksCount
+            Scale.ticks (LineChart.yScale h lineChart.maxValue chartPadding) yTicksCount
 
         numBarRows =
             List.length barChart.rows
@@ -90,14 +98,14 @@ view w h lineChart barChart xAxisLabel yAxisLabel =
             , Svg.Attributes.height (toString h ++ "px")
             ]
             (List.concat
-                [ [ LineChart.renderXAxis w h xTicksCount xAxisScale
-                  , BarChart.renderYAxis w h barChart.maxValue
-                  , LineChart.renderYAxis w h yAxisScale opts
+                [ [ LineChart.renderXAxis w h xTicksCount xAxisScale chartPadding
+                  , BarChart.renderYAxis w h barChart.maxValue chartPadding
+                  , LineChart.renderYAxis w h yAxisScale opts chartPadding
                   , Utils.renderYGrid w
                         h
-                        defaultChartPadding
+                        chartPadding
                         lineChart.maxValue
-                        (LineChart.yScale h lineChart.maxValue)
+                        (LineChart.yScale h lineChart.maxValue chartPadding)
                         yGridTicks
                   ]
                 , BarChart.renderColumns w
@@ -105,11 +113,13 @@ view w h lineChart barChart xAxisLabel yAxisLabel =
                     barChart.maxValue
                     numBarRows
                     barChart.indexedData
+                    chartPadding
                 , LineChart.renderLines w
                     h
                     lineChart.maxValue
                     firstLineDataTuple
                     lineChart.indexedData
+                    chartPadding
                 , ChartLegend.renderBottomCenterAligned w
                     h
                     (List.concat
@@ -117,7 +127,8 @@ view w h lineChart barChart xAxisLabel yAxisLabel =
                         , renderedBarSeriesLabels
                         ]
                     )
-                , [ ChartAxisLabels.renderXAxisLabel w h xAxisLabel defaultChartPadding ]
-                , [ ChartAxisLabels.renderYAxisLabel h yAxisLabel defaultChartPadding ]
+                , [ ChartAxisLabels.renderXAxisLabel w h lineChart.xAxisLabel chartPadding ]
+                , [ ChartAxisLabels.renderLeftYAxisLabel h barChart.yAxisLabel chartPadding ]
+                , [ ChartAxisLabels.renderRightYAxisLabel w h lineChart.yAxisLabel chartPadding ]
                 ]
             )

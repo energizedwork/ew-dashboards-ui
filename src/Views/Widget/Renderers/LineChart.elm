@@ -23,7 +23,7 @@ import Html exposing (..)
 import NumberParser
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Views.Widget.Renderers.Config as ViewConfig exposing (defaultChartPadding)
+import Views.Widget.Renderers.Config as ViewConfig exposing (defaultChartPadding, ChartPadding)
 import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
@@ -99,18 +99,18 @@ view w h chartData =
             }
 
         yGridTicks =
-            Scale.ticks (yScale h chartData.maxValue) yTicksCount
+            Scale.ticks (yScale h chartData.maxValue defaultChartPadding) yTicksCount
     in
         svg [ Svg.Attributes.width (toString w ++ "px"), Svg.Attributes.height (toString h ++ "px") ]
             (List.concat
-                [ [ renderXAxis w h xTicksCount (xScale w firstRow)
-                  , renderYAxis w h (yScale h chartData.maxValue) opts
-                  , Utils.renderYGrid w h defaultChartPadding chartData.maxValue (yScale h chartData.maxValue) yGridTicks
+                [ [ renderXAxis w h xTicksCount (xScale w firstRow defaultChartPadding) defaultChartPadding
+                  , renderYAxis w h (yScale h chartData.maxValue defaultChartPadding) opts defaultChartPadding
+                  , Utils.renderYGrid w h defaultChartPadding chartData.maxValue (yScale h chartData.maxValue defaultChartPadding) yGridTicks
                   ]
-                , renderLines w h chartData.maxValue firstRow indexedData
+                , renderLines w h chartData.maxValue firstRow indexedData defaultChartPadding
                 , renderLegend w h chartData.seriesLabels
                 , [ ChartAxisLabels.renderXAxisLabel w h chartData.xAxisLabel defaultChartPadding ]
-                , [ ChartAxisLabels.renderYAxisLabel h chartData.yAxisLabel defaultChartPadding ]
+                , [ ChartAxisLabels.renderLeftYAxisLabel h chartData.yAxisLabel defaultChartPadding ]
                 ]
             )
 
@@ -121,25 +121,26 @@ renderLines :
     -> Float
     -> List ( Cell, Cell )
     -> List ( Int, List ( Cell, Cell ) )
+    -> ChartPadding
     -> List (Svg msg)
-renderLines width height maxValue firstRow indexedData =
+renderLines width height maxValue firstRow indexedData chartPadding =
     List.map
         (\( index, rowTuple ) ->
-            generateSVGPathDesc width height maxValue firstRow rowTuple
-                |> renderLine (getLineColour (index))
+            generateSVGPathDesc width height maxValue firstRow rowTuple chartPadding
+                |> renderLine (getLineColour (index)) chartPadding
         )
         indexedData
 
 
-renderLine : String -> String -> Svg msg
-renderLine colour lineData =
-    g [ transform ("translate(78" ++ ", " ++ toString defaultChartPadding.top ++ ")"), class "series" ]
+renderLine : String -> ChartPadding -> String -> Svg msg
+renderLine colour chartPadding lineData =
+    g [ transform ("translate(78" ++ ", " ++ toString chartPadding.top ++ ")"), class "series" ]
         [ Svg.path [ d lineData, stroke colour, strokeWidth "3px", fill "none" ] []
         ]
 
 
-renderXAxis : Int -> Int -> Int -> BandScale a1 -> Svg msg
-renderXAxis width height numTicks bandScale =
+renderXAxis : Int -> Int -> Int -> BandScale a1 -> ChartPadding -> Svg msg
+renderXAxis width height numTicks bandScale chartPadding =
     let
         opts =
             Axis.defaultOptions
@@ -155,7 +156,7 @@ renderXAxis width height numTicks bandScale =
                 }
                 (Scale.toRenderable <| bandScale)
     in
-        g [ transform ("translate(" ++ toString (defaultChartPadding.left - 1) ++ ", " ++ toString (toFloat height - defaultChartPadding.bottom) ++ ")") ]
+        g [ transform ("translate(" ++ toString (chartPadding.left - 1) ++ ", " ++ toString (toFloat height - chartPadding.bottom) ++ ")") ]
             [ xAxis ]
 
 
@@ -164,8 +165,9 @@ renderYAxis :
     -> b
     -> Axis.RenderableScale a domain range value
     -> Axis.Options value
+    -> ChartPadding
     -> Svg msg
-renderYAxis width height continuousScale opts =
+renderYAxis width height continuousScale opts chartPadding =
     let
         yAxis : Svg msg
         yAxis =
@@ -174,23 +176,23 @@ renderYAxis width height continuousScale opts =
         xTranslate =
             case opts.orientation of
                 Axis.Left ->
-                    floor <| defaultChartPadding.left - 1
+                    floor <| chartPadding.left - 1
 
                 Axis.Right ->
-                    width - (floor (defaultChartPadding.right) + 1)
+                    width - (floor (chartPadding.right) + 1)
 
                 Axis.Top ->
-                    floor <| defaultChartPadding.top - 1
+                    floor <| chartPadding.top - 1
 
                 Axis.Bottom ->
-                    floor <| defaultChartPadding.top - 1
+                    floor <| chartPadding.bottom - 1
     in
         g
             [ transform
                 ("translate("
                     ++ toString (xTranslate)
                     ++ ", "
-                    ++ toString defaultChartPadding.top
+                    ++ toString chartPadding.top
                     ++ ")"
                 )
             ]
@@ -221,9 +223,10 @@ generateSVGPathDesc :
     -> Float
     -> List ( Cell, Cell )
     -> List ( Cell, Cell )
+    -> ChartPadding
     -> String
-generateSVGPathDesc width height maxValue firstRow rowTuple =
-    List.map (pointGenerator width height maxValue firstRow) rowTuple
+generateSVGPathDesc width height maxValue firstRow rowTuple chartPadding =
+    List.map (pointGenerator width height maxValue firstRow chartPadding) rowTuple
         |> Shape.line Shape.linearCurve
 
 
@@ -232,20 +235,21 @@ pointGenerator :
     -> Int
     -> Float
     -> List ( Cell, Cell )
+    -> ChartPadding
     -> ( String, String )
     -> Maybe ( Float, Float )
-pointGenerator width height maxValue firstRow ( x, y ) =
+pointGenerator width height maxValue firstRow chartPadding ( x, y ) =
     let
         ySantized =
             NumberParser.fromString y
 
         yScaleData =
             Scale.convert
-                (yScale height maxValue)
+                (yScale height maxValue chartPadding)
                 ySantized
 
         xScaleData =
-            Scale.convert (xScale width firstRow) x
+            Scale.convert (xScale width firstRow chartPadding) x
     in
         Just
             ( xScaleData
@@ -253,14 +257,14 @@ pointGenerator width height maxValue firstRow ( x, y ) =
             )
 
 
-xScale : Int -> List ( a1, a2 ) -> BandScale a1
-xScale width firstRow =
+xScale : Int -> List ( a1, a2 ) -> ChartPadding -> BandScale a1
+xScale width firstRow chartPadding =
     Scale.band { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 }
         (List.map Tuple.first firstRow)
-        ( 0, toFloat width - defaultChartPadding.totalHorizontal )
+        ( 0, toFloat width - chartPadding.totalHorizontal )
 
 
-yScale : Int -> Float -> ContinuousScale
-yScale height maxValue =
+yScale : Int -> Float -> ChartPadding -> ContinuousScale
+yScale height maxValue chartPadding =
     Scale.linear ( 0, maxValue )
-        ( (toFloat height) - defaultChartPadding.totalHorizontal, 0 )
+        ( (toFloat height) - chartPadding.totalVertical, 0 )

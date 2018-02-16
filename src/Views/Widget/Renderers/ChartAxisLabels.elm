@@ -1,4 +1,4 @@
-module Views.Widget.Renderers.ChartAxisLabels exposing (renderXAxisLabel, renderYAxisLabel)
+module Views.Widget.Renderers.ChartAxisLabels exposing (renderXAxisLabel, renderLeftYAxisLabel, renderRightYAxisLabel)
 
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -40,8 +40,8 @@ renderXAxisLabel w h text chartPadding =
         createAxisLabel x y 0 text
 
 
-renderYAxisLabel : Int -> Maybe String -> ChartPadding -> Svg msg
-renderYAxisLabel h text chartPadding =
+renderLeftYAxisLabel : Int -> Maybe String -> ChartPadding -> Svg msg
+renderLeftYAxisLabel h text chartPadding =
     let
         heightWithoutPadding =
             h - (round chartPadding.totalVertical)
@@ -53,3 +53,18 @@ renderYAxisLabel h text chartPadding =
             (heightWithoutPadding // 2) + (round chartPadding.top)
     in
         createAxisLabel x y -90 text
+
+
+renderRightYAxisLabel : Int -> Int -> Maybe String -> ChartPadding -> Svg msg
+renderRightYAxisLabel w h text chartPadding =
+    let
+        heightWithoutPadding =
+            h - (round chartPadding.totalVertical)
+
+        x =
+            w - 20
+
+        y =
+            (heightWithoutPadding // 2) + (round chartPadding.top)
+    in
+        createAxisLabel x y 90 text

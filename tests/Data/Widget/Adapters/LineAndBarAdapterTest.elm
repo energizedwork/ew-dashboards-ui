@@ -70,21 +70,25 @@ adapterConfigTest =
                             (CellPosition ( 5, 3 ))
                             (CellPosition ( 10, 3 ))
                   )
-                , ( "xAxisLabel"
+                , ( "lineXAxisLabel"
                   , CellPosition.encode <|
                         CellPosition ( 13, 2 )
                   )
-                , ( "yAxisLabel"
+                , ( "lineYAxisLabel"
                   , CellPosition.encode <|
                         CellPosition ( 13, 3 )
+                  )
+                , ( "barYAxisLabel"
+                  , CellPosition.encode <|
+                        CellPosition ( 13, 4 )
                   )
                 ]
 
         -- functions under test!
-        ( defaultLineChart, defaultBarChart, defaultActualXAxisLabel, defaultActualYAxisLabel ) =
+        ( defaultLineChart, defaultBarChart ) =
             LineAndBarAdapter.adapt defaultConfig unlabelledInput
 
-        ( suppliedLineChart, suppliedBarChart, suppliedActualXAxisLabel, suppliedActualYAxisLabel ) =
+        ( suppliedLineChart, suppliedBarChart ) =
             LineAndBarAdapter.adapt suppliedConfig labelledInput
 
         -- expectations
@@ -136,10 +140,13 @@ adapterConfigTest =
             \_ -> defaultLineChart.xLabels |> Expect.equal TD.headerRow
 
         defaultXAxisLabel =
-            \_ -> defaultActualXAxisLabel |> Expect.equal Nothing
+            \_ -> defaultLineChart.xAxisLabel |> Expect.equal Nothing
 
-        defaultYAxisLabel =
-            \_ -> defaultActualYAxisLabel |> Expect.equal Nothing
+        defaultLineYAxisLabel =
+            \_ -> defaultLineChart.yAxisLabel |> Expect.equal Nothing
+
+        defaultBarYAxisLabel =
+            \_ -> defaultBarChart.yAxisLabel |> Expect.equal Nothing
 
         suppliedLineChartRows =
             \_ ->
@@ -192,10 +199,13 @@ adapterConfigTest =
                         [ "205", "206", "207", "208", "209", "210" ]
 
         suppliedXAxisLabel =
-            \_ -> suppliedActualXAxisLabel |> Expect.equal (Just "Label 1")
+            \_ -> suppliedLineChart.xAxisLabel |> Expect.equal (Just "Label 1")
 
-        suppliedYAxisLabel =
-            \_ -> suppliedActualYAxisLabel |> Expect.equal (Just "Label 2")
+        suppliedLineYAxisLabel =
+            \_ -> suppliedLineChart.yAxisLabel |> Expect.equal (Just "Label 2")
+
+        suppliedBarYAxisLabel =
+            \_ -> suppliedBarChart.yAxisLabel |> Expect.equal (Just "Label 3")
     in
         Test.describe "LineAndBarAdapter.adapt"
             [ Test.describe "with default Config"
@@ -209,7 +219,8 @@ adapterConfigTest =
                 , Test.test "max value is extracted from bar rows" defaultBarMaxValue
                 , Test.test "x-axis labels are the first row" defaultXLabels
                 , Test.test "x-axis label is nothing" defaultXAxisLabel
-                , Test.test "y-axis label is nothing" defaultYAxisLabel
+                , Test.test "line chart y-axis label is nothing" defaultLineYAxisLabel
+                , Test.test "bar chart y-axis label is nothing" defaultBarYAxisLabel
                 ]
             , Test.describe "with supplied Config"
                 [ Test.test "line chart rows are as specified" suppliedLineChartRows
@@ -222,6 +233,7 @@ adapterConfigTest =
                 , Test.test "max value is extracted from bar rows" suppliedBarMaxValue
                 , Test.test "x-axis labels are the third row" suppliedXLabels
                 , Test.test "x-axis label is as specified" suppliedXAxisLabel
-                , Test.test "y-axis label is as specified" suppliedYAxisLabel
+                , Test.test "line charty-axis label is as specified" suppliedLineYAxisLabel
+                , Test.test "bar charty-axis label is as specified" suppliedBarYAxisLabel
                 ]
             ]
