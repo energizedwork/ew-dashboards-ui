@@ -79,9 +79,9 @@ formatNumberTick : a -> String
 formatNumberTick tick =
     case (String.toFloat (toStr tick)) of
         Ok floatTick ->
-            if floatTick >= 1000000 then
+            if floatTick >= 1000000 || floatTick <= -1000000 then
                 toStr (floatTick / 1000000) ++ "m"
-            else if floatTick >= 1000 then
+            else if floatTick >= 1000 || floatTick <= -1000 then
                 toStr (floatTick / 1000) ++ "k"
             else
                 toStr floatTick
