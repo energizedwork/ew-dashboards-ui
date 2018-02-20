@@ -171,7 +171,7 @@ renderYAxis width height continuousScale opts chartPadding =
     let
         yAxis : Svg msg
         yAxis =
-            Axis.axis opts continuousScale
+            Axis.axis { opts | tickFormat = Just Utils.formatNumberTick } continuousScale
 
         xTranslate =
             case opts.orientation of

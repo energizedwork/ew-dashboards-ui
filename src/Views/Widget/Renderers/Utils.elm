@@ -5,6 +5,7 @@ module Views.Widget.Renderers.Utils
         , renderYGrid
         , formatStringTick
         , toStr
+        , formatNumberTick
         )
 
 import Data.DataSource as DataSource
@@ -72,6 +73,21 @@ rowToFloats row =
 formatStringTick : a -> String
 formatStringTick tick =
     toStr tick
+
+
+formatNumberTick : a -> String
+formatNumberTick tick =
+    case (String.toFloat (toStr tick)) of
+        Ok floatTick ->
+            if floatTick >= 1000000 then
+                toStr (floatTick / 1000000) ++ "m"
+            else if floatTick >= 1000 then
+                toStr (floatTick / 1000) ++ "k"
+            else
+                toStr floatTick
+
+        Err err ->
+            toStr tick
 
 
 

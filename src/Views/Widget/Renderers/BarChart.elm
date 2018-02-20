@@ -91,7 +91,7 @@ xAxis width data chartPadding =
 
 yAxis : Int -> Float -> ChartPadding -> Svg msg
 yAxis height maxValue chartPadding =
-    Axis.axis { defaultOptions | orientation = Axis.Left, tickCount = 5 } (yScale height maxValue chartPadding)
+    Axis.axis { defaultOptions | orientation = Axis.Left, tickCount = 5, tickFormat = Just Utils.formatNumberTick } (yScale height maxValue chartPadding)
 
 
 column : Int -> Int -> Int -> String -> BandScale String -> ChartPadding -> Float -> ( String, String ) -> Svg msg
