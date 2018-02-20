@@ -134,7 +134,7 @@ renderLines width height maxValue firstRow indexedData chartPadding =
 
 renderLine : String -> ChartPadding -> String -> Svg msg
 renderLine colour chartPadding lineData =
-    g [ transform ("translate(78" ++ ", " ++ toString chartPadding.top ++ ")"), class "series" ]
+    g [ transform ("translate(" ++ (toString (chartPadding.left + 25)) ++ ", " ++ toString chartPadding.top ++ ")"), class "series" ]
         [ Svg.path [ d lineData, stroke colour, strokeWidth "3px", fill "none" ] []
         ]
 
