@@ -92,6 +92,8 @@ view w h lineChart barChart =
 
         renderedLineSeriesLabels =
             ChartLegend.createLabels lineChart.seriesLabels LineChart.legendLabel
+
+        -- TODO MSP read forecast Bools from config
     in
         svg
             [ Svg.Attributes.width (toString w ++ "px")
@@ -120,6 +122,8 @@ view w h lineChart barChart =
                     firstLineDataTuple
                     lineChart.indexedData
                     chartPadding
+                    False
+                    False
                 , ChartLegend.renderBottomCenterAligned w
                     h
                     (List.concat

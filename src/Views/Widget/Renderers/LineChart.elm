@@ -98,16 +98,60 @@ view w h chartData =
                 , tickSizeOuter = 0
             }
 
+        padding =
+            defaultChartPadding
+
         yGridTicks =
-            Scale.ticks (yScale h chartData.maxValue defaultChartPadding) yTicksCount
+            Scale.ticks (yScale h chartData.maxValue padding) yTicksCount
+
+        -- TODO MSP read from config
+        requiresForecast =
+            True
+
+        forecast =
+            True
+
+        clip =
+            True
+
+        ( lineRenderer, forecastRenderer ) =
+            case requiresForecast of
+                True ->
+                    ( renderLines w h chartData.maxValue firstRow indexedData defaultChartPadding (not forecast) clip
+                    , renderLines w h chartData.maxValue firstRow indexedData defaultChartPadding (forecast) clip
+                    )
+
+                False ->
+                    ( renderLines w h chartData.maxValue firstRow indexedData defaultChartPadding (not forecast) (not clip)
+                    , []
+                    )
     in
         svg [ Svg.Attributes.width (toString w ++ "px"), Svg.Attributes.height (toString h ++ "px") ]
             (List.concat
-                [ [ renderXAxis w h xTicksCount (xScale w firstRow defaultChartPadding) defaultChartPadding
+                [ [ defs []
+                        [ Svg.clipPath [ id "left-region" ]
+                            [ Svg.rect
+                                [ width (toString <| (w - floor padding.totalHorizontal) // 2)
+                                , height (toString <| h - floor padding.top)
+                                ]
+                                []
+                            ]
+                        , Svg.clipPath [ id "right-region" ]
+                            [ Svg.rect
+                                [ width (toString <| w // 2)
+                                , height (toString <| h - floor padding.top)
+                                , x (toString <| (w - floor padding.totalHorizontal) // 2)
+                                ]
+                                []
+                            ]
+                        ]
+                  ]
+                , [ renderXAxis w h xTicksCount (xScale w firstRow defaultChartPadding) defaultChartPadding
                   , renderYAxis w h (yScale h chartData.maxValue defaultChartPadding) opts defaultChartPadding
                   , Utils.renderYGrid w h defaultChartPadding chartData.maxValue (yScale h chartData.maxValue defaultChartPadding) yGridTicks
                   ]
-                , renderLines w h chartData.maxValue firstRow indexedData defaultChartPadding
+                , lineRenderer
+                , forecastRenderer
                 , renderLegend w h chartData.seriesLabels
                 , [ ChartAxisLabels.renderXAxisLabel w h chartData.xAxisLabel defaultChartPadding ]
                 , [ ChartAxisLabels.renderLeftYAxisLabel h chartData.yAxisLabel defaultChartPadding ]
@@ -122,21 +166,70 @@ renderLines :
     -> List ( Cell, Cell )
     -> List ( Int, List ( Cell, Cell ) )
     -> ChartPadding
+    -> Bool
+    -> Bool
     -> List (Svg msg)
-renderLines width height maxValue firstRow indexedData chartPadding =
+renderLines width height maxValue firstRow indexedData chartPadding forecast clip =
     List.map
         (\( index, rowTuple ) ->
             generateSVGPathDesc width height maxValue firstRow rowTuple chartPadding
-                |> renderLine (getLineColour (index)) chartPadding
+                |> renderLine (getLineColour (index)) chartPadding forecast clip
         )
         indexedData
 
 
-renderLine : String -> ChartPadding -> String -> Svg msg
-renderLine colour chartPadding lineData =
-    g [ transform ("translate(" ++ (toString (chartPadding.left + 25)) ++ ", " ++ toString chartPadding.top ++ ")"), class "series" ]
-        [ Svg.path [ d lineData, stroke colour, strokeWidth "3px", fill "none" ] []
-        ]
+renderLine : String -> ChartPadding -> Bool -> Bool -> String -> Svg msg
+renderLine colour chartPadding forecast clip lineData =
+    let
+        clipPath =
+            case forecast of
+                True ->
+                    "url(#right-region)"
+
+                False ->
+                    "url(#left-region)"
+
+        gAtts =
+            [ transform ("translate(" ++ (toString (chartPadding.left + 25)) ++ ", " ++ toString chartPadding.top ++ ")")
+            , class "series"
+            ]
+
+        pAtts =
+            [ d lineData
+            , stroke colour
+            , strokeWidth "3px"
+            , fill "none"
+            ]
+
+        ( groupAtts, pathAtts ) =
+            case forecast of
+                True ->
+                    case clip of
+                        True ->
+                            ( Svg.Attributes.clipPath clipPath :: gAtts
+                            , Svg.Attributes.strokeDasharray "5, 5" :: pAtts
+                            )
+
+                        False ->
+                            ( gAtts
+                            , Svg.Attributes.strokeDasharray "5, 5" :: pAtts
+                            )
+
+                False ->
+                    case clip of
+                        True ->
+                            ( Svg.Attributes.clipPath clipPath :: gAtts
+                            , pAtts
+                            )
+
+                        False ->
+                            ( gAtts
+                            , pAtts
+                            )
+    in
+        g groupAtts
+            [ Svg.path pathAtts []
+            ]
 
 
 renderXAxis : Int -> Int -> Int -> BandScale a1 -> ChartPadding -> Svg msg
