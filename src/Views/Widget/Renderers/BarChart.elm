@@ -69,7 +69,7 @@ getBarColour index =
 xScale : Int -> List ( String, String ) -> ChartPadding -> BandScale String
 xScale width data chartPadding =
     Scale.band
-        { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 }
+        { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2, align = 0.5 }
         (List.map Tuple.first data)
         ( 0, toFloat width - chartPadding.totalHorizontal )
 

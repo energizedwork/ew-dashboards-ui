@@ -202,12 +202,12 @@ renderLines width height maxValue firstRow indexedData chartPadding forecast cli
         scale =
             xScale width firstRow chartPadding
     in
-    List.map
-        (\( index, rowTuple ) ->
-            generateSVGPathDesc width height maxValue firstRow rowTuple chartPadding
+        List.map
+            (\( index, rowTuple ) ->
+                generateSVGPathDesc width height maxValue firstRow rowTuple chartPadding
                     |> renderLine (getLineColour (index)) scale chartPadding forecast clip
-        )
-        indexedData
+            )
+            indexedData
 
 
 renderLine : String -> BandScale a1 -> ChartPadding -> Bool -> Bool -> String -> Svg msg
@@ -222,7 +222,7 @@ renderLine colour scale chartPadding forecast clip lineData =
                     "url(#left-region)"
 
         firstTickPosition =
-            Scale.bandwidth scale
+            Scale.bandwidth scale / 2
 
         gAtts =
             [ transform ("translate(" ++ (toString (chartPadding.left + firstTickPosition)) ++ ", " ++ toString chartPadding.top ++ ")")
@@ -324,12 +324,12 @@ renderYAxis width height continuousScale opts chartPadding =
                     floor <| chartPadding.bottom - 1
 
         translateAmount =
-                ("translate("
-                    ++ toString (xTranslate)
-                    ++ ", "
-                    ++ toString chartPadding.top
-                    ++ ")"
-                )
+            ("translate("
+                ++ toString (xTranslate)
+                ++ ", "
+                ++ toString chartPadding.top
+                ++ ")"
+            )
     in
         g [ transform translateAmount ]
             [ yAxis ]
@@ -395,7 +395,7 @@ pointGenerator width height maxValue firstRow chartPadding ( x, y ) =
 
 xScale : Int -> List ( a1, a2 ) -> ChartPadding -> BandScale a1
 xScale width firstRow chartPadding =
-    Scale.band { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 }
+    Scale.band { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2, align = 0.5 }
         (List.map Tuple.first firstRow)
         ( 0, toFloat width - chartPadding.totalHorizontal )
 
