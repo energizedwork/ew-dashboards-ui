@@ -72,9 +72,40 @@ getLineColour index =
         |> Color.Convert.colorToHex
 
 
+type alias ChartDimensions =
+    { w : Int
+    , h : Int
+    }
+
+
 view : Int -> Int -> Chart.Data -> Svg msg
 view w h chartData =
     let
+        -- Expect 1 based
+        forecastPosition =
+            4
+
+        -- TODO MSP read from config
+        requiresForecast =
+            True
+
+        actualsWidth =
+            (chartDimensions.w // xTicksCount) * (forecastPosition - 1)
+
+        forecastWidth =
+            chartDimensions.w - actualsWidth
+
+        chartDimensions =
+            ChartDimensions
+                (w - floor padding.totalHorizontal)
+                (h - floor padding.totalVertical)
+
+        actualsDimensions =
+            ChartDimensions actualsWidth chartDimensions.h
+
+        forecastsDimensions =
+            ChartDimensions forecastWidth chartDimensions.h
+
         firstRow =
             List.head chartData.data
                 |> Maybe.withDefault []
@@ -104,10 +135,6 @@ view w h chartData =
         yGridTicks =
             Scale.ticks (yScale h chartData.maxValue padding) yTicksCount
 
-        -- TODO MSP read from config
-        requiresForecast =
-            True
-
         forecast =
             True
 
@@ -131,30 +158,31 @@ view w h chartData =
                 [ [ defs []
                         [ Svg.clipPath [ id "left-region" ]
                             [ Svg.rect
-                                [ width (toString <| (w - floor padding.totalHorizontal) // 2)
-                                , height (toString <| h - floor padding.top)
+                                [ width <| toString <| actualsDimensions.w
+                                , height <| toString <| actualsDimensions.h
                                 ]
                                 []
                             ]
                         , Svg.clipPath [ id "right-region" ]
                             [ Svg.rect
-                                [ width (toString <| w // 2)
-                                , height (toString <| h - floor padding.top)
-                                , x (toString <| (w - floor padding.totalHorizontal) // 2)
+                                [ width <| toString <| forecastsDimensions.w
+                                , height <| toString <| forecastsDimensions.h
+                                , x <| toString <| actualsDimensions.w
                                 ]
                                 []
                             ]
                         ]
                   ]
-                , [ renderXAxis w h xTicksCount (xScale w firstRow defaultChartPadding) defaultChartPadding
-                  , renderYAxis w h (yScale h chartData.maxValue defaultChartPadding) opts defaultChartPadding
-                  , Utils.renderYGrid w h defaultChartPadding chartData.maxValue (yScale h chartData.maxValue defaultChartPadding) yGridTicks
+                , [ renderXAxis w h xTicksCount (xScale w firstRow padding) padding
+                  , renderYAxis w h (yScale h chartData.maxValue padding) opts padding
+                  , Utils.renderYGrid w h padding chartData.maxValue (yScale h chartData.maxValue padding) yGridTicks
+                    -- , Utils.renderDebugGrid w h padding
                   ]
                 , lineRenderer
                 , forecastRenderer
                 , renderLegend w h chartData.seriesLabels
-                , [ ChartAxisLabels.renderXAxisLabel w h chartData.xAxisLabel defaultChartPadding ]
-                , [ ChartAxisLabels.renderLeftYAxisLabel h chartData.yAxisLabel defaultChartPadding ]
+                , [ ChartAxisLabels.renderXAxisLabel w h chartData.xAxisLabel padding ]
+                , [ ChartAxisLabels.renderLeftYAxisLabel h chartData.yAxisLabel padding ]
                 ]
             )
 
@@ -170,16 +198,20 @@ renderLines :
     -> Bool
     -> List (Svg msg)
 renderLines width height maxValue firstRow indexedData chartPadding forecast clip =
+    let
+        scale =
+            xScale width firstRow chartPadding
+    in
     List.map
         (\( index, rowTuple ) ->
             generateSVGPathDesc width height maxValue firstRow rowTuple chartPadding
-                |> renderLine (getLineColour (index)) chartPadding forecast clip
+                    |> renderLine (getLineColour (index)) scale chartPadding forecast clip
         )
         indexedData
 
 
-renderLine : String -> ChartPadding -> Bool -> Bool -> String -> Svg msg
-renderLine colour chartPadding forecast clip lineData =
+renderLine : String -> BandScale a1 -> ChartPadding -> Bool -> Bool -> String -> Svg msg
+renderLine colour scale chartPadding forecast clip lineData =
     let
         clipPath =
             case forecast of
@@ -189,8 +221,11 @@ renderLine colour chartPadding forecast clip lineData =
                 False ->
                     "url(#left-region)"
 
+        firstTickPosition =
+            Scale.bandwidth scale
+
         gAtts =
-            [ transform ("translate(" ++ (toString (chartPadding.left + 25)) ++ ", " ++ toString chartPadding.top ++ ")")
+            [ transform ("translate(" ++ (toString (chartPadding.left + firstTickPosition)) ++ ", " ++ toString chartPadding.top ++ ")")
             , class "series"
             ]
 
@@ -248,8 +283,16 @@ renderXAxis width height numTicks bandScale chartPadding =
                     , tickSizeOuter = 0
                 }
                 (Scale.toRenderable <| bandScale)
+
+        translateAmount =
+            ("translate("
+                ++ toString (chartPadding.left - 1)
+                ++ ", "
+                ++ toString (toFloat height - chartPadding.bottom)
+                ++ ")"
+            )
     in
-        g [ transform ("translate(" ++ toString (chartPadding.left - 1) ++ ", " ++ toString (toFloat height - chartPadding.bottom) ++ ")") ]
+        g [ transform translateAmount ]
             [ xAxis ]
 
 
@@ -279,16 +322,16 @@ renderYAxis width height continuousScale opts chartPadding =
 
                 Axis.Bottom ->
                     floor <| chartPadding.bottom - 1
-    in
-        g
-            [ transform
+
+        translateAmount =
                 ("translate("
                     ++ toString (xTranslate)
                     ++ ", "
                     ++ toString chartPadding.top
                     ++ ")"
                 )
-            ]
+    in
+        g [ transform translateAmount ]
             [ yAxis ]
 
 
