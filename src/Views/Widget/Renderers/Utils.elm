@@ -2,6 +2,7 @@ module Views.Widget.Renderers.Utils
     exposing
         ( rowToFloats
         , renderTitleFrom
+        , renderDebugGrid
         , renderYGrid
         , formatStringTick
         , toStr
@@ -37,8 +38,7 @@ yGridLine w h padding scale index tick =
             , y2 yPos
             , stroke "#ccc"
             , strokeWidth "1"
-
-            -- , strokeWidth (toString (Basics.max (toFloat (index % 2)) 0.5))
+              -- , strokeWidth (toString (Basics.max (toFloat (index % 2)) 0.5))
             ]
             []
 
@@ -47,6 +47,59 @@ renderYGrid : Int -> Int -> ChartPadding -> Float -> ContinuousScale -> List Flo
 renderYGrid w h chartPadding maxValue scale ticks =
     g [ transform ("translate(" ++ toString (chartPadding.left - 1) ++ ", " ++ toString (chartPadding.top) ++ ")") ] <|
         List.indexedMap (yGridLine w h chartPadding.totalHorizontal scale) ticks
+
+
+renderDebugGrid : Int -> Int -> ChartPadding -> Svg msg
+renderDebugGrid w h padding =
+    let
+        gridSize =
+            10
+
+        wScale =
+            Scale.linear
+                ( 0, Basics.toFloat w )
+                ( 0, Basics.toFloat w )
+
+        hScale =
+            Scale.linear
+                ( 0, Basics.toFloat h )
+                ( 0, Basics.toFloat h )
+
+        wTicks =
+            Scale.ticks wScale (w // gridSize)
+
+        hTicks =
+            Scale.ticks hScale (h // gridSize)
+
+        drawWline index tick =
+            line
+                [ x1 <| toString <| tick
+                , y1 "0"
+                , x2 <| toString <| tick
+                , y2 <| toString <| h
+                , stroke "#ccc"
+                , calcuateStrokeWidthFrom index
+                ]
+                []
+
+        drawHline index tick =
+            line
+                [ x1 "0"
+                , y1 <| toString <| tick
+                , x2 <| toString <| w
+                , y2 <| toString <| tick
+                , stroke "#ccc"
+                , calcuateStrokeWidthFrom index
+                ]
+                []
+
+        calcuateStrokeWidthFrom index =
+            strokeWidth (toString (Basics.max (Basics.toFloat (index % 2)) 0.8))
+    in
+        g []
+            [ g [] <| List.indexedMap drawWline wTicks
+            , g [] <| List.indexedMap drawHline hTicks
+            ]
 
 
 createDataSourceHoverTitleFrom : Widget -> String
