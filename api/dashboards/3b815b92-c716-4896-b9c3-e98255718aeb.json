@@ -149,7 +149,10 @@
             "lineSeriesLabels": {
               "start": [1, 22],
               "end": [1, 23]
-            }
+            },
+            "barYAxisLabel": [2,25],
+            "lineYAxisLabel": [2,26],
+            "lineXAxisLabel": [2,27]
           }
         },
         "renderer": {
@@ -202,7 +205,10 @@
             "lineSeriesLabels": {
               "start": [1, 62],
               "end": [1, 63]
-            }
+            },
+            "barYAxisLabel": [2,65],
+            "lineYAxisLabel": [2,66],
+            "lineXAxisLabel": [2,67]
           }
         },
         "renderer": {
@@ -255,7 +261,10 @@
             "lineSeriesLabels": {
               "start": [1, 107],
               "end": [1, 108]
-            }
+            },
+            "barYAxisLabel": [2,111],
+            "lineYAxisLabel": [2,112],
+            "lineXAxisLabel": [2,113]
           }
         },
         "renderer": {
@@ -385,7 +394,9 @@
             "seriesLabels": {
               "start": [1, 242],
               "end": [1, 243]
-            }
+            },
+            "yAxisLabel": [2,245],
+            "xAxisLabel": [2,246]
           }
         },
         "renderer": {

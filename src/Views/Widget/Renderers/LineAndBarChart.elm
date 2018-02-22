@@ -10,18 +10,22 @@ import Html exposing (..)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Views.Widget.Renderers.BarChart as BarChart
-import Views.Widget.Renderers.Config as ViewConfig
+import Views.Widget.Renderers.Config as ViewConfig exposing (defaultChartPadding, ChartPadding)
 import Views.Widget.Renderers.LineChart as LineChart
 import Views.Widget.Renderers.BarChart as BarChart
 import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (..)
 import Views.Widget.Renderers.ChartLegend as ChartLegend
+import Views.Widget.Renderers.ChartAxisLabels as ChartAxisLabels
 
 
-padding : Float
-padding =
-    Utils.mediumPadding
+chartPadding : ChartPadding
+chartPadding =
+    { defaultChartPadding
+        | right = ViewConfig.largePadding
+        , totalHorizontal = ViewConfig.largePadding * 2
+    }
 
 
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
@@ -72,13 +76,13 @@ view w h lineChart barChart =
             { defaultOptions | orientation = Axis.Right, tickCount = yTicksCount }
 
         xAxisScale =
-            (LineChart.xScale w firstLineDataTuple)
+            (LineChart.xScale w firstLineDataTuple chartPadding)
 
         yAxisScale =
-            (LineChart.yScale h lineChart.maxValue)
+            (LineChart.yScale h lineChart.maxValue chartPadding)
 
         yGridTicks =
-            Scale.ticks (LineChart.yScale h lineChart.maxValue) yTicksCount
+            Scale.ticks (LineChart.yScale h lineChart.maxValue chartPadding) yTicksCount
 
         numBarRows =
             List.length barChart.rows
@@ -94,14 +98,14 @@ view w h lineChart barChart =
             , Svg.Attributes.height (toString h ++ "px")
             ]
             (List.concat
-                [ [ LineChart.renderXAxis w h xTicksCount xAxisScale
-                  , BarChart.renderYAxis w h barChart.maxValue
-                  , LineChart.renderYAxis w h yAxisScale opts
+                [ [ LineChart.renderXAxis w h xTicksCount xAxisScale chartPadding
+                  , BarChart.renderYAxis w h barChart.maxValue chartPadding
+                  , LineChart.renderYAxis w h yAxisScale opts chartPadding
                   , Utils.renderYGrid w
                         h
-                        padding
+                        chartPadding
                         lineChart.maxValue
-                        (LineChart.yScale h lineChart.maxValue)
+                        (LineChart.yScale h lineChart.maxValue chartPadding)
                         yGridTicks
                   ]
                 , BarChart.renderColumns w
@@ -109,11 +113,13 @@ view w h lineChart barChart =
                     barChart.maxValue
                     numBarRows
                     barChart.indexedData
+                    chartPadding
                 , LineChart.renderLines w
                     h
                     lineChart.maxValue
                     firstLineDataTuple
                     lineChart.indexedData
+                    chartPadding
                 , ChartLegend.renderBottomCenterAligned w
                     h
                     (List.concat
@@ -121,5 +127,8 @@ view w h lineChart barChart =
                         , renderedBarSeriesLabels
                         ]
                     )
+                , [ ChartAxisLabels.renderXAxisLabel w h lineChart.xAxisLabel chartPadding ]
+                , [ ChartAxisLabels.renderLeftYAxisLabel h barChart.yAxisLabel chartPadding ]
+                , [ ChartAxisLabels.renderRightYAxisLabel w h lineChart.yAxisLabel chartPadding ]
                 ]
             )

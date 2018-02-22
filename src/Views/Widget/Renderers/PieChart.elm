@@ -59,7 +59,7 @@ render optionalRendererConfig width height widget data =
 
 padding : Float
 padding =
-    Utils.mediumPadding
+    ViewConfig.mediumPadding
 
 
 lineColours : Array Color.Color

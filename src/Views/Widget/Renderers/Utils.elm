@@ -1,16 +1,11 @@
 module Views.Widget.Renderers.Utils
     exposing
-        ( mediumWidth
-        , mediumHeight
-        , mediumPadding
-        , largeWidth
-        , largeHeight
-        , largePadding
+        ( rowToFloats
         , renderTitleFrom
         , renderYGrid
-        , rowToFloats
         , formatStringTick
         , toStr
+        , formatNumberTick
         )
 
 import Data.DataSource as DataSource
@@ -21,36 +16,7 @@ import String exposing (..)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Visualization.Scale as Scale exposing (ContinuousScale)
-
-
-mediumWidth : Float
-mediumWidth =
-    740
-
-
-mediumHeight : Float
-mediumHeight =
-    370
-
-
-mediumPadding : Float
-mediumPadding =
-    50
-
-
-largeWidth : Float
-largeWidth =
-    1320
-
-
-largeHeight : Float
-largeHeight =
-    880
-
-
-largePadding : Float
-largePadding =
-    50
+import Views.Widget.Renderers.Config as ViewConfig exposing (ChartPadding)
 
 
 renderDataSourceInfoFrom : Widget -> Html msg
@@ -67,19 +33,20 @@ yGridLine w h padding scale index tick =
         line
             [ x1 "0"
             , y1 yPos
-            , x2 <| toString (Basics.toFloat w - 2 * padding)
+            , x2 <| toString (Basics.toFloat w - padding)
             , y2 yPos
             , stroke "#ccc"
             , strokeWidth "1"
-              -- , strokeWidth (toString (Basics.max (toFloat (index % 2)) 0.5))
+
+            -- , strokeWidth (toString (Basics.max (toFloat (index % 2)) 0.5))
             ]
             []
 
 
-renderYGrid : Int -> Int -> Float -> Float -> ContinuousScale -> List Float -> Svg msg
-renderYGrid w h padding maxValue scale ticks =
-    g [ transform ("translate(" ++ toString (padding - 1) ++ ", " ++ toString (padding) ++ ")") ] <|
-        List.indexedMap (yGridLine w h padding scale) ticks
+renderYGrid : Int -> Int -> ChartPadding -> Float -> ContinuousScale -> List Float -> Svg msg
+renderYGrid w h chartPadding maxValue scale ticks =
+    g [ transform ("translate(" ++ toString (chartPadding.left - 1) ++ ", " ++ toString (chartPadding.top) ++ ")") ] <|
+        List.indexedMap (yGridLine w h chartPadding.totalHorizontal scale) ticks
 
 
 createDataSourceHoverTitleFrom : Widget -> String
@@ -106,6 +73,21 @@ rowToFloats row =
 formatStringTick : a -> String
 formatStringTick tick =
     toStr tick
+
+
+formatNumberTick : a -> String
+formatNumberTick tick =
+    case (String.toFloat (toStr tick)) of
+        Ok floatTick ->
+            if floatTick >= 1000000 || floatTick <= -1000000 then
+                toStr (floatTick / 1000000) ++ "m"
+            else if floatTick >= 1000 || floatTick <= -1000 then
+                toStr (floatTick / 1000) ++ "k"
+            else
+                toStr floatTick
+
+        Err err ->
+            toStr tick
 
 
 

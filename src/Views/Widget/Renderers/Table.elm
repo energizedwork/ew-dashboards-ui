@@ -51,7 +51,7 @@ render optionalRendererConfig width height widget data =
 
 padding : Float
 padding =
-    Utils.largePadding
+    ViewConfig.mediumPadding
 
 
 renderHeaderFrom : List String -> Html msg

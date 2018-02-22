@@ -14,6 +14,8 @@ import Json.Decode as Json exposing (Value)
 -- "barRows"
 -- "barSeriesLabels"
 -- "xLabels"
+-- "xAxisLabel"
+-- "yAxisLabel"
 
 
 defaultConfig : Dict String Json.Value
@@ -26,40 +28,54 @@ cleanseConfig optionalConfig =
     optionalConfig
         |> Dict.remove "lineRows"
         |> Dict.remove "lineSeriesLabels"
+        |> Dict.remove "lineXAxisLabel"
+        |> Dict.remove "lineYAxisLabel"
         |> Dict.remove "barRows"
         |> Dict.remove "barSeriesLabels"
+        |> Dict.remove "barXAxisLabel"
+        |> Dict.remove "barYAxisLabel"
 
 
 normalizeLineChartConfig : AdapterConfig.Config -> Dict String Value
 normalizeLineChartConfig combinedConfig =
-    extractChartConfig combinedConfig "lineRows" "lineSeriesLabels"
+    extractChartConfig combinedConfig "lineRows" "lineSeriesLabels" "lineXAxisLabel" "lineYAxisLabel"
 
 
 normalizeBarChartConfig : AdapterConfig.Config -> Dict String Value
 normalizeBarChartConfig combinedConfig =
-    extractChartConfig combinedConfig "barRows" "barSeriesLabels"
+    extractChartConfig combinedConfig "barRows" "barSeriesLabels" "barXAxisLabel" "barYAxisLabel"
 
 
-tempConfig : Maybe Value -> String -> Dict String Value
+tempConfig : Maybe Value -> String -> List ( String, Value )
 tempConfig configValue configKey =
-    case configValue of
-        Just configValue ->
-            Dict.fromList
-                [ ( configKey, configValue )
-                ]
+    let
+        cleansedConfig =
+            case configValue of
+                Just configValue ->
+                    Dict.fromList
+                        [ ( configKey, configValue )
+                        ]
 
-        Nothing ->
-            Dict.empty
+                Nothing ->
+                    Dict.empty
+    in
+        Dict.toList cleansedConfig
 
 
-extractChartConfig : AdapterConfig.Config -> String -> String -> Dict String Value
-extractChartConfig combinedConfig rowsKey seriesLabelKey =
+extractChartConfig : AdapterConfig.Config -> String -> String -> String -> String -> Dict String Value
+extractChartConfig combinedConfig rowsKey seriesLabelKey xAxisLabelKey yAxisLabelKey =
     let
         rowsRange =
             Dict.get rowsKey combinedConfig
 
         seriesLabelsRange =
             Dict.get seriesLabelKey combinedConfig
+
+        xAxisLabel =
+            Dict.get xAxisLabelKey combinedConfig
+
+        yAxisLabel =
+            Dict.get yAxisLabelKey combinedConfig
 
         cleansedConfig =
             cleanseConfig combinedConfig
@@ -70,10 +86,20 @@ extractChartConfig combinedConfig rowsKey seriesLabelKey =
         tempSeriesLabelConfig =
             tempConfig seriesLabelsRange "seriesLabels"
 
+        tempXAxisConfig =
+            tempConfig xAxisLabel "xAxisLabel"
+
+        tempYAxisConfig =
+            tempConfig yAxisLabel "yAxisLabel"
+
         tempChartConfig =
-            Dict.union
-                tempRowConfig
-                tempSeriesLabelConfig
+            List.concat
+                [ tempRowConfig
+                , tempSeriesLabelConfig
+                , tempXAxisConfig
+                , tempYAxisConfig
+                ]
+                |> Dict.fromList
     in
         Dict.union
             tempChartConfig
@@ -88,5 +114,11 @@ adapt combinedConfig data =
 
         barChartData =
             ChartAdapter.adapt (normalizeBarChartConfig combinedConfig) data
+
+        xAxisLabel =
+            ChartAdapter.extractXAxisLabel combinedConfig data
+
+        yAxisLabel =
+            ChartAdapter.extractYAxisLabel combinedConfig data
     in
         ( lineChartData, barChartData )

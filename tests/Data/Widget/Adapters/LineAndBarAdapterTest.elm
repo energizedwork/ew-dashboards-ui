@@ -70,6 +70,18 @@ adapterConfigTest =
                             (CellPosition ( 5, 3 ))
                             (CellPosition ( 10, 3 ))
                   )
+                , ( "lineXAxisLabel"
+                  , CellPosition.encode <|
+                        CellPosition ( 13, 2 )
+                  )
+                , ( "lineYAxisLabel"
+                  , CellPosition.encode <|
+                        CellPosition ( 13, 3 )
+                  )
+                , ( "barYAxisLabel"
+                  , CellPosition.encode <|
+                        CellPosition ( 13, 4 )
+                  )
                 ]
 
         -- functions under test!
@@ -127,6 +139,15 @@ adapterConfigTest =
         defaultXLabels =
             \_ -> defaultLineChart.xLabels |> Expect.equal TD.headerRow
 
+        defaultXAxisLabel =
+            \_ -> defaultLineChart.xAxisLabel |> Expect.equal Nothing
+
+        defaultLineYAxisLabel =
+            \_ -> defaultLineChart.yAxisLabel |> Expect.equal Nothing
+
+        defaultBarYAxisLabel =
+            \_ -> defaultBarChart.yAxisLabel |> Expect.equal Nothing
+
         suppliedLineChartRows =
             \_ ->
                 suppliedLineChart.rows
@@ -176,6 +197,15 @@ adapterConfigTest =
                 suppliedLineChart.xLabels
                     |> Expect.equal
                         [ "205", "206", "207", "208", "209", "210" ]
+
+        suppliedXAxisLabel =
+            \_ -> suppliedLineChart.xAxisLabel |> Expect.equal (Just "Label 1")
+
+        suppliedLineYAxisLabel =
+            \_ -> suppliedLineChart.yAxisLabel |> Expect.equal (Just "Label 2")
+
+        suppliedBarYAxisLabel =
+            \_ -> suppliedBarChart.yAxisLabel |> Expect.equal (Just "Label 3")
     in
         Test.describe "LineAndBarAdapter.adapt"
             [ Test.describe "with default Config"
@@ -188,6 +218,9 @@ adapterConfigTest =
                 , Test.test "min value is extracted from bar rows" defaultBarMinValue
                 , Test.test "max value is extracted from bar rows" defaultBarMaxValue
                 , Test.test "x-axis labels are the first row" defaultXLabels
+                , Test.test "x-axis label is nothing" defaultXAxisLabel
+                , Test.test "line chart y-axis label is nothing" defaultLineYAxisLabel
+                , Test.test "bar chart y-axis label is nothing" defaultBarYAxisLabel
                 ]
             , Test.describe "with supplied Config"
                 [ Test.test "line chart rows are as specified" suppliedLineChartRows
@@ -199,5 +232,8 @@ adapterConfigTest =
                 , Test.test "min value is extracted from bar rows" suppliedBarMinValue
                 , Test.test "max value is extracted from bar rows" suppliedBarMaxValue
                 , Test.test "x-axis labels are the third row" suppliedXLabels
+                , Test.test "x-axis label is as specified" suppliedXAxisLabel
+                , Test.test "line charty-axis label is as specified" suppliedLineYAxisLabel
+                , Test.test "bar charty-axis label is as specified" suppliedBarYAxisLabel
                 ]
             ]

@@ -11,4 +11,6 @@ type alias Data =
     , maxValue : Float
     , xLabels : List String
     , seriesLabels : Maybe (List String)
+    , xAxisLabel : Maybe String
+    , yAxisLabel : Maybe String
     }

@@ -4,12 +4,8 @@ import Data.Widget.Adapters.AdapterTestData as TD
 import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), decoder, encode)
 import Data.Widget.Adapters.CellRange as CellRange exposing (..)
 import Data.Widget.Table as Table exposing (Data)
-import Dict exposing (Dict)
 import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer, int, list, string)
 import Json.Decode as Decode exposing (..)
-import Json.Encode as Encode exposing (..)
-import List.Extra
 import Test exposing (..)
 
 
@@ -121,6 +117,20 @@ cellRangeTest =
                         , [ "309" ]
                         , [ "409" ]
                         ]
+
+        cellValueAt1_1 =
+            \_ ->
+                CellRange.extractCell input
+                    (CellPosition ( 1, 1 ))
+                    |> Expect.equal
+                        "Jan"
+
+        cellValueAt2_1 =
+            \_ ->
+                CellRange.extractCell input
+                    (CellPosition ( 2, 1 ))
+                    |> Expect.equal
+                        "Feb"
     in
         Test.describe "CellRangeTest"
             [ Test.describe "extractRows"
@@ -136,6 +146,10 @@ cellRangeTest =
                 , Test.test "1x1 starting at (6, 4)" offsetBasedRange1x1
                 , Test.test "3x1 starting at (10,3)" offsetBasedRange3x1
                 , Test.test "1x3 starting at (9, 3)" offsetBasedRange1x3
+                ]
+            , Test.describe "extractCell"
+                [ Test.test "at (1,1)" cellValueAt1_1
+                , Test.test "at (2, 1)" cellValueAt2_1
                 ]
             ]
 

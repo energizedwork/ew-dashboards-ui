@@ -1,6 +1,17 @@
-module Data.Widget.Adapters.CellRange exposing (CellRange, encode, decoder, extractRow, extractRows, firstRowRange, remainingRowsRange, emptyRange)
+module Data.Widget.Adapters.CellRange
+    exposing
+        ( CellRange
+        , encode
+        , decoder
+        , extractRow
+        , extractRows
+        , firstRowRange
+        , remainingRowsRange
+        , defaultRange
+        , extractCell
+        )
 
-import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder)
+import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder, defaultPosition)
 import Data.Widget.Table exposing (..)
 import Json.Decode as Decode exposing (Decoder, Value, index, int, map2)
 import Json.Encode as Encode exposing (int)
@@ -16,11 +27,11 @@ type alias CellRange =
     }
 
 
-emptyRange : CellRange
-emptyRange =
+defaultRange : CellRange
+defaultRange =
     CellRange
-        (CellPosition ( 0, 0 ))
-        (CellPosition ( 0, 0 ))
+        defaultPosition
+        defaultPosition
 
 
 decoder : Decoder CellRange
@@ -90,6 +101,22 @@ extractRow : Data -> CellRange -> Row
 extractRow data range =
     List.head (extractRows data range)
         |> Maybe.withDefault []
+
+
+extractCell : Data -> CellPosition -> Cell
+extractCell data position =
+    let
+        range =
+            CellRange position position
+
+        row =
+            extractRow data range
+
+        cell =
+            List.Extra.getAt 0 row
+                |> Maybe.withDefault ""
+    in
+        cell
 
 
 firstRowRange : Data -> CellRange
