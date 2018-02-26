@@ -150,9 +150,9 @@
               "start": [1, 22],
               "end": [1, 23]
             },
-            "barYAxisLabel": [2,25],
-            "lineYAxisLabel": [2,26],
-            "lineXAxisLabel": [2,27]
+            "barYAxisLabel": [3,15],
+            "lineYAxisLabel": [3,16],
+            "lineXAxisLabel": [5,15]
           }
         },
         "renderer": {
@@ -206,9 +206,9 @@
               "start": [1, 62],
               "end": [1, 63]
             },
-            "barYAxisLabel": [2,65],
-            "lineYAxisLabel": [2,66],
-            "lineXAxisLabel": [2,67]
+            "barYAxisLabel": [3,55],
+            "lineYAxisLabel": [3,56],
+            "lineXAxisLabel": [5,55]
           }
         },
         "renderer": {
@@ -262,9 +262,9 @@
               "start": [1, 107],
               "end": [1, 108]
             },
-            "barYAxisLabel": [2,111],
-            "lineYAxisLabel": [2,112],
-            "lineXAxisLabel": [2,113]
+            "barYAxisLabel": [3,100],
+            "lineYAxisLabel": [3,101],
+            "lineXAxisLabel": [5,100]
           }
         },
         "renderer": {
@@ -395,8 +395,8 @@
               "start": [1, 242],
               "end": [1, 243]
             },
-            "yAxisLabel": [2,245],
-            "xAxisLabel": [2,246]
+            "yAxisLabel": [3, 239],
+            "xAxisLabel": [3 ,240]
           }
         },
         "renderer": {
