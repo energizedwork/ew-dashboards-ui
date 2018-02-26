@@ -13,4 +13,5 @@ type alias Data =
     , seriesLabels : Maybe (List String)
     , xAxisLabel : Maybe String
     , yAxisLabel : Maybe String
+    , forecastPosition : Maybe Int
     }

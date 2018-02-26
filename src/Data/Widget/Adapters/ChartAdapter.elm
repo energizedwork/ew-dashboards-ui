@@ -47,16 +47,16 @@ extractSeriesLabels config data =
 
 extractXAxisLabel : Dict String Json.Value -> Table.Data -> Maybe Cell
 extractXAxisLabel config data =
-    extractAxisLabel "xAxisLabel" config data
+    extractCellPosition "xAxisLabel" config data
 
 
 extractYAxisLabel : Dict String Json.Value -> Table.Data -> Maybe Cell
 extractYAxisLabel config data =
-    extractAxisLabel "yAxisLabel" config data
+    extractCellPosition "yAxisLabel" config data
 
 
-extractAxisLabel : String -> Dict String Json.Value -> Table.Data -> Maybe Cell
-extractAxisLabel configKey config data =
+extractCellPosition : String -> Dict String Json.Value -> Table.Data -> Maybe Cell
+extractCellPosition configKey config data =
     case Dict.get configKey config of
         Just labelPosition ->
             let
@@ -94,6 +94,11 @@ adapt optionalConfig data =
 
         yAxisLabel =
             extractYAxisLabel optionalConfig data
+
+        forecastPosition =
+            extractCellPosition "forecastPosition" optionalConfig data
+                |> Maybe.map String.toInt
+                |> Maybe.map (Result.withDefault 0)
     in
         Chart.Data
             bodyRows
@@ -105,3 +110,4 @@ adapt optionalConfig data =
             seriesLabels
             xAxisLabel
             yAxisLabel
+            forecastPosition
