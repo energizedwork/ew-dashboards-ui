@@ -81,16 +81,19 @@ type alias ChartDimensions =
 view : Int -> Int -> Chart.Data -> Svg msg
 view w h chartData =
     let
-        -- Expect 1 based
         forecastPosition =
-            4
+                case chartData.forecastPosition of
+                    Just forecastPosition ->
+                        forecastPosition - 1
 
-        -- TODO MSP read from config
+                    Nothing ->
+                        0
+
         requiresForecast =
-            True
+            forecastPosition > 0
 
         actualsWidth =
-            (chartDimensions.w // xTicksCount) * (forecastPosition - 1)
+            (chartDimensions.w // xTicksCount) * forecastPosition
 
         forecastWidth =
             chartDimensions.w - actualsWidth
@@ -141,6 +144,7 @@ view w h chartData =
         clip =
             True
 
+        -- TODO refactor me
         ( lineRenderer, forecastRenderer ) =
             case requiresForecast of
                 True ->

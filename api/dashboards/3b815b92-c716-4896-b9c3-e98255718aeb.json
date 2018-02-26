@@ -405,7 +405,8 @@
               "end": [1, 243]
             },
             "yAxisLabel": [3, 239],
-            "xAxisLabel": [3 ,240]
+            "xAxisLabel": [3 ,240],
+            "forecastPosition": [6 ,239]
           }
         },
         "renderer": {

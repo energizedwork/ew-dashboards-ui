@@ -25,7 +25,7 @@ adapterConfigTest =
 
         labelledInput =
             Data
-                [ TD.headerRow ++ [ "X Axis Label" ]
+                [ TD.headerRow ++ [ "X Axis Label" ] ++ [ "Forecast position", "9" ]
                 , TD.firstRow ++ [ "Label 1" ]
                 , TD.secondRow ++ [ "Label 2" ]
                 , TD.thirdRow ++ [ "Label 3" ]
@@ -62,6 +62,10 @@ adapterConfigTest =
                         CellRange
                             (CellPosition ( 13, 2 ))
                             (CellPosition ( 13, 5 ))
+                  )
+                , ( "forecastPosition"
+                  , CellPosition.encode <|
+                        CellPosition ( 15, 1 )
                   )
                 ]
 
@@ -110,6 +114,12 @@ adapterConfigTest =
                     |> Expect.equal
                         Nothing
 
+        defaultForecastPosition =
+            \_ ->
+                defaultActualChartData.forecastPosition
+                    |> Expect.equal
+                        Nothing
+
         suppliedLineChartRows =
             \_ ->
                 suppliedActualChartData.rows
@@ -146,6 +156,12 @@ adapterConfigTest =
                 suppliedActualChartData.yAxisLabel
                     |> Expect.equal
                         (Just "Label 1")
+
+        suppliedForecastPosition =
+            \_ ->
+                suppliedActualChartData.forecastPosition
+                    |> Expect.equal
+                        (Just 9)
     in
         Test.describe "ChartAdapter.adapt"
             [ Test.describe "with default Config"
@@ -156,6 +172,7 @@ adapterConfigTest =
                 , Test.test "series labels are empty" defaultSeriesLabels
                 , Test.test "x-axis label is nothing" defaultXAxisLabel
                 , Test.test "y-axis label is nothing" defaultYAxisLabel
+                , Test.test "no forecasts included" defaultForecastPosition
                 ]
             , Test.describe "with supplied Config"
                 [ Test.test "body rows are as specified" suppliedLineChartRows
@@ -165,5 +182,6 @@ adapterConfigTest =
                 , Test.test "series labels are as specified" suppliedSeriesLabels
                 , Test.test "x-axis label is as specified" suppliedXAxisLabel
                 , Test.test "y-axis label is as specified" suppliedYAxisLabel
+                , Test.test "forecast position is as specified" suppliedForecastPosition
                 ]
             ]
