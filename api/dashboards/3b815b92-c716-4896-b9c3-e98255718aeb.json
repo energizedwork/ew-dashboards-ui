@@ -404,8 +404,8 @@
               "start": [1, 242],
               "end": [1, 243]
             },
-            "yAxisLabel": [2,245],
-            "xAxisLabel": [2,246]
+            "yAxisLabel": [3, 239],
+            "xAxisLabel": [3 ,240]
           }
         },
         "renderer": {
