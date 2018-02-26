@@ -30,6 +30,7 @@ import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousS
 import Visualization.Shape as Shape
 import Views.Widget.Renderers.ChartLegend as ChartLegend
 import Views.Widget.Renderers.ChartAxisLabels as ChartAxisLabels
+import Views.Widget.Renderers.Chart as ChartRenderer
 import Data.Widget.Chart as Chart
 
 
@@ -46,6 +47,9 @@ render optionalRendererConfig width height widget data =
 
                 calculatedHeight =
                     ViewConfig.calculateHeight optionalRendererConfig height
+
+                namespace =
+                    Utils.cssSafe widget.name
             in
                 div
                     [ class <|
@@ -53,7 +57,7 @@ render optionalRendererConfig width height widget data =
                             ++ " widget"
                     ]
                     [ Utils.renderTitleFrom widget
-                    , view calculatedWidth calculatedHeight chartData
+                    , view namespace calculatedWidth calculatedHeight chartData
                     ]
 
         _ ->
@@ -72,42 +76,39 @@ getLineColour index =
         |> Color.Convert.colorToHex
 
 
-type alias ChartDimensions =
-    { w : Int
-    , h : Int
-    }
-
-
-view : Int -> Int -> Chart.Data -> Svg msg
-view w h chartData =
+view : String -> Int -> Int -> Chart.Data -> Svg msg
+view namespace w h chartData =
     let
-        forecastPosition =
-                case chartData.forecastPosition of
-                    Just forecastPosition ->
-                        forecastPosition - 1
+        ( forecastPosition, requiresForecast ) =
+            case chartData.forecastPosition of
+                Just forecastPosition ->
+                    ( forecastPosition - 1, True )
 
-                    Nothing ->
-                        0
-
-        requiresForecast =
-            forecastPosition > 0
+                Nothing ->
+                    ( 0, False )
 
         actualsWidth =
-            (chartDimensions.w // xTicksCount) * forecastPosition
+            case requiresForecast of
+                True ->
+                    (chartDimensions.w // xTicksCount) * forecastPosition
+
+                False ->
+                    chartDimensions.w
+
+        noPadding =
+            Nothing
 
         forecastWidth =
-            chartDimensions.w - actualsWidth
+            chartDimensions.w - (Debug.log "actualsWidth" actualsWidth)
 
         chartDimensions =
-            ChartDimensions
-                (w - floor padding.totalHorizontal)
-                (h - floor padding.totalVertical)
+            ChartRenderer.calculateDimensions w h (Just padding)
 
         actualsDimensions =
-            ChartDimensions actualsWidth chartDimensions.h
+            ChartRenderer.calculateDimensions actualsWidth chartDimensions.h noPadding
 
         forecastsDimensions =
-            ChartDimensions forecastWidth chartDimensions.h
+            ChartRenderer.calculateDimensions forecastWidth chartDimensions.h noPadding
 
         firstRow =
             List.head chartData.data
@@ -138,46 +139,26 @@ view w h chartData =
         yGridTicks =
             Scale.ticks (yScale h chartData.maxValue padding) yTicksCount
 
-        forecast =
-            True
-
-        clip =
-            True
-
-        -- TODO refactor me
         ( lineRenderer, forecastRenderer ) =
-            case requiresForecast of
-                True ->
-                    ( renderLines w h chartData.maxValue firstRow indexedData defaultChartPadding (not forecast) clip
-                    , renderLines w h chartData.maxValue firstRow indexedData defaultChartPadding (forecast) clip
-                    )
+            let
+                forecast =
+                    True
+            in
+                case requiresForecast of
+                    True ->
+                        ( renderLines namespace w h chartData.maxValue firstRow indexedData defaultChartPadding (not forecast)
+                        , renderLines namespace w h chartData.maxValue firstRow indexedData defaultChartPadding (forecast)
+                        )
 
-                False ->
-                    ( renderLines w h chartData.maxValue firstRow indexedData defaultChartPadding (not forecast) (not clip)
-                    , []
-                    )
+                    False ->
+                        ( renderLines namespace w h chartData.maxValue firstRow indexedData defaultChartPadding (not forecast)
+                        , []
+                        )
     in
         svg [ Svg.Attributes.width (toString w ++ "px"), Svg.Attributes.height (toString h ++ "px") ]
             (List.concat
-                [ [ defs []
-                        [ Svg.clipPath [ id "left-region" ]
-                            [ Svg.rect
-                                [ width <| toString <| actualsDimensions.w
-                                , height <| toString <| actualsDimensions.h
-                                ]
-                                []
-                            ]
-                        , Svg.clipPath [ id "right-region" ]
-                            [ Svg.rect
-                                [ width <| toString <| forecastsDimensions.w
-                                , height <| toString <| forecastsDimensions.h
-                                , x <| toString <| actualsDimensions.w
-                                ]
-                                []
-                            ]
-                        ]
-                  ]
-                , [ renderXAxis w h xTicksCount (xScale w firstRow padding) padding
+                [ [ ChartRenderer.renderClipPaths namespace actualsDimensions forecastsDimensions
+                  , renderXAxis w h xTicksCount (xScale w firstRow padding) padding
                   , renderYAxis w h (yScale h chartData.maxValue padding) opts padding
                   , Utils.renderYGrid w h padding chartData.maxValue (yScale h chartData.maxValue padding) yGridTicks
                     -- , Utils.renderDebugGrid w h padding
@@ -192,16 +173,16 @@ view w h chartData =
 
 
 renderLines :
-    Int
+    String
+    -> Int
     -> Int
     -> Float
     -> List ( Cell, Cell )
     -> List ( Int, List ( Cell, Cell ) )
     -> ChartPadding
     -> Bool
-    -> Bool
     -> List (Svg msg)
-renderLines width height maxValue firstRow indexedData chartPadding forecast clip =
+renderLines namespace width height maxValue firstRow indexedData chartPadding forecast =
     let
         scale =
             xScale width firstRow chartPadding
@@ -209,21 +190,21 @@ renderLines width height maxValue firstRow indexedData chartPadding forecast cli
         List.map
             (\( index, rowTuple ) ->
                 generateSVGPathDesc width height maxValue firstRow rowTuple chartPadding
-                    |> renderLine (getLineColour (index)) scale chartPadding forecast clip
+                    |> renderLine namespace (getLineColour (index)) scale chartPadding forecast
             )
             indexedData
 
 
-renderLine : String -> BandScale a1 -> ChartPadding -> Bool -> Bool -> String -> Svg msg
-renderLine colour scale chartPadding forecast clip lineData =
+renderLine : String -> String -> BandScale a1 -> ChartPadding -> Bool -> String -> Svg msg
+renderLine namespace colour scale chartPadding forecast lineData =
     let
         clipPath =
             case forecast of
                 True ->
-                    "url(#right-region)"
+                    "url(#" ++ namespace ++ "-right-region)"
 
                 False ->
-                    "url(#left-region)"
+                    "url(#" ++ namespace ++ "-left-region)"
 
         firstTickPosition =
             Scale.bandwidth scale / 2
@@ -231,6 +212,7 @@ renderLine colour scale chartPadding forecast clip lineData =
         gAtts =
             [ transform ("translate(" ++ (toString (chartPadding.left + firstTickPosition)) ++ ", " ++ toString chartPadding.top ++ ")")
             , class "series"
+            , Svg.Attributes.clipPath clipPath
             ]
 
         pAtts =
@@ -243,28 +225,14 @@ renderLine colour scale chartPadding forecast clip lineData =
         ( groupAtts, pathAtts ) =
             case forecast of
                 True ->
-                    case clip of
-                        True ->
-                            ( Svg.Attributes.clipPath clipPath :: gAtts
-                            , Svg.Attributes.strokeDasharray "5, 5" :: pAtts
-                            )
-
-                        False ->
-                            ( gAtts
-                            , Svg.Attributes.strokeDasharray "5, 5" :: pAtts
-                            )
+                    ( gAtts
+                    , Svg.Attributes.strokeDasharray "5, 5" :: pAtts
+                    )
 
                 False ->
-                    case clip of
-                        True ->
-                            ( Svg.Attributes.clipPath clipPath :: gAtts
-                            , pAtts
-                            )
-
-                        False ->
-                            ( gAtts
-                            , pAtts
-                            )
+                    ( gAtts
+                    , pAtts
+                    )
     in
         g groupAtts
             [ Svg.path pathAtts []
