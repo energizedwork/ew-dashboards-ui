@@ -1,6 +1,7 @@
 module Views.Widget.Renderers.Utils
     exposing
-        ( rowToFloats
+        ( cssSafe
+        , rowToFloats
         , renderTitleFrom
         , renderDebugGrid
         , renderYGrid
@@ -13,11 +14,13 @@ import Data.DataSource as DataSource
 import Data.Widget as Widget exposing (Body, Widget)
 import Html exposing (..)
 import Html.Attributes exposing (class)
+import Regex exposing (..)
 import String exposing (..)
+import String.Extra exposing (..)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Visualization.Scale as Scale exposing (ContinuousScale)
 import Views.Widget.Renderers.Config as ViewConfig exposing (ChartPadding)
+import Visualization.Scale as Scale exposing (ContinuousScale)
 
 
 renderDataSourceInfoFrom : Widget -> Html msg
@@ -157,3 +160,12 @@ toStr v =
             dropRight 1 (dropLeft 1 str)
         else
             str
+
+
+cssSafe : String -> String
+cssSafe input =
+    input
+        |> String.Extra.dasherize
+        |> String.Extra.clean
+        |> Regex.replace All (regex "[&#%.',\"\\s]+") (always "")
+        |> (++) "d-"

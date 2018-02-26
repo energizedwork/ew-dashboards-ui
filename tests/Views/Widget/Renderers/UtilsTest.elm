@@ -2,7 +2,7 @@ module Views.Widget.Renderers.UtilsTest exposing (..)
 
 import Expect exposing (Expectation)
 import Test exposing (..)
-import Views.Widget.Renderers.Utils as Utils exposing (formatNumberTick)
+import Views.Widget.Renderers.Utils as Utils exposing (cssSafe, formatNumberTick)
 
 
 formatNumberTickTest : Test
@@ -61,4 +61,15 @@ formatNumberTickTest =
             , Test.test "correctly formats -10000000" negativeTenMillion
             , Test.test "correctly formats 10500000" tenAndAHalfMillion
             , Test.test "when given a string returns the same string" untouchedString
+            ]
+
+
+cssSafeTest : Test
+cssSafeTest =
+    let
+        runCssSafe =
+            \_ -> Expect.equal (cssSafe "1_23'\"456 #My Widget & ting% ") "d-1-23456--my-widget--ting"
+    in
+        Test.describe "Utils.cssSafe"
+            [ Test.test "returns a CSS safe class name" runCssSafe
             ]

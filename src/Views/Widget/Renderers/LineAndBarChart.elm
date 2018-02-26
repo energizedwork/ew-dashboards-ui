@@ -10,6 +10,7 @@ import Html exposing (..)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Views.Widget.Renderers.BarChart as BarChart
+import Views.Widget.Renderers.Chart as ChartRenderer
 import Views.Widget.Renderers.Config as ViewConfig exposing (defaultChartPadding, ChartPadding)
 import Views.Widget.Renderers.LineChart as LineChart
 import Views.Widget.Renderers.BarChart as BarChart
@@ -41,10 +42,13 @@ render optionalRendererConfig width height widget data =
 
                 calculatedHeight =
                     ViewConfig.calculateHeight optionalRendererConfig height
+
+                namespace =
+                    Utils.cssSafe widget.name
             in
                 div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ]
                     [ Utils.renderTitleFrom widget
-                    , view calculatedWidth calculatedHeight lineChart barChart
+                    , view namespace calculatedWidth calculatedHeight lineChart barChart
                     ]
 
         _ ->
@@ -54,8 +58,8 @@ render optionalRendererConfig width height widget data =
                 ]
 
 
-view : Int -> Int -> Chart.Data -> Chart.Data -> Html msg
-view w h lineChart barChart =
+view : String -> Int -> Int -> Chart.Data -> Chart.Data -> Html msg
+view namespace w h lineChart barChart =
     let
         firstLineDataTuple =
             List.head lineChart.data |> Maybe.withDefault []
@@ -93,14 +97,31 @@ view w h lineChart barChart =
         renderedLineSeriesLabels =
             ChartLegend.createLabels lineChart.seriesLabels LineChart.legendLabel
 
-        -- TODO MSP read forecast Bools from config
+        forecastWidth =
+            0
+
+        actualsWidth =
+            chartDimensions.w
+
+        noPadding =
+            Nothing
+
+        chartDimensions =
+            ChartRenderer.calculateDimensions w h (Just chartPadding)
+
+        actualsDimensions =
+            ChartRenderer.calculateDimensions actualsWidth chartDimensions.h noPadding
+
+        forecastsDimensions =
+            ChartRenderer.calculateDimensions forecastWidth chartDimensions.h noPadding
     in
         svg
             [ Svg.Attributes.width (toString w ++ "px")
             , Svg.Attributes.height (toString h ++ "px")
             ]
             (List.concat
-                [ [ LineChart.renderXAxis w h xTicksCount xAxisScale chartPadding
+                [ [ ChartRenderer.renderClipPaths namespace actualsDimensions forecastsDimensions
+                  , LineChart.renderXAxis w h xTicksCount xAxisScale chartPadding
                   , BarChart.renderYAxis w h barChart.maxValue chartPadding
                   , LineChart.renderYAxis w h yAxisScale opts chartPadding
                   , Utils.renderYGrid w
@@ -116,13 +137,13 @@ view w h lineChart barChart =
                     numBarRows
                     barChart.indexedData
                     chartPadding
-                , LineChart.renderLines w
+                , LineChart.renderLines namespace
+                    w
                     h
                     lineChart.maxValue
                     firstLineDataTuple
                     lineChart.indexedData
                     chartPadding
-                    False
                     False
                 , ChartLegend.renderBottomCenterAligned w
                     h
