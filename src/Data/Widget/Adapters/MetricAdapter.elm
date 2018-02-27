@@ -1,6 +1,6 @@
 module Data.Widget.Adapters.MetricAdapter exposing (defaultConfig, adapt)
 
-import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder)
+import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder, defaultPosition)
 import Data.Widget.Config as AdapterConfig
 import Data.Widget.Table as Table exposing (Data)
 import Array
@@ -8,21 +8,14 @@ import Dict exposing (Dict)
 import Json.Decode as Json exposing (Value)
 
 
-sourceCellPosition : CellPosition
-sourceCellPosition =
-    CellPosition ( 1, 1 )
-
-
-targetCellPosition : CellPosition
-targetCellPosition =
-    CellPosition ( 2, 1 )
-
-
 defaultConfig : Dict String Json.Value
 defaultConfig =
     Dict.fromList
-        [ ( "sourceCell", CellPosition.encode sourceCellPosition )
-        , ( "targetCell", CellPosition.encode targetCellPosition )
+        [ ( "subtitleCell", CellPosition.encode defaultPosition )
+        , ( "actualCell", CellPosition.encode defaultPosition )
+        , ( "targetCell", CellPosition.encode defaultPosition )
+        , ( "changeCell", CellPosition.encode defaultPosition )
+        , ( "lastUpdatedCell", CellPosition.encode defaultPosition )
         ]
 
 
@@ -36,9 +29,15 @@ rowForCell rows cellPosition =
             []
 
 
-valueForCell : Array.Array (List String) -> CellPosition -> String
-valueForCell rows cellPosition =
+valueForCell : Array.Array (List String) -> AdapterConfig.Config -> String -> String
+valueForCell rows config key =
     let
+        cellPosition =
+            Dict.get key config
+                |> Maybe.withDefault (CellPosition.encode defaultPosition)
+                |> Json.decodeValue CellPosition.decoder
+                |> Result.withDefault defaultPosition
+
         row =
             rowForCell rows cellPosition
     in
@@ -50,28 +49,25 @@ valueForCell rows cellPosition =
                 ""
 
 
-adapt : AdapterConfig.Config -> Data -> ( String, String )
+adapt : AdapterConfig.Config -> Data -> ( String, String, String, String, String )
 adapt optionalConfig data =
     let
         rows =
             Array.fromList data.rows
 
-        sourceCell =
-            Dict.get "sourceCell" optionalConfig
-                |> Maybe.withDefault (CellPosition.encode sourceCellPosition)
-                |> Json.decodeValue CellPosition.decoder
-                |> Result.withDefault sourceCellPosition
+        subtitleValue =
+            valueForCell rows optionalConfig "subtitleCell"
 
-        targetCell =
-            Dict.get "targetCell" optionalConfig
-                |> Maybe.withDefault (CellPosition.encode targetCellPosition)
-                |> Json.decodeValue CellPosition.decoder
-                |> Result.withDefault targetCellPosition
-
-        sourceValue =
-            valueForCell rows sourceCell
+        actualValue =
+            valueForCell rows optionalConfig "actualCell"
 
         targetValue =
-            valueForCell rows targetCell
+            valueForCell rows optionalConfig "targetCell"
+
+        changeValue =
+            valueForCell rows optionalConfig "changeCell"
+
+        lastUpdatedValue =
+            valueForCell rows optionalConfig "lastUpdatedCell"
     in
-        ( sourceValue, targetValue )
+        ( subtitleValue, actualValue, targetValue, changeValue, lastUpdatedValue )

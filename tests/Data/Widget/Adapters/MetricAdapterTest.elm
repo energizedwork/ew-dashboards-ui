@@ -25,45 +25,81 @@ adapterConfigTest =
         defaultConfig =
             MetricAdapter.defaultConfig
 
-        suppliedConfigSource =
+        suppliedConfigSubtitle =
+            CellPosition.encode <| CellPosition ( 2, 1 )
+
+        suppliedConfigActual =
             CellPosition.encode <| CellPosition ( 2, 2 )
 
         suppliedConfigTarget =
-            CellPosition.encode <| CellPosition ( 3, 2 )
+            CellPosition.encode <| CellPosition ( 2, 3 )
+
+        suppliedConfigChange =
+            CellPosition.encode <| CellPosition ( 3, 3 )
+
+        suppliedConfigLastUpdated =
+            CellPosition.encode <| CellPosition ( 3, 4 )
 
         suppliedConfig =
             Dict.fromList
-                [ ( "sourceCell", suppliedConfigSource )
+                [ ( "subtitleCell", suppliedConfigSubtitle )
+                , ( "actualCell", suppliedConfigActual )
                 , ( "targetCell", suppliedConfigTarget )
+                , ( "changeCell", suppliedConfigChange )
+                , ( "lastUpdatedCell", suppliedConfigLastUpdated )
                 ]
 
         -- function under test!
-        ( defaultActualSourceFigure, defaultActualTargetFigure ) =
+        ( defaultSubtitle, defaultActualFigure, defaultTargetFigure, defaultChangeFigure, defaultLastUpdated ) =
             MetricAdapter.adapt defaultConfig input
 
-        ( suppliedActualSourceFigure, suplliedActualTargetFigure ) =
+        ( suppliedSubtitle, suppliedActualFigure, suppliedTargetFigure, suppliedChangeFigure, suppliedLastUpdated ) =
             MetricAdapter.adapt suppliedConfig input
 
         -- expectations
-        defaultSource =
-            \_ -> Expect.equal defaultActualSourceFigure "Jan"
+        expectedDefaultSubtitle =
+            \_ -> Expect.equal defaultSubtitle "Jan"
 
-        defaultTarget =
-            \_ -> Expect.equal defaultActualTargetFigure "Feb"
+        expectedDefaultActual =
+            \_ -> Expect.equal defaultActualFigure "Jan"
 
-        suppliedSource =
-            \_ -> Expect.equal suppliedActualSourceFigure "102"
+        expectedDefaultTarget =
+            \_ -> Expect.equal defaultTargetFigure "Jan"
 
-        suppliedTarget =
-            \_ -> Expect.equal suplliedActualTargetFigure "103"
+        expectedDefaultChange =
+            \_ -> Expect.equal defaultChangeFigure "Jan"
+
+        expectedDefaultLastUpdated =
+            \_ -> Expect.equal defaultLastUpdated "Jan"
+
+        expectedSuppliedSubtitle =
+            \_ -> Expect.equal suppliedSubtitle "Feb"
+
+        expectedSuppliedActual =
+            \_ -> Expect.equal suppliedActualFigure "102"
+
+        expectedSuppliedTarget =
+            \_ -> Expect.equal suppliedTargetFigure "202"
+
+        expectedSuppliedChange =
+            \_ -> Expect.equal suppliedChangeFigure "203"
+
+        expectedSuppliedLastUpdated =
+            \_ -> Expect.equal suppliedLastUpdated "303"
     in
         Test.describe "MetricAdapter.adapt"
             [ Test.describe "with default Config"
-                [ Test.test "source is figure at A1" defaultSource
-                , Test.test "target is figure at A2" defaultTarget
+                [ Test.test "subtitle is figure at A1" expectedDefaultSubtitle
+                , Test.test "actual is figure at A1" expectedDefaultActual
+                , Test.test "target is figure at A1" expectedDefaultTarget
+                , Test.test "change is figure at A1" expectedDefaultChange
+                , Test.test "lastUpdated is figure at A1" expectedDefaultLastUpdated
                 ]
             , Test.describe "with supplied Config"
-                [ Test.test "source is figure at B2" suppliedSource
-                , Test.test "target is figure at C2" suppliedTarget
+                [ Test.test "subtitle is figure at A2" expectedSuppliedSubtitle
+                , Test.test "actual is figure at B2" expectedSuppliedActual
+                , Test.test "target is figure at B3" expectedSuppliedTarget
+                , Test.test "change is figure at C3" expectedSuppliedChange
+                , Test.test "lastUpdated is figure at C4" expectedSuppliedLastUpdated
                 ]
             ]

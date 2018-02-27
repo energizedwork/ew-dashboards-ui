@@ -30,7 +30,7 @@ render optionalRendererConfig width height widget data =
     case widget.adapter of
         METRIC config ->
             let
-                ( source, target ) =
+                ( subtitle, actual, target, change, lastUpdated ) =
                     MetricAdapter.adapt config data
 
                 calculatedWidth =
@@ -46,8 +46,11 @@ render optionalRendererConfig width height widget data =
                     ]
                     [ div [ class "" ]
                         [ Utils.renderTitleFrom widget
-                        , viewMetric "Actual" source
+                        , h4 [] [ text subtitle ]
+                        , viewMetric "Actual" actual
                         , viewMetric "Target" target
+                        , viewMetric "Change" change
+                        , viewMetric "Last Updated" lastUpdated
                         ]
                     ]
 
