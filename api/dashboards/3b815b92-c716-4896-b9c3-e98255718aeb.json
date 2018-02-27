@@ -25,8 +25,8 @@
         "adapter": {
           "type_": "METRIC",
           "config": {
-            "sourceCell": [5, 2],
-            "targetCell": [6, 2]
+            "sourceCell": [3, 6],
+            "targetCell": [3, 7]
           }
         },
         "renderer": {
@@ -60,8 +60,8 @@
           "adapter": {
             "type_": "METRIC",
             "config": {
-              "sourceCell": [5, 5],
-              "targetCell": [6, 5]
+              "sourceCell": [6, 6],
+              "targetCell": [6, 7]
             }
           },
           "renderer": {
@@ -95,8 +95,8 @@
           "adapter": {
             "type_": "METRIC",
             "config": {
-              "sourceCell": [5, 8],
-              "targetCell": [6, 8]
+              "sourceCell": [9, 6],
+              "targetCell": [9, 7]
             }
           },
           "renderer": {

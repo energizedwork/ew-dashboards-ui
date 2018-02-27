@@ -7,7 +7,6 @@ import Data.Widget.Adapters.CellPosition as CellPosition exposing (..)
 import Data.Widget.Adapters.MetricAdapter as MetricAdapter exposing (adapt)
 import Data.Widget.Table as Table exposing (Data)
 import Dict exposing (Dict)
-import Json.Encode as Encode exposing (..)
 
 
 adapterConfigTest : Test
@@ -27,10 +26,10 @@ adapterConfigTest =
             MetricAdapter.defaultConfig
 
         suppliedConfigSource =
-            CellPosition.encode <| CellPosition ( 1, 1 )
+            CellPosition.encode <| CellPosition ( 2, 2 )
 
         suppliedConfigTarget =
-            CellPosition.encode <| CellPosition ( 2, 1 )
+            CellPosition.encode <| CellPosition ( 3, 2 )
 
         suppliedConfig =
             Dict.fromList
@@ -56,7 +55,7 @@ adapterConfigTest =
             \_ -> Expect.equal suppliedActualSourceFigure "102"
 
         suppliedTarget =
-            \_ -> Expect.equal suplliedActualTargetFigure "202"
+            \_ -> Expect.equal suplliedActualTargetFigure "103"
     in
         Test.describe "MetricAdapter.adapt"
             [ Test.describe "with default Config"

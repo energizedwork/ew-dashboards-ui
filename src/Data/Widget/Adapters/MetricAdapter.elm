@@ -8,17 +8,14 @@ import Dict exposing (Dict)
 import Json.Decode as Json exposing (Value)
 
 
--- TODO These are flipped (y, x) and zero based which is unique amongst the adapters
-
-
 sourceCellPosition : CellPosition
 sourceCellPosition =
-    CellPosition ( 0, 0 )
+    CellPosition ( 1, 1 )
 
 
 targetCellPosition : CellPosition
 targetCellPosition =
-    CellPosition ( 0, 1 )
+    CellPosition ( 2, 1 )
 
 
 defaultConfig : Dict String Json.Value
@@ -31,7 +28,7 @@ defaultConfig =
 
 rowForCell : Array.Array (List String) -> CellPosition -> List String
 rowForCell rows cellPosition =
-    case Array.get (CellPosition.x cellPosition) rows of
+    case Array.get ((CellPosition.y cellPosition) - 1) rows of
         Just row ->
             row
 
@@ -45,7 +42,7 @@ valueForCell rows cellPosition =
         row =
             rowForCell rows cellPosition
     in
-        case Array.get (CellPosition.y cellPosition) (Array.fromList row) of
+        case Array.get ((CellPosition.x cellPosition) - 1) (Array.fromList row) of
             Just value ->
                 value
 
