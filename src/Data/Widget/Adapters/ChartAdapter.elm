@@ -7,7 +7,7 @@ module Data.Widget.Adapters.ChartAdapter
         , extractYAxisLabel
         )
 
-import Data.Widget.Adapters.TableAdapter as TableAdapter
+import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (Orientation(..))
 import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder, defaultPosition)
 import Data.Widget.Table as Table exposing (Cell, Data, Row)
 import Data.Widget.Config as AdapterConfig
@@ -78,7 +78,7 @@ adapt : AdapterConfig.Config -> Data -> Chart.Data
 adapt optionalConfig data =
     let
         ( headerRow, bodyRows, minValue, maxValue, xLabels ) =
-            TableAdapter.adapt optionalConfig data
+            TableAdapter.adapt optionalConfig data Vertical
 
         chartData =
             List.map (List.map2 (,) headerRow) bodyRows

@@ -4,7 +4,7 @@ import Data.Widget.Adapters.AdapterTestData as TD
 import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), decoder, encode)
 import Data.Widget.Adapters.CellRange as CellRange exposing (CellRange, encode)
 import Data.Widget.Config as TableConfig
-import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (adapt)
+import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (adapt, Orientation(..))
 import Data.Widget.Table as Table exposing (Data)
 import Dict exposing (Dict)
 import Expect exposing (Expectation)
@@ -14,8 +14,8 @@ import List.Extra
 import Test exposing (..)
 
 
-adapterConfigTest : Test
-adapterConfigTest =
+verticalAdapterConfigTest : Test
+verticalAdapterConfigTest =
     let
         -- setup data
         input =
@@ -48,10 +48,10 @@ adapterConfigTest =
 
         -- functions under test!
         ( defaultActualHeaderRow, defaultActualBodyRows, defaultActualMinValue, defaultActualMaxValue, defaultActualXLabels ) =
-            TableAdapter.adapt defaultConfig input
+            TableAdapter.adapt defaultConfig input Vertical
 
         ( suppliedActualHeaderRow, suppliedActualBodyRows, suppliedActualMinValue, suppliedActualMaxValue, suppliedActualXLabels ) =
-            TableAdapter.adapt suppliedConfig input
+            TableAdapter.adapt suppliedConfig input Vertical
 
         -- expectations
         defaultHeaders =
@@ -99,7 +99,7 @@ adapterConfigTest =
         suppliedXLabels =
             suppliedHeaders
     in
-        Test.describe "TableAdapter.adapt"
+        Test.describe "TableAdapter.adapt (Vertical)"
             [ Test.describe "with default Config"
                 [ Test.test "headers are first row" defaultHeaders
                 , Test.test "body rows are remain rows, excluding the header row" defaultBodyRows
@@ -113,5 +113,155 @@ adapterConfigTest =
                 , Test.test "min value is extracted from body rows" suppliedMinValue
                 , Test.test "max value is extracted from body rows" suppliedMaxValue
                 , Test.test "x-axis labels are as specified" suppliedXLabels
+                ]
+            ]
+
+
+horizontalAdapterConfigTest : Test
+horizontalAdapterConfigTest =
+    let
+        -- setup data
+        input =
+            Data
+                [ [ "Client A" ] ++ (Tuple.first <| List.Extra.splitAt 4 TD.firstRow)
+                , [ "Client B" ] ++ (Tuple.first <| List.Extra.splitAt 4 TD.secondRow)
+                , [ "Client C" ] ++ (Tuple.first <| List.Extra.splitAt 4 TD.thirdRow)
+                , [ "Client D" ] ++ (Tuple.first <| List.Extra.splitAt 4 TD.forthRow)
+                ]
+
+        defaultConfig =
+            TableConfig.default
+
+        suppliedConfig =
+            Dict.fromList
+                [ ( "bodyRows"
+                  , CellRange.encode <|
+                        CellRange
+                            (CellPosition ( 3, 1 ))
+                            (CellPosition ( 5, 4 ))
+                  )
+                , ( "xLabels"
+                  , CellRange.encode <|
+                        CellRange
+                            (CellPosition ( 5, 1 ))
+                            (CellPosition ( 5, 5 ))
+                  )
+                ]
+
+        -- functions under test!
+        ( defaultActualHeaderRow, defaultActualBodyRows, defaultActualMinValue, defaultActualMaxValue, defaultActualXLabels ) =
+            TableAdapter.adapt defaultConfig input Horizontal
+
+        ( suppliedActualHeaderRow, suppliedActualBodyRows, suppliedActualMinValue, suppliedActualMaxValue, suppliedActualXLabels ) =
+            TableAdapter.adapt suppliedConfig input Horizontal
+
+        -- expectations
+        defaultHeaders =
+            \_ ->
+                defaultActualHeaderRow
+                    |> Expect.equal
+                        [ "Client A"
+                        , "Client B"
+                        , "Client C"
+                        , "Client D"
+                        ]
+
+        defaultBodyRows =
+            \_ ->
+                defaultActualBodyRows
+                    |> Expect.equal
+                        [ [ "101"
+                          , "201"
+                          , "301"
+                          , "401"
+                          ]
+                        , [ "102"
+                          , "202"
+                          , "302"
+                          , "402"
+                          ]
+                        , [ "103"
+                          , "203"
+                          , "303"
+                          , "403"
+                          ]
+                        , [ "104"
+                          , "204"
+                          , "304"
+                          , "404"
+                          ]
+                        ]
+
+        defaultMinValue =
+            \_ -> defaultActualMinValue |> Expect.equal 101
+
+        defaultMaxValue =
+            \_ -> defaultActualMaxValue |> Expect.equal 404
+
+        defaultXLabels =
+            \_ ->
+                defaultActualXLabels
+                    |> Expect.equal
+                        [ "Client A"
+                        , "Client B"
+                        , "Client C"
+                        , "Client D"
+                        ]
+
+        suppliedHeaders =
+            \_ ->
+                suppliedActualHeaderRow
+                    |> Expect.equal
+                        [ "104"
+                        , "204"
+                        , "304"
+                        , "404"
+                        ]
+
+        suppliedLineChartRows =
+            \_ ->
+                suppliedActualBodyRows
+                    |> Expect.equal
+                        [ [ "102"
+                          , "202"
+                          , "302"
+                          , "402"
+                          ]
+                        , [ "103"
+                          , "203"
+                          , "303"
+                          , "403"
+                          ]
+                        , [ "104"
+                          , "204"
+                          , "304"
+                          , "404"
+                          ]
+                        ]
+
+        suppliedMinValue =
+            \_ -> suppliedActualMinValue |> Expect.equal 102
+
+        suppliedMaxValue =
+            \_ -> suppliedActualMaxValue |> Expect.equal 404
+
+        suppliedXLabels =
+            suppliedHeaders
+    in
+        Test.describe "TableAdapter.adapt (Horizontal)"
+            [ Test.describe "with default Config"
+                [ Test.test "headers are first column" defaultHeaders
+                , Test.test "body is remaining cols, excluding the first cell per row" defaultBodyRows
+                , Test.test "min value is extracted from body" defaultMinValue
+                , Test.test "max value is extracted from body" defaultMaxValue
+                , Test.test "x-axis labels are the first col" defaultXLabels
+                  -- TODO these are really y-labels above
+                ]
+            , Test.describe "with supplied Config"
+                [ Test.test "headers are fith column row" suppliedHeaders
+                , Test.test "body rows are as specified" suppliedLineChartRows
+                , Test.test "min value is extracted from body rows" suppliedMinValue
+                , Test.test "max value is extracted from body rows" suppliedMaxValue
+                , Test.test "x-axis labels are the fith col" suppliedXLabels
                 ]
             ]
