@@ -1,6 +1,8 @@
 module Data.Widget.Adapters.TableAdapter exposing (adapt, Orientation(..))
 
+import Array
 import Data.Widget.Adapters.CellRange as CellRange exposing (..)
+import Data.Widget.Chart as Chart exposing (..)
 import Data.Widget.Config as AdapterConfig
 import Data.Widget.Table as Table exposing (Cell, Data, Row)
 import Dict exposing (Dict)
@@ -11,7 +13,7 @@ import NumberParser
 -- Possible values:
 -- "bodyRows"
 -- "xLabels"
--- TODO refactor to use Chart.Data
+-- "yLabels"
 
 
 type Orientation
@@ -19,41 +21,109 @@ type Orientation
     | Horizontal
 
 
-adapt : AdapterConfig.Config -> Data -> Orientation -> ( Row, List Row, Float, Float, Row )
+adapt : AdapterConfig.Config -> Table.Data -> Orientation -> Chart.Data
 adapt optionalConfig data orientation =
     let
-        defaultHeaderRange =
+        defaultXLabelsRange =
             case orientation of
                 Vertical ->
-            CellRange.firstRowRange data
+                    Just <| CellRange.firstRowRange data
 
                 Horizontal ->
-                    CellRange.firstColRange data
+                    Nothing
+
+        defaultYLabelsRange =
+            case orientation of
+                Vertical ->
+                    Nothing
+
+                Horizontal ->
+                    Just <| CellRange.firstColRange data
 
         defaultBodyRange =
             case orientation of
                 Vertical ->
-            CellRange.remainingRowsRange data
+                    CellRange.remainingRowsRange data
 
                 Horizontal ->
                     CellRange.remainingColsRange data
 
-        headerRange =
-            Dict.get "xLabels" optionalConfig
-                |> Maybe.withDefault (CellRange.encode defaultHeaderRange)
-                |> Json.decodeValue CellRange.decoder
-                |> Result.withDefault defaultHeaderRange
+        xLabelsRange =
+            let
+                configXLabels =
+                    Dict.get "xLabels" optionalConfig
+            in
+                case defaultXLabelsRange of
+                    Just xRange ->
+                        configXLabels
+                            |> Maybe.withDefault (CellRange.encode xRange)
+                            |> Json.decodeValue CellRange.decoder
+                            |> Result.withDefault xRange
+                            |> Just
+
+                    Nothing ->
+                        case configXLabels of
+                            Just range ->
+                                range
+                                    |> Json.decodeValue CellRange.decoder
+                                    |> Result.withDefault (CellRange.firstRowRange data)
+                                    |> Just
+
+                            Nothing ->
+                                Nothing
+
+        yLabelsRange =
+            let
+                configYLabels =
+                    Dict.get "yLabels" optionalConfig
+            in
+                case defaultYLabelsRange of
+                    Just yRange ->
+                        configYLabels
+                            |> Maybe.withDefault (CellRange.encode yRange)
+                            |> Json.decodeValue CellRange.decoder
+                            |> Result.withDefault yRange
+                            |> Just
+
+                    Nothing ->
+                        case configYLabels of
+                            Just range ->
+                                range
+                                    |> Json.decodeValue CellRange.decoder
+                                    |> Result.withDefault (CellRange.firstColRange data)
+                                    |> Just
+
+                            Nothing ->
+                                Nothing
 
         xLabels =
-            case orientation of
-                Vertical ->
-            CellRange.extractRow data headerRange
+            case xLabelsRange of
+                Just xRange ->
+                    case orientation of
+                        Vertical ->
+                            Just <| CellRange.extractRow data xRange
 
-                Horizontal ->
-                    CellRange.extractCol data headerRange
+                        Horizontal ->
+                            Just <| CellRange.extractCol data xRange
+
+                Nothing ->
+                    Nothing
+
+        yLabels =
+            case yLabelsRange of
+                Just yRange ->
+                    case orientation of
+                        Vertical ->
+                            Just <| CellRange.extractRow data yRange
+
+                        Horizontal ->
+                            Just <| CellRange.extractCol data yRange
+
+                Nothing ->
+                    Nothing
 
         headerRow =
-            xLabels
+            Maybe.withDefault [] xLabels
 
         bodyRows =
             case Dict.get "bodyRows" optionalConfig of
@@ -66,7 +136,7 @@ adapt optionalConfig data orientation =
                     in
                         case orientation of
                             Vertical ->
-                        CellRange.extractRows data range
+                                CellRange.extractRows data range
 
                             Horizontal ->
                                 CellRange.extractCols data range
@@ -74,10 +144,16 @@ adapt optionalConfig data orientation =
                 Nothing ->
                     case orientation of
                         Vertical ->
-                    CellRange.extractRows data defaultBodyRange
+                            CellRange.extractRows data defaultBodyRange
 
                         Horizontal ->
                             CellRange.extractCols data defaultBodyRange
+
+        tableData =
+            List.map (List.map2 (,) headerRow) bodyRows
+
+        indexedTableData =
+            Array.toIndexedList (Array.fromList tableData)
 
         rowToNumber row =
             List.map NumberParser.fromString row
@@ -99,5 +175,28 @@ adapt optionalConfig data orientation =
 
         maxValue =
             (List.maximum bodyRowMaxes |> Maybe.withDefault 0)
+
+        noSeriesLabels =
+            Nothing
+
+        noXAxisLabel =
+            Nothing
+
+        noYAxisLabel =
+            Nothing
+
+        noForecastPosition =
+            Nothing
     in
-        ( headerRow, bodyRows, minValue, maxValue, xLabels )
+        Chart.Data
+            bodyRows
+            tableData
+            indexedTableData
+            minValue
+            maxValue
+            xLabels
+            yLabels
+            noSeriesLabels
+            noXAxisLabel
+            noYAxisLabel
+            noForecastPosition

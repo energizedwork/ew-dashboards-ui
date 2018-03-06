@@ -77,37 +77,21 @@ extractCellPosition configKey config data =
 adapt : AdapterConfig.Config -> Data -> Chart.Data
 adapt optionalConfig data =
     let
-        ( headerRow, bodyRows, minValue, maxValue, xLabels ) =
+        tableData =
             TableAdapter.adapt optionalConfig data Vertical
 
         chartData =
-            List.map (List.map2 (,) headerRow) bodyRows
-
-        indexedChartData =
-            Array.toIndexedList (Array.fromList chartData)
-
-        seriesLabels =
-            extractSeriesLabels optionalConfig data
-
-        xAxisLabel =
-            extractXAxisLabel optionalConfig data
-
-        yAxisLabel =
-            extractYAxisLabel optionalConfig data
-
-        forecastPosition =
-            extractCellPosition "forecastPosition" optionalConfig data
-                |> Maybe.map String.toInt
-                |> Maybe.map (Result.withDefault 0)
+            { tableData
+                | seriesLabels =
+                    extractSeriesLabels optionalConfig data
+                , xAxisLabel =
+                    extractXAxisLabel optionalConfig data
+                , yAxisLabel =
+                    extractYAxisLabel optionalConfig data
+                , forecastPosition =
+                    extractCellPosition "forecastPosition" optionalConfig data
+                        |> Maybe.map String.toInt
+                        |> Maybe.map (Result.withDefault 0)
+            }
     in
-        Chart.Data
-            bodyRows
-            chartData
-            indexedChartData
-            minValue
-            maxValue
-            xLabels
-            seriesLabels
-            xAxisLabel
-            yAxisLabel
-            forecastPosition
+        chartData

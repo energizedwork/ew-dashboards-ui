@@ -2,7 +2,7 @@ module Views.Widget.Renderers.Table exposing (render)
 
 import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
-import Data.Widget.Adapters.TableAdapter as TableAdapter
+import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (Orientation(..))
 import Data.Widget.Config as RendererConfig
 import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
@@ -17,7 +17,7 @@ render optionalRendererConfig width height widget data =
         TABLE optionalAdapterConfig ->
             let
                 ( headerRow, bodyRows, minValue, maxValue, xLabels ) =
-                    TableAdapter.adapt optionalAdapterConfig data
+                    TableAdapter.adapt optionalAdapterConfig data Vertical
 
                 calculatedHeight =
                     ViewConfig.calculateHeight optionalRendererConfig height

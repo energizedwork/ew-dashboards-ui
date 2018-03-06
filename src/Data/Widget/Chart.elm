@@ -9,7 +9,8 @@ type alias Data =
     , indexedData : List ( Int, List ( Cell, Cell ) )
     , minValue : Float
     , maxValue : Float
-    , xLabels : List String
+    , xLabels : Maybe (List String)
+    , yLabels : Maybe (List String)
     , seriesLabels : Maybe (List String)
     , xAxisLabel : Maybe String
     , yAxisLabel : Maybe String

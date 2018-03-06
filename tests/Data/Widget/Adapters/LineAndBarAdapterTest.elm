@@ -137,7 +137,7 @@ adapterConfigTest =
             \_ -> defaultBarChart.maxValue |> Expect.equal 412
 
         defaultXLabels =
-            \_ -> defaultLineChart.xLabels |> Expect.equal TD.headerRow
+            \_ -> defaultLineChart.xLabels |> Expect.equal (Just TD.headerRow)
 
         defaultXAxisLabel =
             \_ -> defaultLineChart.xAxisLabel |> Expect.equal Nothing
@@ -196,7 +196,9 @@ adapterConfigTest =
             \_ ->
                 suppliedLineChart.xLabels
                     |> Expect.equal
-                        [ "205", "206", "207", "208", "209", "210" ]
+                        (Just
+                            [ "205", "206", "207", "208", "209", "210" ]
+                        )
 
         suppliedXAxisLabel =
             \_ -> suppliedLineChart.xAxisLabel |> Expect.equal (Just "Label 1")
