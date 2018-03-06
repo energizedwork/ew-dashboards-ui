@@ -16,7 +16,7 @@
     "favoritesCount": 0,
     "widgets": [{
         "uuid": "ae339be9-5913-453d-a892-01180adcfbc9",
-        "name": "Sales",
+        "name": "Sales (Bookings)",
         "description": "Sales targets",
         "dataSources": [{
           "uuid": "35cfdb89-012b-4194-9901-56d55464a4ee",
@@ -25,8 +25,11 @@
         "adapter": {
           "type_": "METRIC",
           "config": {
-            "sourceCell": [5, 2],
-            "targetCell": [6, 2]
+            "subtitleCell": [3, 5],
+            "actualCell": [3, 6],
+            "targetCell": [3, 7],
+            "changeCell": [3, 8],
+            "lastUpdatedCell": [3, 10]
           }
         },
         "renderer": {
@@ -60,8 +63,11 @@
           "adapter": {
             "type_": "METRIC",
             "config": {
-              "sourceCell": [5, 5],
-              "targetCell": [6, 5]
+              "subtitleCell": [6, 5],
+              "actualCell": [6, 6],
+              "targetCell": [6, 7],
+              "changeCell": [6, 8],
+              "lastUpdatedCell": [6, 10]
             }
           },
           "renderer": {
@@ -86,7 +92,7 @@
           }
       }, {
           "uuid": "ae339be9-5913-453d-a892-01180adcfbc9",
-          "name": "Profit",
+          "name": "Net Profit",
           "description": "Profit targets",
           "dataSources": [{
             "uuid": "35cfdb89-012b-4194-9901-56d55464a4ee",
@@ -95,8 +101,11 @@
           "adapter": {
             "type_": "METRIC",
             "config": {
-              "sourceCell": [5, 8],
-              "targetCell": [6, 8]
+              "subtitleCell": [9, 5],
+              "actualCell": [9, 6],
+              "targetCell": [9, 7],
+              "changeCell": [9, 8],
+              "lastUpdatedCell": [9, 10]
             }
           },
           "renderer": {
