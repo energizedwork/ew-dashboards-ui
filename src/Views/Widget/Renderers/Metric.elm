@@ -11,20 +11,6 @@ import Views.Widget.Renderers.Config as ViewConfig
 import Views.Widget.Renderers.Utils as Utils
 
 
-viewMetric : String -> String -> Html msg
-viewMetric label metric =
-    div [ class "card d-inline-block" ]
-        [ div [ class "card-header" ]
-            [ text label
-            ]
-        , div [ class "card-block" ]
-            [ div [ class "" ]
-                [ div [ class "h1 font-weight-bold" ] [ text metric ]
-                ]
-            ]
-        ]
-
-
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
 render optionalRendererConfig width height widget data =
     case widget.adapter of
@@ -44,13 +30,15 @@ render optionalRendererConfig width height widget data =
                         ViewConfig.colSpanClass optionalRendererConfig
                             ++ " widget container reduce-margin-top"
                     ]
-                    [ div [ class "" ]
+                    [ div [ class "metric" ]
                         [ Utils.renderTitleFrom widget
-                        , h4 [] [ text subtitle ]
-                        , viewMetric "Actual" actual
-                        , viewMetric "Target" target
-                        , viewMetric "Change" change
-                        , viewMetric "Last Updated" lastUpdated
+                        , div [ class "metric-body" ]
+                            [ p [ class "subtitle" ] [ text subtitle ]
+                            , h3 [ class "actual" ] [ text actual ]
+                            , h4 [ class "change" ] [ text change ]
+                            , p [ class "forecast" ] [ text target ]
+                            , p [ class "last-updated" ] [ text <| "updated: " ++ lastUpdated ]
+                            ]
                         ]
                     ]
 

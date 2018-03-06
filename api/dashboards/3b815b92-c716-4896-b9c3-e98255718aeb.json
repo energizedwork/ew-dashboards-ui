@@ -16,7 +16,7 @@
     "favoritesCount": 0,
     "widgets": [{
         "uuid": "ae339be9-5913-453d-a892-01180adcfbc9",
-        "name": "Sales",
+        "name": "Sales (Bookings)",
         "description": "Sales targets",
         "dataSources": [{
           "uuid": "35cfdb89-012b-4194-9901-56d55464a4ee",
@@ -92,7 +92,7 @@
           }
       }, {
           "uuid": "ae339be9-5913-453d-a892-01180adcfbc9",
-          "name": "Profit",
+          "name": "Net Profit",
           "description": "Profit targets",
           "dataSources": [{
             "uuid": "35cfdb89-012b-4194-9901-56d55464a4ee",
