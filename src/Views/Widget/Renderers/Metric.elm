@@ -7,7 +7,6 @@ import Data.Widget.Config as RendererConfig
 import Data.Widget.Table as Table exposing (Data)
 import Html exposing (..)
 import Html.Attributes exposing (class, title)
-import Views.Spinner
 import Views.Widget.Renderers.Config as ViewConfig
 import Views.Widget.Renderers.Utils as Utils
 

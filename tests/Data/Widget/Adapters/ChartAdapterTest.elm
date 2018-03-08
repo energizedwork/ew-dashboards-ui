@@ -186,3 +186,46 @@ adapterConfigTest =
                 , Test.test "forecast position is as specified" suppliedForecastPosition
                 ]
             ]
+
+
+horizontalSeriesLabelsTest : Test
+horizontalSeriesLabelsTest =
+    let
+        -- setup data
+        labelledInput =
+            Data
+                [ TD.headerRow ++ [ "X Axis Label" ] ++ [ "Forecast position", "9" ]
+                , TD.firstRow ++ [ "Label 1" ]
+                , TD.secondRow ++ [ "Label 2" ]
+                , TD.thirdRow ++ [ "Label 3" ]
+                , TD.forthRow ++ [ "Label 4" ]
+                ]
+
+        suppliedConfig =
+            Dict.fromList
+                [ ( "seriesLabels"
+                  , CellRange.encode <|
+                        CellRange
+                            (CellPosition ( 11, 2 ))
+                            (CellPosition ( 13, 2 ))
+                  )
+                ]
+
+        -- functions under test!
+        suppliedActualChartData =
+            ChartAdapter.adapt suppliedConfig labelledInput Vertical
+
+        -- expectations
+        suppliedSeriesLabels =
+            \_ ->
+                suppliedActualChartData.seriesLabels
+                    |> Expect.equal
+                        (Just
+                            [ "111", "112", "Label 1" ]
+                        )
+    in
+        Test.describe "ChartAdapter.adapt (seriesLabels)"
+            [ Test.describe "with supplied Config"
+                [ Test.test "Horizontal series labels are as specified" suppliedSeriesLabels
+                ]
+            ]

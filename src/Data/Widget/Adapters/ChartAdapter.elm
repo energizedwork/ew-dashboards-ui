@@ -7,14 +7,15 @@ module Data.Widget.Adapters.ChartAdapter
         , extractYAxisLabel
         )
 
-import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (Orientation(..))
-import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder, defaultPosition)
-import Data.Widget.Table as Table exposing (Cell, Data, Row)
-import Data.Widget.Config as AdapterConfig
-import Json.Decode as Json exposing (Value)
+import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), decoder, defaultPosition, encode)
 import Data.Widget.Adapters.CellRange as CellRange exposing (..)
-import Dict exposing (Dict)
+import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (Orientation(..))
 import Data.Widget.Chart as Chart
+import Data.Widget.Config as AdapterConfig
+import Data.Widget.Table as Table exposing (Cell, Data, Row)
+import Dict exposing (Dict)
+import Json.Decode as Json exposing (Value)
+import Util
 
 
 defaultConfig : Dict String Json.Value
@@ -22,7 +23,7 @@ defaultConfig =
     Dict.empty
 
 
-extractSeriesLabels : Dict String Json.Value -> Table.Data -> Maybe (List String)
+extractSeriesLabels : Dict String Json.Value -> Table.Data -> Maybe Table.Cells
 extractSeriesLabels config data =
     let
         defaultSeriesLabelsRange =
@@ -35,8 +36,8 @@ extractSeriesLabels config data =
                         seriesLabels
                             |> Json.decodeValue CellRange.decoder
                             |> Result.withDefault defaultSeriesLabelsRange
-                            |> CellRange.extractRows data
-                            |> List.map (\a -> Maybe.withDefault "" (List.head a))
+                            |> CellRange.extractCells data
+                            |> Util.flatten2D
                 in
                     Just labels
 

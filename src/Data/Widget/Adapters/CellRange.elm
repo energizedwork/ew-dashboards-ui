@@ -13,6 +13,7 @@ module Data.Widget.Adapters.CellRange
         , remainingColsRange
         , defaultRange
         , extractCell
+        , extractCells
         )
 
 import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder, defaultPosition)

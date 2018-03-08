@@ -105,7 +105,7 @@ view namespace w h chartData =
             Nothing
 
         forecastWidth =
-            chartDimensions.w - (Debug.log "actualsWidth" actualsWidth)
+            chartDimensions.w - actualsWidth
 
         chartDimensions =
             ChartRenderer.calculateDimensions w h (Just padding)
