@@ -6,6 +6,7 @@ module Views.Widget.Renderers.Utils
         , renderDebugGrid
         , renderWidgetBody
         , renderYGrid
+        , renderXGrid
         , formatStringTick
         , toStr
         , formatNumberTick
@@ -23,12 +24,39 @@ import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Views.Spinner
 import Views.Widget.Renderers.Config as ViewConfig exposing (ChartPadding)
-import Visualization.Scale as Scale exposing (ContinuousScale)
+import Visualization.Scale as Scale exposing (BandScale, ContinuousScale)
 
 
 renderDataSourceInfoFrom : Widget -> Html msg
 renderDataSourceInfoFrom widget =
     p [ Html.Attributes.class "small data-source-info" ] [ Html.text <| DataSource.toChannel <| Widget.primaryDataSource widget ]
+
+
+gridStroke : String
+gridStroke =
+    "#ccc"
+
+
+gridStrokeWidth : String
+gridStrokeWidth =
+    "1"
+
+
+xGridLine : Int -> Int -> Float -> ContinuousScale -> Int -> Float -> Svg msg
+xGridLine w h padding scale index tick =
+    let
+        xPos =
+            toString <| Scale.convert scale tick
+    in
+        line
+            [ x1 <| xPos
+            , y1 "0"
+            , x2 <| xPos
+            , y2 <| toString <| (Basics.toFloat h - padding)
+            , stroke gridStroke
+            , strokeWidth gridStrokeWidth
+            ]
+            []
 
 
 yGridLine : Int -> Int -> Float -> ContinuousScale -> Int -> Float -> Svg msg
@@ -42,16 +70,39 @@ yGridLine w h padding scale index tick =
             , y1 yPos
             , x2 <| toString (Basics.toFloat w - padding)
             , y2 yPos
-            , stroke "#ccc"
-            , strokeWidth "1"
-              -- , strokeWidth (toString (Basics.max (toFloat (index % 2)) 0.5))
+            , stroke gridStroke
+            , strokeWidth gridStrokeWidth
             ]
             []
 
 
+renderXGrid : Int -> Int -> ChartPadding -> Float -> ContinuousScale -> List Float -> Svg msg
+renderXGrid w h chartPadding maxValue scale ticks =
+    g
+        [ transform
+            ("translate("
+                ++ toString (chartPadding.left - 1)
+                ++ ", "
+                ++ toString (chartPadding.top)
+                ++ ")"
+            )
+        ]
+    <|
+        List.indexedMap (xGridLine w h chartPadding.totalVertical scale) ticks
+
+
 renderYGrid : Int -> Int -> ChartPadding -> Float -> ContinuousScale -> List Float -> Svg msg
 renderYGrid w h chartPadding maxValue scale ticks =
-    g [ transform ("translate(" ++ toString (chartPadding.left - 1) ++ ", " ++ toString (chartPadding.top) ++ ")") ] <|
+    g
+        [ transform
+            ("translate("
+                ++ toString (chartPadding.left - 1)
+                ++ ", "
+                ++ toString (chartPadding.top)
+                ++ ")"
+            )
+        ]
+    <|
         List.indexedMap (yGridLine w h chartPadding.totalHorizontal scale) ticks
 
 
@@ -83,7 +134,7 @@ renderDebugGrid w h padding =
                 , y1 "0"
                 , x2 <| toString <| tick
                 , y2 <| toString <| h
-                , stroke "#ccc"
+                , stroke gridStroke
                 , calcuateStrokeWidthFrom index
                 ]
                 []
@@ -94,7 +145,7 @@ renderDebugGrid w h padding =
                 , y1 <| toString <| tick
                 , x2 <| toString <| w
                 , y2 <| toString <| tick
-                , stroke "#ccc"
+                , stroke gridStroke
                 , calcuateStrokeWidthFrom index
                 ]
                 []
