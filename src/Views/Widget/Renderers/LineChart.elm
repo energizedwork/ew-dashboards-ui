@@ -152,12 +152,12 @@ view namespace w h chartData =
             in
                 case requiresForecast of
                     True ->
-                        ( renderLines namespace w h chartData.maxValue firstRow indexedData defaultChartPadding (not forecast)
-                        , renderLines namespace w h chartData.maxValue firstRow indexedData defaultChartPadding (forecast)
+                        ( renderLines namespace w h chartData.maxValue firstRow indexedData padding (not forecast)
+                        , renderLines namespace w h chartData.maxValue firstRow indexedData padding (forecast)
                         )
 
                     False ->
-                        ( renderLines namespace w h chartData.maxValue firstRow indexedData defaultChartPadding (not forecast)
+                        ( renderLines namespace w h chartData.maxValue firstRow indexedData padding (not forecast)
                         , []
                         )
     in

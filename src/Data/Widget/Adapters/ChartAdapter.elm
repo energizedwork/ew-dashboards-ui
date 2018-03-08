@@ -80,7 +80,6 @@ adapt optionalConfig data orientation =
         tableData =
             TableAdapter.adapt optionalConfig data orientation
 
-        -- TODO orientation switch here also?
         chartData =
             { tableData
                 | seriesLabels =
