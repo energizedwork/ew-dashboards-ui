@@ -348,20 +348,25 @@
           "name": "sheets"
         }],
         "adapter": {
-          "type_": "TABLE",
+          "type_": "BAR_CHART_HORIZONTAL",
           "config": {
-            "xLabels": {
-              "start": [1, 194],
-              "end": [5, 194]
+            "yLabels": {
+              "start": [1, 195],
+              "end": [1, 204]
             },
             "bodyRows": {
-              "start": [1, 195],
+              "start": [2, 195],
               "end": [5, 204]
-            }
+            },
+            "seriesLabels": {
+              "start": [2, 194],
+              "end": [4, 194]
+            },
+            "xAxisLabel": [5, 191]
           }
         },
         "renderer": {
-          "type_": "TABLE",
+          "type_": "BAR_CHART_HORIZONTAL",
           "config": {
             "colSpan": 6
           }
@@ -404,8 +409,9 @@
               "start": [1, 242],
               "end": [1, 243]
             },
-            "yAxisLabel": [2,245],
-            "xAxisLabel": [2,246]
+            "yAxisLabel": [3, 239],
+            "xAxisLabel": [3 ,240],
+            "forecastPosition": [6 ,239]
           }
         },
         "renderer": {

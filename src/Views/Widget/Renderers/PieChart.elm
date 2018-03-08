@@ -5,7 +5,7 @@ import Color
 import Color.Convert
 import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
-import Data.Widget.Adapters.TableAdapter as TableAdapter
+import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (Orientation(..))
 import Data.Widget.Config as RendererConfig
 import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
@@ -25,8 +25,8 @@ render optionalRendererConfig width height widget data =
     case widget.adapter of
         TABLE optionalAdapterConfig ->
             let
-                ( headerRow, bodyRows, minValue, maxValue, xLabels ) =
-                    TableAdapter.adapt optionalAdapterConfig data
+                vTable =
+                    TableAdapter.adapt optionalAdapterConfig data Vertical
 
                 dataAsLabelValueTuples =
                     List.map
@@ -40,18 +40,22 @@ render optionalRendererConfig width height widget data =
                             in
                                 ( label, value )
                         )
-                        bodyRows
+                        vTable.rows
 
                 calculatedWidth =
                     ViewConfig.calculateWidth optionalRendererConfig width
 
                 calculatedHeight =
                     ViewConfig.calculateHeight optionalRendererConfig height
+
+                body =
+                    div []
+                        [ Utils.renderTitleFrom widget
+                        , view calculatedWidth calculatedHeight dataAsLabelValueTuples
+                        ]
             in
-                div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ]
-                    [ Utils.renderTitleFrom widget
-                    , view calculatedWidth calculatedHeight dataAsLabelValueTuples
-                    ]
+                div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ] <|
+                    Utils.renderWidgetBody data body
 
         _ ->
             p [ class "data" ] [ Html.text "Sorry, I can only render pie charts from a TABLE adapter right now" ]

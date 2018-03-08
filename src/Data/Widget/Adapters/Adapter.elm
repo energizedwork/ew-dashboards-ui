@@ -35,6 +35,11 @@ decoder =
                             CHART
                                 (definition.config |> Maybe.withDefault AdapterConfig.default)
 
+                    "BAR_CHART_HORIZONTAL" ->
+                        Decode.succeed <|
+                            CHART
+                                (definition.config |> Maybe.withDefault AdapterConfig.default)
+
                     "LINE_AND_BAR_CHART" ->
                         Decode.succeed <|
                             LINE_AND_BAR_CHART

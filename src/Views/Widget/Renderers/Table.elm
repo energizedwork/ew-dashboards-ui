@@ -2,7 +2,7 @@ module Views.Widget.Renderers.Table exposing (render)
 
 import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
-import Data.Widget.Adapters.TableAdapter as TableAdapter
+import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (Orientation(..))
 import Data.Widget.Config as RendererConfig
 import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
@@ -16,34 +16,39 @@ render optionalRendererConfig width height widget data =
     case widget.adapter of
         TABLE optionalAdapterConfig ->
             let
-                ( headerRow, bodyRows, minValue, maxValue, xLabels ) =
-                    TableAdapter.adapt optionalAdapterConfig data
+                vTable =
+                    TableAdapter.adapt optionalAdapterConfig data Vertical
 
                 calculatedHeight =
                     ViewConfig.calculateHeight optionalRendererConfig height
+
+                body =
+                    div []
+                        [ Utils.renderTitleFrom widget
+                        , div
+                            [ style
+                                [ ( "maxWidth", ((toString <| width - floor padding * 2) ++ "px") )
+                                , ( "minHeight", ((toString <| calculatedHeight) ++ "px") )
+                                , ( "overflow", "auto" )
+                                ]
+                            ]
+                            [ table
+                                [ class "table table-striped" ]
+                                [ thead []
+                                    [ renderHeaderFrom <| Maybe.withDefault [] vTable.xLabels
+                                    ]
+                                , tbody [] <| renderBodyFrom vTable.rows
+                                ]
+                            ]
+                        ]
             in
                 div
                     [ class <|
                         ViewConfig.colSpanClass optionalRendererConfig
                             ++ " widget"
                     ]
-                    [ Utils.renderTitleFrom widget
-                    , div
-                        [ style
-                            [ ( "maxWidth", ((toString <| width - floor padding * 2) ++ "px") )
-                            , ( "minHeight", ((toString <| calculatedHeight) ++ "px") )
-                            , ( "overflow", "auto" )
-                            ]
-                        ]
-                        [ table
-                            [ class "table table-striped" ]
-                            [ thead []
-                                [ renderHeaderFrom headerRow
-                                ]
-                            , tbody [] <| renderBodyFrom bodyRows
-                            ]
-                        ]
-                    ]
+                <|
+                    Utils.renderWidgetBody data body
 
         _ ->
             p [ class "data" ] [ text "Sorry, I can only render tables from a TABLE adapter right now" ]

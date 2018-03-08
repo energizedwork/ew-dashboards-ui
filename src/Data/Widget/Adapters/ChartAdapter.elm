@@ -7,15 +7,15 @@ module Data.Widget.Adapters.ChartAdapter
         , extractYAxisLabel
         )
 
-import Data.Widget.Adapters.TableAdapter as TableAdapter
-import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder, defaultPosition)
-import Data.Widget.Table as Table exposing (Cell, Data, Row)
-import Data.Widget.Config as AdapterConfig
-import Json.Decode as Json exposing (Value)
+import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), decoder, defaultPosition, encode)
 import Data.Widget.Adapters.CellRange as CellRange exposing (..)
-import Dict exposing (Dict)
+import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (Orientation(..))
 import Data.Widget.Chart as Chart
-import Array
+import Data.Widget.Config as AdapterConfig
+import Data.Widget.Table as Table exposing (Cell, Data, Row)
+import Dict exposing (Dict)
+import Json.Decode as Json exposing (Value)
+import Util
 
 
 defaultConfig : Dict String Json.Value
@@ -23,7 +23,7 @@ defaultConfig =
     Dict.empty
 
 
-extractSeriesLabels : Dict String Json.Value -> Table.Data -> Maybe (List String)
+extractSeriesLabels : Dict String Json.Value -> Table.Data -> Maybe Table.Cells
 extractSeriesLabels config data =
     let
         defaultSeriesLabelsRange =
@@ -36,8 +36,8 @@ extractSeriesLabels config data =
                         seriesLabels
                             |> Json.decodeValue CellRange.decoder
                             |> Result.withDefault defaultSeriesLabelsRange
-                            |> CellRange.extractRows data
-                            |> List.map (\a -> Maybe.withDefault "" (List.head a))
+                            |> CellRange.extractCells data
+                            |> Util.flatten2D
                 in
                     Just labels
 
@@ -47,16 +47,16 @@ extractSeriesLabels config data =
 
 extractXAxisLabel : Dict String Json.Value -> Table.Data -> Maybe Cell
 extractXAxisLabel config data =
-    extractAxisLabel "xAxisLabel" config data
+    extractCellPosition "xAxisLabel" config data
 
 
 extractYAxisLabel : Dict String Json.Value -> Table.Data -> Maybe Cell
 extractYAxisLabel config data =
-    extractAxisLabel "yAxisLabel" config data
+    extractCellPosition "yAxisLabel" config data
 
 
-extractAxisLabel : String -> Dict String Json.Value -> Table.Data -> Maybe Cell
-extractAxisLabel configKey config data =
+extractCellPosition : String -> Dict String Json.Value -> Table.Data -> Maybe Cell
+extractCellPosition configKey config data =
     case Dict.get configKey config of
         Just labelPosition ->
             let
@@ -74,34 +74,24 @@ extractAxisLabel configKey config data =
             Nothing
 
 
-adapt : AdapterConfig.Config -> Data -> Chart.Data
-adapt optionalConfig data =
+adapt : AdapterConfig.Config -> Data -> Orientation -> Chart.Data
+adapt optionalConfig data orientation =
     let
-        ( headerRow, bodyRows, minValue, maxValue, xLabels ) =
-            TableAdapter.adapt optionalConfig data
+        tableData =
+            TableAdapter.adapt optionalConfig data orientation
 
         chartData =
-            List.map (List.map2 (,) headerRow) bodyRows
-
-        indexedChartData =
-            Array.toIndexedList (Array.fromList chartData)
-
-        seriesLabels =
-            extractSeriesLabels optionalConfig data
-
-        xAxisLabel =
-            extractXAxisLabel optionalConfig data
-
-        yAxisLabel =
-            extractYAxisLabel optionalConfig data
+            { tableData
+                | seriesLabels =
+                    extractSeriesLabels optionalConfig data
+                , xAxisLabel =
+                    extractXAxisLabel optionalConfig data
+                , yAxisLabel =
+                    extractYAxisLabel optionalConfig data
+                , forecastPosition =
+                    extractCellPosition "forecastPosition" optionalConfig data
+                        |> Maybe.map String.toInt
+                        |> Maybe.map (Result.withDefault 0)
+            }
     in
-        Chart.Data
-            bodyRows
-            chartData
-            indexedChartData
-            minValue
-            maxValue
-            xLabels
-            seriesLabels
-            xAxisLabel
-            yAxisLabel
+        chartData

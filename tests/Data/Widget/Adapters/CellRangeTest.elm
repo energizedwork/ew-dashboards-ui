@@ -50,6 +50,34 @@ cellRangeTest =
                         , [ "401", "402", "403", "404", "405", "406" ]
                         ]
 
+        originBasedRange1x4 =
+            \_ ->
+                CellRange.extractRows input
+                    (CellRange
+                        (CellPosition ( 1, 1 ))
+                        (CellPosition ( 1, 4 ))
+                    )
+                    |> Expect.equal
+                        [ [ "Jan" ]
+                        , [ "101" ]
+                        , [ "201" ]
+                        , [ "301" ]
+                        ]
+
+        originBasedRange2x4 =
+            \_ ->
+                CellRange.extractRows input
+                    (CellRange
+                        (CellPosition ( 2, 1 ))
+                        (CellPosition ( 2, 4 ))
+                    )
+                    |> Expect.equal
+                        [ [ "Feb" ]
+                        , [ "102" ]
+                        , [ "202" ]
+                        , [ "302" ]
+                        ]
+
         offsetBasedRange9x2 =
             \_ ->
                 CellRange.extractRows input
@@ -137,6 +165,8 @@ cellRangeTest =
                 [ Test.describe "from origin (1, 1)"
                     [ Test.test "10x2 starting at origin" originBasedRange10x2
                     , Test.test "6x5  starting at origin" originBasedRange6x5
+                    , Test.test "1x4  starting at origin" originBasedRange1x4
+                    , Test.test "2x4  starting at origin" originBasedRange2x4
                     ]
                 ]
             , Test.describe "from offset"

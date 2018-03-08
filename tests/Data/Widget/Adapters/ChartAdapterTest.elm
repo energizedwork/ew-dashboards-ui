@@ -4,6 +4,7 @@ import Data.Widget.Adapters.AdapterTestData as TD
 import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder)
 import Data.Widget.Adapters.CellRange as CellRange exposing (CellRange, encode)
 import Data.Widget.Adapters.ChartAdapter as ChartAdapter exposing (adapt)
+import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (adapt, Orientation(..))
 import Data.Widget.Table as Table exposing (Data)
 import Dict exposing (Dict)
 import Expect exposing (Expectation)
@@ -25,7 +26,7 @@ adapterConfigTest =
 
         labelledInput =
             Data
-                [ TD.headerRow ++ [ "X Axis Label" ]
+                [ TD.headerRow ++ [ "X Axis Label" ] ++ [ "Forecast position", "9" ]
                 , TD.firstRow ++ [ "Label 1" ]
                 , TD.secondRow ++ [ "Label 2" ]
                 , TD.thirdRow ++ [ "Label 3" ]
@@ -63,14 +64,18 @@ adapterConfigTest =
                             (CellPosition ( 13, 2 ))
                             (CellPosition ( 13, 5 ))
                   )
+                , ( "forecastPosition"
+                  , CellPosition.encode <|
+                        CellPosition ( 15, 1 )
+                  )
                 ]
 
         -- functions under test!
         defaultActualChartData =
-            ChartAdapter.adapt defaultConfig unlabelledInput
+            ChartAdapter.adapt defaultConfig unlabelledInput Vertical
 
         suppliedActualChartData =
-            ChartAdapter.adapt suppliedConfig labelledInput
+            ChartAdapter.adapt suppliedConfig labelledInput Vertical
 
         -- expectations
         defaultBodyRows =
@@ -90,7 +95,7 @@ adapterConfigTest =
             \_ -> defaultActualChartData.maxValue |> Expect.equal 412
 
         defaultXLabels =
-            \_ -> defaultActualChartData.xLabels |> Expect.equal TD.headerRow
+            \_ -> defaultActualChartData.xLabels |> Expect.equal (Just TD.headerRow)
 
         defaultSeriesLabels =
             \_ ->
@@ -110,6 +115,12 @@ adapterConfigTest =
                     |> Expect.equal
                         Nothing
 
+        defaultForecastPosition =
+            \_ ->
+                defaultActualChartData.forecastPosition
+                    |> Expect.equal
+                        Nothing
+
         suppliedLineChartRows =
             \_ ->
                 suppliedActualChartData.rows
@@ -125,7 +136,7 @@ adapterConfigTest =
             \_ -> suppliedActualChartData.maxValue |> Expect.equal 210
 
         suppliedXLabels =
-            \_ -> suppliedActualChartData.xLabels |> Expect.equal [ "205", "206", "207", "208", "209", "210" ]
+            \_ -> suppliedActualChartData.xLabels |> Expect.equal (Just [ "205", "206", "207", "208", "209", "210" ])
 
         suppliedSeriesLabels =
             \_ ->
@@ -146,6 +157,12 @@ adapterConfigTest =
                 suppliedActualChartData.yAxisLabel
                     |> Expect.equal
                         (Just "Label 1")
+
+        suppliedForecastPosition =
+            \_ ->
+                suppliedActualChartData.forecastPosition
+                    |> Expect.equal
+                        (Just 9)
     in
         Test.describe "ChartAdapter.adapt"
             [ Test.describe "with default Config"
@@ -156,6 +173,7 @@ adapterConfigTest =
                 , Test.test "series labels are empty" defaultSeriesLabels
                 , Test.test "x-axis label is nothing" defaultXAxisLabel
                 , Test.test "y-axis label is nothing" defaultYAxisLabel
+                , Test.test "no forecasts included" defaultForecastPosition
                 ]
             , Test.describe "with supplied Config"
                 [ Test.test "body rows are as specified" suppliedLineChartRows
@@ -165,5 +183,49 @@ adapterConfigTest =
                 , Test.test "series labels are as specified" suppliedSeriesLabels
                 , Test.test "x-axis label is as specified" suppliedXAxisLabel
                 , Test.test "y-axis label is as specified" suppliedYAxisLabel
+                , Test.test "forecast position is as specified" suppliedForecastPosition
+                ]
+            ]
+
+
+horizontalSeriesLabelsTest : Test
+horizontalSeriesLabelsTest =
+    let
+        -- setup data
+        labelledInput =
+            Data
+                [ TD.headerRow ++ [ "X Axis Label" ] ++ [ "Forecast position", "9" ]
+                , TD.firstRow ++ [ "Label 1" ]
+                , TD.secondRow ++ [ "Label 2" ]
+                , TD.thirdRow ++ [ "Label 3" ]
+                , TD.forthRow ++ [ "Label 4" ]
+                ]
+
+        suppliedConfig =
+            Dict.fromList
+                [ ( "seriesLabels"
+                  , CellRange.encode <|
+                        CellRange
+                            (CellPosition ( 11, 2 ))
+                            (CellPosition ( 13, 2 ))
+                  )
+                ]
+
+        -- functions under test!
+        suppliedActualChartData =
+            ChartAdapter.adapt suppliedConfig labelledInput Vertical
+
+        -- expectations
+        suppliedSeriesLabels =
+            \_ ->
+                suppliedActualChartData.seriesLabels
+                    |> Expect.equal
+                        (Just
+                            [ "111", "112", "Label 1" ]
+                        )
+    in
+        Test.describe "ChartAdapter.adapt (seriesLabels)"
+            [ Test.describe "with supplied Config"
+                [ Test.test "Horizontal series labels are as specified" suppliedSeriesLabels
                 ]
             ]

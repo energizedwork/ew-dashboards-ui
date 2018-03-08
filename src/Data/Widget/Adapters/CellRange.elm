@@ -4,11 +4,16 @@ module Data.Widget.Adapters.CellRange
         , encode
         , decoder
         , extractRow
+        , extractCol
         , extractRows
+        , extractCols
         , firstRowRange
+        , firstColRange
         , remainingRowsRange
+        , remainingColsRange
         , defaultRange
         , extractCell
+        , extractCells
         )
 
 import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder, defaultPosition)
@@ -49,8 +54,18 @@ encode cellRange =
         ]
 
 
+extractCols : Data -> CellRange -> List Col
+extractCols data range =
+    List.Extra.transpose <| extractCells data range
+
+
 extractRows : Data -> CellRange -> List Row
 extractRows data range =
+    extractCells data range
+
+
+extractCells : Data -> CellRange -> List Cells
+extractCells data range =
     let
         lowerBound =
             range.start
@@ -73,7 +88,7 @@ extractRows data range =
         rowRange =
             (List.range rowStart rowEnd)
 
-        extractedRows =
+        extractedCells =
             List.map
                 (\rowIndex ->
                     let
@@ -94,12 +109,18 @@ extractRows data range =
                 )
                 rowRange
     in
-        extractedRows
+        extractedCells
 
 
 extractRow : Data -> CellRange -> Row
 extractRow data range =
     List.head (extractRows data range)
+        |> Maybe.withDefault []
+
+
+extractCol : Data -> CellRange -> Col
+extractCol data range =
+    List.head (extractCols data range)
         |> Maybe.withDefault []
 
 
@@ -134,6 +155,17 @@ firstRowRange data =
             (CellPosition ( numberCells, 1 ))
 
 
+firstColRange : Data -> CellRange
+firstColRange data =
+    let
+        numberRows =
+            List.length data.rows
+    in
+        CellRange
+            (CellPosition ( 1, 1 ))
+            (CellPosition ( 1, numberRows ))
+
+
 remainingRowsRange : Data -> CellRange
 remainingRowsRange data =
     let
@@ -153,4 +185,22 @@ remainingRowsRange data =
     in
         CellRange
             (CellPosition ( 1, 2 ))
+            (CellPosition ( numberCells, numberRows ))
+
+
+remainingColsRange : Data -> CellRange
+remainingColsRange data =
+    let
+        firstRow =
+            List.head data.rows
+                |> Maybe.withDefault []
+
+        numberCells =
+            List.length firstRow
+
+        numberRows =
+            List.length data.rows
+    in
+        CellRange
+            (CellPosition ( 2, 1 ))
             (CellPosition ( numberCells, numberRows ))

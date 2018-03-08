@@ -15,20 +15,20 @@ import Color.Convert
 import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.ChartAdapter as ChartAdapter
+import Data.Widget.Adapters.TableAdapter exposing (Orientation(..))
+import Data.Widget.Chart as Chart
 import Data.Widget.Config as RendererConfig
 import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
 import NumberParser
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
+import Views.Widget.Renderers.ChartAxisLabels as ChartAxisLabels
 import Views.Widget.Renderers.ChartLegend as ChartLegend
-import Views.Widget.Renderers.Config as ViewConfig exposing (defaultChartPadding, ChartPadding)
+import Views.Widget.Renderers.Config as ViewConfig exposing (ChartPadding, defaultChartPadding)
 import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
-import Views.Widget.Renderers.ChartLegend as ChartLegend
-import Views.Widget.Renderers.ChartAxisLabels as ChartAxisLabels
-import Data.Widget.Chart as Chart
 
 
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
@@ -37,18 +37,22 @@ render optionalRendererConfig width height widget data =
         CHART optionalConfig ->
             let
                 chartData =
-                    ChartAdapter.adapt optionalConfig data
+                    ChartAdapter.adapt optionalConfig data Vertical
 
                 calculatedWidth =
                     ViewConfig.calculateWidth optionalRendererConfig width
 
                 calculatedHeight =
                     ViewConfig.calculateHeight optionalRendererConfig height
+
+                body =
+                    div []
+                        [ Utils.renderTitleFrom widget
+                        , view calculatedWidth calculatedHeight chartData
+                        ]
             in
-                div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ]
-                    [ Utils.renderTitleFrom widget
-                    , view calculatedWidth calculatedHeight chartData
-                    ]
+                div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ] <|
+                    Utils.renderWidgetBody data body
 
         _ ->
             p [ class "data" ] [ Html.text "Sorry, I can only render bar charts from a CHART adapter right now" ]
@@ -69,7 +73,7 @@ getBarColour index =
 xScale : Int -> List ( String, String ) -> ChartPadding -> BandScale String
 xScale width data chartPadding =
     Scale.band
-        { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 }
+        { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2, align = 0.5 }
         (List.map Tuple.first data)
         ( 0, toFloat width - chartPadding.totalHorizontal )
 
@@ -157,7 +161,10 @@ view w h chartData =
         yGridTicks =
             Scale.ticks (yScale h chartData.maxValue defaultChartPadding) yTicksCount
     in
-        svg [ Svg.Attributes.width (toString w ++ "px"), Svg.Attributes.height (toString h ++ "px") ]
+        svg
+            [ Svg.Attributes.width (toString w ++ "px")
+            , Svg.Attributes.height (toString h ++ "px")
+            ]
             (List.concat
                 [ [ Svg.style []
                         [ Svg.text """

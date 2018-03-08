@@ -83,6 +83,11 @@ totalCols =
     12
 
 
+bootstrapPadding : Int
+bootstrapPadding =
+    15 * 2
+
+
 colSpan : WidgetConfig.Config -> Int
 colSpan config =
     (Dict.get "colSpan" config)
@@ -99,9 +104,19 @@ colSpanClass config =
 
 
 calculateWidth : WidgetConfig.Config -> Int -> Int
-calculateWidth config width =
-    width
-        // (totalCols // colSpan config)
+calculateWidth config screenWidth =
+    let
+        cols =
+            colSpan config
+
+        widgetPageSpan =
+            totalCols // cols
+
+        widgetPageSpanPadding =
+            widgetPageSpan * bootstrapPadding
+    in
+        (screenWidth - widgetPageSpanPadding)
+            // widgetPageSpan
 
 
 calculateHeight : WidgetConfig.Config -> Int -> Int
