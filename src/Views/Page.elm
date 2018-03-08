@@ -28,6 +28,7 @@ type ActivePage
     | Settings
     | Profile Username
     | NewWidget
+    | Dashboard
 
 
 {-| Take a page's Html and frame it with a header and footer.
@@ -50,16 +51,21 @@ frame isLoading user page content =
 
 viewHeader : ActivePage -> Maybe User -> Bool -> Html msg
 viewHeader page user isLoading =
-    nav [ class "navbar navbar-light" ]
-        [ div [ class "container-fluid" ]
-            [ a [ class "navbar-brand", Route.href Route.Home ]
-                [ text "EW Dashboards" ]
-            , ul [ class "nav navbar-nav pull-xs-right" ] <|
-                lazy2 Util.viewIf isLoading spinner
-                    :: navbarLink (page == Home) Route.Home [ text "Home" ]
-                    :: viewSignIn page user
-            ]
-        ]
+    case page of
+        Dashboard ->
+            div [] []
+
+        _ ->
+            nav [ class "navbar navbar-light" ]
+                [ div [ class "container-fluid" ]
+                    [ a [ class "navbar-brand", Route.href Route.Home ]
+                        [ text "EW Dashboards" ]
+                    , ul [ class "nav navbar-nav pull-xs-right" ] <|
+                        lazy2 Util.viewIf isLoading spinner
+                            :: navbarLink (page == Home) Route.Home [ text "Home" ]
+                            :: viewSignIn page user
+                    ]
+                ]
 
 
 viewSignIn : ActivePage -> Maybe User -> List (Html msg)

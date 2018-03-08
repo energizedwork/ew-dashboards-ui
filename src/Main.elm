@@ -143,7 +143,7 @@ viewPage session isLoading page =
 
             Dashboard subModel ->
                 Dashboard.view session subModel
-                    |> frame Page.Other
+                    |> frame Page.Dashboard
                     |> Html.map DashboardMsg
 
             Widget subModel ->

@@ -1,0 +1,164 @@
+{
+  "dashboard": {
+    "uuid": "3b815b92-c716-4896-b9c3-e98255718aeb",
+    "name": "KPIs #2",
+    "slug": "kpis-2",
+    "description": "Insight into the EW financial position, data from from 'EW KPI deck December 2017 (DRAFT)' on Google Drive",
+    "createdAt": "2018-03-08T19:46:55.948Z",
+    "updatedAt": "2018-03-08T19:46:55.948Z",
+    "author": {
+      "username": "msp",
+      "bio": "beautifully flawed creation .. \n\n",
+      "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
+      "following": false
+    },
+    "favorited": false,
+    "favoritesCount": 0,
+    "widgets": [{
+        "uuid": "006f0092-5a11-468d-b822-ea57753f45c4",
+        "name": "Gross & Operating Profit - 12 months rolling",
+        "description": "Month on Month Trend Analysis - Last 12 months rolling",
+        "dataSources": [{
+          "uuid": "35cfdb89-012b-4194-9901-56d55464a4ee",
+          "name": "sheets"
+        }],
+        "adapter": {
+          "type_": "LINE_AND_BAR_CHART",
+          "config": {
+            "xLabels": {
+              "start": [2, 58],
+              "end": [13, 58]
+            },
+            "barRows": {
+              "start": [2, 59],
+              "end": [13, 61]
+            },
+            "barSeriesLabels": {
+              "start": [1, 59],
+              "end": [1, 61]
+            },
+            "lineRows": {
+              "start": [2, 62],
+              "end": [13, 63]
+            },
+            "lineSeriesLabels": {
+              "start": [1, 62],
+              "end": [1, 63]
+            },
+            "barYAxisLabel": [3, 55],
+            "lineYAxisLabel": [3, 56],
+            "lineXAxisLabel": [5, 55]
+          }
+        },
+        "renderer": {
+          "type_": "LINE_AND_BAR_CHART",
+          "config": {
+            "colSpan": 12
+          }
+        },
+        "createdAt": "2017-02-06T16:03:55.948Z",
+        "updatedAt": "2017-02-06T16:03:55.948Z",
+        "tagList": [],
+        "author": {
+          "username": "msp",
+          "bio": "beautifully flawed creation .. \n\n",
+          "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
+          "following": false
+        },
+        "favorited": false,
+        "favoritesCount": 0,
+        "data": {
+          "data": []
+        }
+      },
+      {
+        "uuid": "006f0092-5a11-468d-b822-ea57753f45c4",
+        "name": "Client Concentration - past 6 months",
+        "description": "Client Concentration - past 6 months",
+        "dataSources": [{
+          "uuid": "35cfdb89-012b-4194-9901-56d55464a4ee",
+          "name": "sheets"
+        }],
+        "adapter": {
+          "type_": "TABLE",
+          "config": {
+            "xLabels": {
+              "start": [1, 149],
+              "end": [1, 152]
+            },
+            "bodyRows": {
+              "start": [1, 149],
+              "end": [2, 152]
+            }
+          }
+        },
+        "renderer": {
+          "type_": "PIE_CHART",
+          "config": {
+            "colSpan": 6
+          }
+        },
+        "createdAt": "2017-02-06T16:03:55.948Z",
+        "updatedAt": "2017-02-06T16:03:55.948Z",
+        "tagList": [],
+        "author": {
+          "username": "msp",
+          "bio": "beautifully flawed creation .. \n\n",
+          "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
+          "following": false
+        },
+        "favorited": false,
+        "favoritesCount": 0,
+        "data": {
+          "data": []
+        }
+      },
+      {
+        "uuid": "006f0092-5a11-468d-b822-ea57753f45c4",
+        "name": "Operating Costs",
+        "description": "Jul 17 - Jan 18 - YTD Expenditure by Tracking Code",
+        "dataSources": [{
+          "uuid": "35cfdb89-012b-4194-9901-56d55464a4ee",
+          "name": "sheets"
+        }],
+        "adapter": {
+          "type_": "BAR_CHART",
+          "config": {
+            "xLabels": {
+              "start": [2, 287],
+              "end": [12, 287]
+            },
+            "bodyRows": {
+              "start": [2, 288],
+              "end": [12, 288]
+            },
+            "seriesLabels": {
+              "start": [1, 288],
+              "end": [1, 288]
+            }
+          }
+        },
+        "renderer": {
+          "type_": "BAR_CHART",
+          "config": {
+            "colSpan": 6
+          }
+        },
+        "createdAt": "2017-02-06T16:03:55.948Z",
+        "updatedAt": "2017-02-06T16:03:55.948Z",
+        "tagList": [],
+        "author": {
+          "username": "msp",
+          "bio": "beautifully flawed creation .. \n\n",
+          "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
+          "following": false
+        },
+        "favorited": false,
+        "favoritesCount": 0,
+        "data": {
+          "data": []
+        }
+      }
+    ]
+  }
+}
