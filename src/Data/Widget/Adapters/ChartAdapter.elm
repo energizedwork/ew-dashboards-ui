@@ -74,12 +74,13 @@ extractCellPosition configKey config data =
             Nothing
 
 
-adapt : AdapterConfig.Config -> Data -> Chart.Data
-adapt optionalConfig data =
+adapt : AdapterConfig.Config -> Data -> Orientation -> Chart.Data
+adapt optionalConfig data orientation =
     let
         tableData =
-            TableAdapter.adapt optionalConfig data Vertical
+            TableAdapter.adapt optionalConfig data orientation
 
+        -- TODO orientation switch here also?
         chartData =
             { tableData
                 | seriesLabels =

@@ -348,20 +348,20 @@
           "name": "sheets"
         }],
         "adapter": {
-          "type_": "TABLE",
+          "type_": "BAR_CHART_HORIZONTAL",
           "config": {
-            "xLabels": {
-              "start": [1, 194],
-              "end": [5, 194]
+            "yLabels": {
+              "start": [1, 195],
+              "end": [1, 204]
             },
             "bodyRows": {
-              "start": [1, 195],
+              "start": [2, 195],
               "end": [5, 204]
             }
           }
         },
         "renderer": {
-          "type_": "TABLE",
+          "type_": "BAR_CHART_HORIZONTAL",
           "config": {
             "colSpan": 6
           }

@@ -1,4 +1,4 @@
-module Views.Widget.Renderers.BarChart
+module Views.Widget.Renderers.BarChartHorizontal
     exposing
         ( render
         , renderColumn
@@ -16,7 +16,7 @@ import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.ChartAdapter as ChartAdapter
 import Data.Widget.Adapters.TableAdapter exposing (Orientation(..))
-import Data.Widget.Chart as Chart
+import Data.Widget.Chart as Chart exposing (..)
 import Data.Widget.Config as RendererConfig
 import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
@@ -37,7 +37,7 @@ render optionalRendererConfig width height widget data =
         CHART optionalConfig ->
             let
                 chartData =
-                    ChartAdapter.adapt optionalConfig data Vertical
+                    ChartAdapter.adapt optionalConfig data Horizontal
 
                 calculatedWidth =
                     ViewConfig.calculateWidth optionalRendererConfig width
@@ -66,57 +66,65 @@ getBarColour index =
         |> Color.Convert.colorToHex
 
 
-xScale : Int -> List ( String, String ) -> ChartPadding -> BandScale String
-xScale width data chartPadding =
+yScale : Int -> List ( String, String ) -> ChartPadding -> BandScale String
+yScale width data chartPadding =
     Scale.band
-        { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2, align = 0.5 }
+        { defaultBandConfig | align = 0.5 }
         (List.map Tuple.first data)
-        ( 0, toFloat width - chartPadding.totalHorizontal )
+        ( toFloat width - chartPadding.totalVertical, 0 )
 
 
-yScale : Int -> Float -> ChartPadding -> ContinuousScale
-yScale height maxValue chartPadding =
-    Scale.linear ( 0, maxValue ) ( toFloat height - chartPadding.totalVertical, 0 )
+xScale : Int -> Float -> ChartPadding -> ContinuousScale
+xScale width maxValue chartPadding =
+    Scale.linear ( 0, maxValue ) ( 0, toFloat width - chartPadding.totalHorizontal )
 
 
-xAxis : Int -> List ( String, String ) -> ChartPadding -> Svg msg
-xAxis width data chartPadding =
+yAxis : Int -> List ( String, String ) -> ChartPadding -> Svg msg
+yAxis width data chartPadding =
+    Axis.axis
+        { defaultOptions
+            | orientation = Axis.Left
+            , tickFormat = Just Utils.formatStringTick
+        }
+        (Scale.toRenderable (yScale width data chartPadding))
+
+
+xAxis : Int -> Float -> ChartPadding -> Svg msg
+xAxis width maxValue chartPadding =
     Axis.axis
         { defaultOptions
             | orientation = Axis.Bottom
-            , tickFormat = Just Utils.formatStringTick
+            , tickFormat = Just Utils.formatNumberTick
         }
-        (Scale.toRenderable (xScale width data chartPadding))
+        (xScale width maxValue chartPadding)
 
 
-yAxis : Int -> Float -> ChartPadding -> Svg msg
-yAxis height maxValue chartPadding =
-    Axis.axis { defaultOptions | orientation = Axis.Left, tickCount = 5, tickFormat = Just Utils.formatNumberTick } (yScale height maxValue chartPadding)
-
-
-column : Int -> Int -> Int -> String -> BandScale String -> ChartPadding -> Float -> ( String, String ) -> Svg msg
-column height index totalRows colour xScaleBand chartPadding maxValue ( header, value ) =
+column :
+    Int
+    -> Int
+    -> Int
+    -> String
+    -> BandScale String
+    -> ChartPadding
+    -> Float
+    -> ( String, String )
+    -> Svg msg
+column width index totalRows colour yScaleBand chartPadding maxValue ( header, value ) =
     let
-        xpos =
-            (Scale.convert xScaleBand header) + (colWidth * (toFloat index))
-
-        xposText =
-            (Scale.convert (Scale.toRenderable xScaleBand) header) + (colWidth * (toFloat index))
+        ypos =
+            (Scale.convert yScaleBand header) + (colHeight * (toFloat index))
 
         valueSantized =
             NumberParser.fromString value
 
-        ypos =
-            Scale.convert (yScale height maxValue chartPadding) valueSantized
-
-        yposText =
-            Scale.convert (yScale height maxValue chartPadding) valueSantized - 5
+        xpos =
+            0
 
         colWidth =
-            Scale.bandwidth xScaleBand / toFloat (totalRows)
+            Scale.convert (xScale width maxValue chartPadding) valueSantized
 
         colHeight =
-            toFloat height - Scale.convert (yScale height maxValue chartPadding) valueSantized - chartPadding.totalVertical
+            Scale.bandwidth yScaleBand / toFloat (totalRows)
 
         makeTitle =
             value
@@ -151,11 +159,10 @@ view w h chartData =
         yTicksCount =
             5
 
-        yAxisScale =
-            (yScale h chartData.maxValue)
-
-        yGridTicks =
-            Scale.ticks (yScale h chartData.maxValue defaultChartPadding) yTicksCount
+        -- yAxisScale =
+        --     (yScale h chartData.maxValue)
+        -- yGridTicks =
+        --     Scale.ticks (yScale h chartData.maxValue defaultChartPadding) yTicksCount
     in
         svg
             [ Svg.Attributes.width (toString w ++ "px")
@@ -168,9 +175,9 @@ view w h chartData =
                             .column:hover rect { opacity: 0.7; cursor: crosshair; }
                             .column:hover text { display: inline; z-index: 9999; }
                           """ ]
-                  , renderXAxis w h firstDataTuple defaultChartPadding
-                  , renderYAxis w h chartData.maxValue defaultChartPadding
-                  , Utils.renderYGrid w h defaultChartPadding chartData.maxValue (yScale h chartData.maxValue defaultChartPadding) yGridTicks
+                  , renderYAxis w h firstDataTuple defaultChartPadding
+                  , renderXAxis w h chartData.maxValue defaultChartPadding
+                    -- , Utils.renderYGrid w h defaultChartPadding chartData.maxValue (yScale h chartData.maxValue defaultChartPadding) yGridTicks
                   ]
                 , renderColumns w h chartData.maxValue totalRows indexedData defaultChartPadding
                 , renderLegend w h chartData.seriesLabels
@@ -207,19 +214,19 @@ renderColumn :
     -> Svg msg
 renderColumn width height index totalRows row maxValue chartPadding =
     g [ transform ("translate(" ++ toString chartPadding.left ++ ", " ++ toString chartPadding.top ++ ")"), class "series" ] <|
-        List.map (column height index totalRows (getBarColour index) (xScale width row chartPadding) chartPadding maxValue) row
+        List.map (column width index totalRows (getBarColour index) (yScale height row chartPadding) chartPadding maxValue) row
 
 
-renderXAxis : Int -> Int -> List ( Cell, Cell ) -> ChartPadding -> Svg msg
-renderXAxis width height firstDataTuple chartPadding =
-    g [ transform ("translate(" ++ toString (chartPadding.left - 1) ++ ", " ++ toString (toFloat height - chartPadding.bottom) ++ ")") ]
-        [ xAxis width firstDataTuple chartPadding ]
-
-
-renderYAxis : Int -> Int -> Float -> ChartPadding -> Svg msg
-renderYAxis width height maxValue chartPadding =
+renderYAxis : Int -> Int -> List ( Cell, Cell ) -> ChartPadding -> Svg msg
+renderYAxis width height firstDataTuple chartPadding =
     g [ transform ("translate(" ++ toString (chartPadding.left - 1) ++ ", " ++ toString chartPadding.top ++ ")") ]
-        [ (yAxis height maxValue chartPadding) ]
+        [ yAxis height firstDataTuple chartPadding ]
+
+
+renderXAxis : Int -> Int -> Float -> ChartPadding -> Svg msg
+renderXAxis width height maxValue chartPadding =
+    g [ transform ("translate(" ++ toString (chartPadding.left - 1) ++ ", " ++ toString (toFloat height - chartPadding.bottom) ++ ")") ]
+        [ (xAxis width maxValue chartPadding) ]
 
 
 legendLabel : Int -> String -> Svg msg

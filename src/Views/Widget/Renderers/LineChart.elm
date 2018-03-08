@@ -16,22 +16,23 @@ import Color
 import Color.Convert
 import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
-import Data.Widget.Config as RendererConfig
 import Data.Widget.Adapters.ChartAdapter as ChartAdapter
+import Data.Widget.Adapters.TableAdapter exposing (Orientation(..))
+import Data.Widget.Chart as Chart
+import Data.Widget.Config as RendererConfig
 import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
 import NumberParser
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Views.Widget.Renderers.Config as ViewConfig exposing (defaultChartPadding, ChartPadding)
+import Views.Widget.Renderers.Chart as ChartRenderer
+import Views.Widget.Renderers.ChartAxisLabels as ChartAxisLabels
+import Views.Widget.Renderers.ChartLegend as ChartLegend
+import Views.Widget.Renderers.Config as ViewConfig exposing (ChartPadding, defaultChartPadding)
 import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
 import Visualization.Shape as Shape
-import Views.Widget.Renderers.ChartLegend as ChartLegend
-import Views.Widget.Renderers.ChartAxisLabels as ChartAxisLabels
-import Views.Widget.Renderers.Chart as ChartRenderer
-import Data.Widget.Chart as Chart
 
 
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
@@ -40,7 +41,7 @@ render optionalRendererConfig width height widget data =
         CHART optionalAdapterConfig ->
             let
                 chartData =
-                    ChartAdapter.adapt optionalAdapterConfig data
+                    ChartAdapter.adapt optionalAdapterConfig data Vertical
 
                 calculatedWidth =
                     ViewConfig.calculateWidth optionalRendererConfig width

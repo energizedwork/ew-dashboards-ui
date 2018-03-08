@@ -137,20 +137,27 @@ view session model =
         -- use in conjunction with dev-data-test.json for Widget config
         devData =
             Data
-                [ [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
-                , List.range 100 111 |> List.map toString
-                , List.range 200 211 |> List.map toString
-                , List.range 300 311 |> List.map toString
-                , List.range 400 411 |> List.map toString
-                , List.range 500 511 |> List.map toString
-                , List.range 600 611 |> List.map toString
-                , List.range 700 711 |> List.map toString
-                , List.range 800 811 |> List.map toString
-                , List.range 900 911 |> List.map toString
-                , List.range 1000 1011 |> List.map toString
-                , List.range 1100 1111 |> List.map toString
-                , List.range 1200 1211 |> List.map toString
+                [ [ "Client A", "2,482,780", "1,294,181" ]
+                , [ "Client B", "39,500", "(11,400)" ]
+                , [ "Client C", "394,000", "187,147" ]
                 ]
+
+        -- devData =
+        --     Data
+        --         [ [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
+        --         , List.range 100 111 |> List.map toString
+        --         , List.range 200 211 |> List.map toString
+        --         , List.range 300 311 |> List.map toString
+        --         , List.range 400 411 |> List.map toString
+        --         , List.range 500 511 |> List.map toString
+        --         , List.range 600 611 |> List.map toString
+        --         , List.range 700 711 |> List.map toString
+        --         , List.range 800 811 |> List.map toString
+        --         , List.range 900 911 |> List.map toString
+        --         , List.range 1000 1011 |> List.map toString
+        --         , List.range 1100 1111 |> List.map toString
+        --         , List.range 1200 1211 |> List.map toString
+        --         ]
     in
         div [ class "article-page" ]
             [ viewBanner model.errors dashboard author session.user

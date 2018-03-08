@@ -16,7 +16,7 @@ render optionalRendererConfig width height widget data =
     case widget.adapter of
         TABLE optionalAdapterConfig ->
             let
-                ( headerRow, bodyRows, minValue, maxValue, xLabels ) =
+                vTable =
                     TableAdapter.adapt optionalAdapterConfig data Vertical
 
                 calculatedHeight =
@@ -38,9 +38,9 @@ render optionalRendererConfig width height widget data =
                         [ table
                             [ class "table table-striped" ]
                             [ thead []
-                                [ renderHeaderFrom headerRow
+                                [ renderHeaderFrom <| Maybe.withDefault [] vTable.xLabels
                                 ]
-                            , tbody [] <| renderBodyFrom bodyRows
+                            , tbody [] <| renderBodyFrom vTable.rows
                             ]
                         ]
                     ]

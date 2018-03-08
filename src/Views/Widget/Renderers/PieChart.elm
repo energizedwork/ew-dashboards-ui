@@ -25,7 +25,7 @@ render optionalRendererConfig width height widget data =
     case widget.adapter of
         TABLE optionalAdapterConfig ->
             let
-                ( headerRow, bodyRows, minValue, maxValue, xLabels ) =
+                vTable =
                     TableAdapter.adapt optionalAdapterConfig data Vertical
 
                 dataAsLabelValueTuples =
@@ -40,7 +40,7 @@ render optionalRendererConfig width height widget data =
                             in
                                 ( label, value )
                         )
-                        bodyRows
+                        vTable.rows
 
                 calculatedWidth =
                     ViewConfig.calculateWidth optionalRendererConfig width

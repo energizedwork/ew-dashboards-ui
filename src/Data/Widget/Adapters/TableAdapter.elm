@@ -123,7 +123,12 @@ adapt optionalConfig data orientation =
                     Nothing
 
         headerRow =
-            Maybe.withDefault [] xLabels
+            case orientation of
+                Vertical ->
+                    Maybe.withDefault [] xLabels
+
+                Horizontal ->
+                    Maybe.withDefault [] yLabels
 
         bodyRows =
             case Dict.get "bodyRows" optionalConfig of

@@ -10,6 +10,7 @@ type Renderer
     = TABLE RendererConfig.Config
     | LINE_CHART RendererConfig.Config
     | BAR_CHART RendererConfig.Config
+    | BAR_CHART_HORIZONTAL RendererConfig.Config
     | LINE_AND_BAR_CHART RendererConfig.Config
     | HEAT_MAP
     | UPDATABLE_HEAT_MAP
@@ -36,6 +37,11 @@ decoder =
                     "BAR_CHART" ->
                         Decode.succeed <|
                             BAR_CHART
+                                (definition.config |> Maybe.withDefault RendererConfig.default)
+
+                    "BAR_CHART_HORIZONTAL" ->
+                        Decode.succeed <|
+                            BAR_CHART_HORIZONTAL
                                 (definition.config |> Maybe.withDefault RendererConfig.default)
 
                     "LINE_AND_BAR_CHART" ->

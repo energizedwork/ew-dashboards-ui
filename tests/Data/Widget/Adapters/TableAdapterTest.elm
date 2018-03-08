@@ -248,6 +248,16 @@ horizontalAdapterConfigTest =
                             ]
                         )
 
+        defaultDataPairs =
+            \_ ->
+                defaultActual.data
+                    |> Expect.equal
+                        [ [ ( "Client A", "101" ), ( "Client B", "201" ), ( "Client C", "301" ), ( "Client D", "401" ) ]
+                        , [ ( "Client A", "102" ), ( "Client B", "202" ), ( "Client C", "302" ), ( "Client D", "402" ) ]
+                        , [ ( "Client A", "103" ), ( "Client B", "203" ), ( "Client C", "303" ), ( "Client D", "403" ) ]
+                        , [ ( "Client A", "104" ), ( "Client B", "204" ), ( "Client C", "304" ), ( "Client D", "404" ) ]
+                        ]
+
         suppliedHeaders =
             defaultYLabels
 
@@ -274,6 +284,16 @@ horizontalAdapterConfigTest =
                             , "404"
                             ]
                         )
+
+        suppliedDataPairs =
+            \_ ->
+                defaultActual.data
+                    |> Expect.equal
+                        [ [ ( "Client A", "101" ), ( "Client B", "201" ), ( "Client C", "301" ), ( "Client D", "401" ) ]
+                        , [ ( "Client A", "102" ), ( "Client B", "202" ), ( "Client C", "302" ), ( "Client D", "402" ) ]
+                        , [ ( "Client A", "103" ), ( "Client B", "203" ), ( "Client C", "303" ), ( "Client D", "403" ) ]
+                        , [ ( "Client A", "104" ), ( "Client B", "204" ), ( "Client C", "304" ), ( "Client D", "404" ) ]
+                        ]
 
         suppliedLineChartRows =
             \_ ->
@@ -310,6 +330,7 @@ horizontalAdapterConfigTest =
                 , Test.test "max value is extracted from body" defaultMaxValue
                 , Test.test "x-axis labels are empty" defaultXLabels
                 , Test.test "y-axis labels are the first col" defaultYLabels
+                , Test.test "data is header, value pairs" defaultDataPairs
                 ]
             , Test.describe "with supplied Config"
                 [ Test.test "headers are fith column row" suppliedHeaders
@@ -318,5 +339,6 @@ horizontalAdapterConfigTest =
                 , Test.test "max value is extracted from body rows" suppliedMaxValue
                 , Test.test "x-axis labels are the forth col" suppliedXLabels
                 , Test.test "y-axis labels are the fifth col" suppliedYLabels
+                , Test.test "data is header, value pairs" suppliedDataPairs
                 ]
             ]

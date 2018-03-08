@@ -2,6 +2,7 @@ module Data.Widget.Adapters.LineAndBarAdapter exposing (defaultConfig, adapt)
 
 import Data.Widget.Config as AdapterConfig
 import Data.Widget.Adapters.ChartAdapter as ChartAdapter exposing (..)
+import Data.Widget.Adapters.TableAdapter exposing (Orientation(..))
 import Data.Widget.Chart as Chart exposing (Data)
 import Data.Widget.Table as Table exposing (Cell, Data, Row)
 import Dict exposing (Dict)
@@ -110,10 +111,16 @@ adapt : AdapterConfig.Config -> Table.Data -> ( Chart.Data, Chart.Data )
 adapt combinedConfig data =
     let
         lineChartData =
-            ChartAdapter.adapt (normalizeLineChartConfig combinedConfig) data
+            ChartAdapter.adapt
+                (normalizeLineChartConfig combinedConfig)
+                data
+                Vertical
 
         barChartData =
-            ChartAdapter.adapt (normalizeBarChartConfig combinedConfig) data
+            ChartAdapter.adapt
+                (normalizeBarChartConfig combinedConfig)
+                data
+                Vertical
 
         xAxisLabel =
             ChartAdapter.extractXAxisLabel combinedConfig data

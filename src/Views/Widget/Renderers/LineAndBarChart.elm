@@ -3,6 +3,7 @@ module Views.Widget.Renderers.LineAndBarChart exposing (render)
 import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.LineAndBarAdapter as LineAndBarAdapter exposing (adapt)
+import Data.Widget.Adapters.TableAdapter exposing (Orientation(..))
 import Data.Widget.Chart as Chart exposing (Data)
 import Data.Widget.Config as RendererConfig
 import Data.Widget.Table as Table exposing (..)
@@ -11,14 +12,13 @@ import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Views.Widget.Renderers.BarChart as BarChart
 import Views.Widget.Renderers.Chart as ChartRenderer
-import Views.Widget.Renderers.Config as ViewConfig exposing (defaultChartPadding, ChartPadding)
+import Views.Widget.Renderers.ChartAxisLabels as ChartAxisLabels
+import Views.Widget.Renderers.ChartLegend as ChartLegend
+import Views.Widget.Renderers.Config as ViewConfig exposing (ChartPadding, defaultChartPadding)
 import Views.Widget.Renderers.LineChart as LineChart
-import Views.Widget.Renderers.BarChart as BarChart
 import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (..)
-import Views.Widget.Renderers.ChartLegend as ChartLegend
-import Views.Widget.Renderers.ChartAxisLabels as ChartAxisLabels
 
 
 chartPadding : ChartPadding

@@ -4,6 +4,7 @@ import Data.Widget.Adapters.AdapterTestData as TD
 import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder)
 import Data.Widget.Adapters.CellRange as CellRange exposing (CellRange, encode)
 import Data.Widget.Adapters.ChartAdapter as ChartAdapter exposing (adapt)
+import Data.Widget.Adapters.TableAdapter as TableAdapter exposing (adapt, Orientation(..))
 import Data.Widget.Table as Table exposing (Data)
 import Dict exposing (Dict)
 import Expect exposing (Expectation)
@@ -71,10 +72,10 @@ adapterConfigTest =
 
         -- functions under test!
         defaultActualChartData =
-            ChartAdapter.adapt defaultConfig unlabelledInput
+            ChartAdapter.adapt defaultConfig unlabelledInput Vertical
 
         suppliedActualChartData =
-            ChartAdapter.adapt suppliedConfig labelledInput
+            ChartAdapter.adapt suppliedConfig labelledInput Vertical
 
         -- expectations
         defaultBodyRows =

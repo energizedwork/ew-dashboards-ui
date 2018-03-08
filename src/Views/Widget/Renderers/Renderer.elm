@@ -7,6 +7,7 @@ import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src)
 import Views.Spinner
 import Views.Widget.Renderers.BarChart as BarChart
+import Views.Widget.Renderers.BarChartHorizontal as BarChartHorizontal
 import Views.Widget.Renderers.HeatMap as HeatMap
 import Views.Widget.Renderers.LineAndBarChart as LineAndBarChart
 import Views.Widget.Renderers.LineChart as LineChart
@@ -38,6 +39,9 @@ run width height widget data =
 
                     BAR_CHART config ->
                         BarChart.render config width height widget data
+
+                    BAR_CHART_HORIZONTAL config ->
+                        BarChartHorizontal.render config width height widget data
 
                     LINE_AND_BAR_CHART config ->
                         LineAndBarChart.render config width height widget data
