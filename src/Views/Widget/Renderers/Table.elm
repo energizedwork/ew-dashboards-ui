@@ -7,6 +7,7 @@ import Data.Widget.Config as RendererConfig
 import Data.Widget.Table as Table exposing (Cell, Data)
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, src, style, title)
+import Views.Spinner
 import Views.Widget.Renderers.Config as ViewConfig
 import Views.Widget.Renderers.Utils as Utils
 
@@ -21,29 +22,34 @@ render optionalRendererConfig width height widget data =
 
                 calculatedHeight =
                     ViewConfig.calculateHeight optionalRendererConfig height
+
+                body =
+                    div []
+                        [ Utils.renderTitleFrom widget
+                        , div
+                            [ style
+                                [ ( "maxWidth", ((toString <| width - floor padding * 2) ++ "px") )
+                                , ( "minHeight", ((toString <| calculatedHeight) ++ "px") )
+                                , ( "overflow", "auto" )
+                                ]
+                            ]
+                            [ table
+                                [ class "table table-striped" ]
+                                [ thead []
+                                    [ renderHeaderFrom <| Maybe.withDefault [] vTable.xLabels
+                                    ]
+                                , tbody [] <| renderBodyFrom vTable.rows
+                                ]
+                            ]
+                        ]
             in
                 div
                     [ class <|
                         ViewConfig.colSpanClass optionalRendererConfig
                             ++ " widget"
                     ]
-                    [ Utils.renderTitleFrom widget
-                    , div
-                        [ style
-                            [ ( "maxWidth", ((toString <| width - floor padding * 2) ++ "px") )
-                            , ( "minHeight", ((toString <| calculatedHeight) ++ "px") )
-                            , ( "overflow", "auto" )
-                            ]
-                        ]
-                        [ table
-                            [ class "table table-striped" ]
-                            [ thead []
-                                [ renderHeaderFrom <| Maybe.withDefault [] vTable.xLabels
-                                ]
-                            , tbody [] <| renderBodyFrom vTable.rows
-                            ]
-                        ]
-                    ]
+                <|
+                    Utils.renderWidgetBody data body
 
         _ ->
             p [ class "data" ] [ text "Sorry, I can only render tables from a TABLE adapter right now" ]

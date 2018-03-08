@@ -3,7 +3,6 @@ module Views.Widget.Renderers.LineAndBarChart exposing (render)
 import Data.Widget as Widget exposing (Body, Widget)
 import Data.Widget.Adapters.Adapter exposing (Adapter(..))
 import Data.Widget.Adapters.LineAndBarAdapter as LineAndBarAdapter exposing (adapt)
-import Data.Widget.Adapters.TableAdapter exposing (Orientation(..))
 import Data.Widget.Chart as Chart exposing (Data)
 import Data.Widget.Config as RendererConfig
 import Data.Widget.Table as Table exposing (..)
@@ -45,11 +44,15 @@ render optionalRendererConfig width height widget data =
 
                 namespace =
                     Utils.cssSafe widget.name
+
+                body =
+                    div []
+                        [ Utils.renderTitleFrom widget
+                        , view namespace calculatedWidth calculatedHeight lineChart barChart
+                        ]
             in
-                div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ]
-                    [ Utils.renderTitleFrom widget
-                    , view namespace calculatedWidth calculatedHeight lineChart barChart
-                    ]
+                div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ] <|
+                    Utils.renderWidgetBody data body
 
         _ ->
             p [ class "data" ]

@@ -4,6 +4,7 @@ module Views.Widget.Renderers.Utils
         , rowToFloats
         , renderTitleFrom
         , renderDebugGrid
+        , renderWidgetBody
         , renderYGrid
         , formatStringTick
         , toStr
@@ -12,6 +13,7 @@ module Views.Widget.Renderers.Utils
 
 import Data.DataSource as DataSource
 import Data.Widget as Widget exposing (Body, Widget)
+import Data.Widget.Table as Table
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Regex exposing (..)
@@ -19,6 +21,7 @@ import String exposing (..)
 import String.Extra exposing (..)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
+import Views.Spinner
 import Views.Widget.Renderers.Config as ViewConfig exposing (ChartPadding)
 import Visualization.Scale as Scale exposing (ContinuousScale)
 
@@ -169,3 +172,13 @@ cssSafe input =
         |> String.Extra.clean
         |> Regex.replace All (regex "[&#%.',\"\\s]+") (always "")
         |> (++) "d-"
+
+
+renderWidgetBody : Table.Data -> Html msg -> List (Html msg)
+renderWidgetBody data bodyRenderer =
+    case List.isEmpty data.rows of
+        True ->
+            [ Views.Spinner.wrappedSpinnerSVG ]
+
+        False ->
+            [ bodyRenderer ]

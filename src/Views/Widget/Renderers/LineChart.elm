@@ -51,15 +51,20 @@ render optionalRendererConfig width height widget data =
 
                 namespace =
                     Utils.cssSafe widget.name
+
+                body =
+                    div []
+                        [ Utils.renderTitleFrom widget
+                        , view namespace calculatedWidth calculatedHeight chartData
+                        ]
             in
                 div
                     [ class <|
                         ViewConfig.colSpanClass optionalRendererConfig
                             ++ " widget"
                     ]
-                    [ Utils.renderTitleFrom widget
-                    , view namespace calculatedWidth calculatedHeight chartData
-                    ]
+                <|
+                    Utils.renderWidgetBody data body
 
         _ ->
             p [ class "data" ] [ Html.text "Sorry, I can only render line charts from a CHART adapter right now" ]

@@ -15,7 +15,6 @@ import Json.Decode as Json exposing (Value)
 import Data.Widget.Adapters.CellRange as CellRange exposing (..)
 import Dict exposing (Dict)
 import Data.Widget.Chart as Chart
-import Array
 
 
 defaultConfig : Dict String Json.Value

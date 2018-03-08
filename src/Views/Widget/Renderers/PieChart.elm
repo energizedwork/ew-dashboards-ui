@@ -47,11 +47,15 @@ render optionalRendererConfig width height widget data =
 
                 calculatedHeight =
                     ViewConfig.calculateHeight optionalRendererConfig height
+
+                body =
+                    div []
+                        [ Utils.renderTitleFrom widget
+                        , view calculatedWidth calculatedHeight dataAsLabelValueTuples
+                        ]
             in
-                div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ]
-                    [ Utils.renderTitleFrom widget
-                    , view calculatedWidth calculatedHeight dataAsLabelValueTuples
-                    ]
+                div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ] <|
+                    Utils.renderWidgetBody data body
 
         _ ->
             p [ class "data" ] [ Html.text "Sorry, I can only render pie charts from a TABLE adapter right now" ]

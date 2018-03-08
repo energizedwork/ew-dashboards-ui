@@ -7,6 +7,7 @@ import Data.Widget.Config as RendererConfig
 import Data.Widget.Table as Table exposing (Data)
 import Html exposing (..)
 import Html.Attributes exposing (class, title)
+import Views.Spinner
 import Views.Widget.Renderers.Config as ViewConfig
 import Views.Widget.Renderers.Utils as Utils
 
@@ -24,13 +25,9 @@ render optionalRendererConfig width height widget data =
 
                 calculatedHeight =
                     ViewConfig.calculateHeight optionalRendererConfig height
-            in
-                div
-                    [ class <|
-                        ViewConfig.colSpanClass optionalRendererConfig
-                            ++ " widget container reduce-margin-top"
-                    ]
-                    [ div [ class "metric" ]
+
+                body =
+                    div [ class "metric" ]
                         [ Utils.renderTitleFrom widget
                         , div [ class "metric-body" ]
                             [ p [ class "subtitle" ] [ text subtitle ]
@@ -40,7 +37,14 @@ render optionalRendererConfig width height widget data =
                             , p [ class "last-updated" ] [ text <| "updated: " ++ lastUpdated ]
                             ]
                         ]
+            in
+                div
+                    [ class <|
+                        ViewConfig.colSpanClass optionalRendererConfig
+                            ++ " widget container reduce-margin-top"
                     ]
+                <|
+                    Utils.renderWidgetBody data body
 
         _ ->
             p [ class "data" ] [ text "Sorry, I can only render metrics from a METRIC adapter right now" ]

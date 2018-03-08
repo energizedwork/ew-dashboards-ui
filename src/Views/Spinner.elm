@@ -1,4 +1,4 @@
-module Views.Spinner exposing (spinner, spinnerSVG)
+module Views.Spinner exposing (spinner, spinnerSVG, wrappedSpinnerSVG)
 
 import Html exposing (Attribute, Html, div, li, text)
 import Html.Attributes as HTMLa exposing (class, style, attribute)
@@ -14,6 +14,11 @@ spinner =
         , div [ HTMLa.class "sk-child sk-bounce2" ] []
         , div [ HTMLa.class "sk-child sk-bounce3" ] []
         ]
+
+
+wrappedSpinnerSVG : Html msg
+wrappedSpinnerSVG =
+    div [ HTMLa.class "spinner-wrapper" ] [ spinnerSVG ]
 
 
 spinnerSVG : Html msg

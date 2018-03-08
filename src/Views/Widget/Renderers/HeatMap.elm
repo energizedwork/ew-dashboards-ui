@@ -80,17 +80,21 @@ render width height widget data updatable =
 
                 initModel =
                     Model initWidth initHeight dataAsHeaderValueTuples xLabels yLabels maxValue
-            in
-                div [ class "col-md-12 widget" ]
-                    [ div [ class "row" ]
-                        [ div [ class "col-md-5" ]
-                            [ Utils.renderTitleFrom widget ]
-                        , div [ class "col-md-5 col-md-offset-2" ]
-                            [ renderOptionalInputField
+
+                body =
+                    div []
+                        [ div [ class "row" ]
+                            [ div [ class "col-md-5" ]
+                                [ Utils.renderTitleFrom widget ]
+                            , div [ class "col-md-5 col-md-offset-2" ]
+                                [ renderOptionalInputField
+                                ]
                             ]
+                        , draw initModel
                         ]
-                    , draw initModel
-                    ]
+            in
+                div [ class "col-md-12 widget" ] <|
+                    Utils.renderWidgetBody data body
 
         _ ->
             p [ class "data" ] [ Html.text "Sorry, I can only render line charts from a HEAT_MAP / UPDATABLE_HEAT_MAP adapter right now" ]

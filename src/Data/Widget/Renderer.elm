@@ -3,7 +3,6 @@ module Data.Widget.Renderer exposing (Renderer(..), decoder)
 import Data.Widget.Config as RendererConfig
 import Data.Widget.Definition as Definition
 import Json.Decode as Decode exposing (Decoder, index, int, map2, maybe)
-import Json.Decode.Pipeline as Pipeline exposing (decode, optional, required)
 
 
 type Renderer

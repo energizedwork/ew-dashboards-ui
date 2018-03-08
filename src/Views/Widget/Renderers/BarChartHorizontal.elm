@@ -44,11 +44,15 @@ render optionalRendererConfig width height widget data =
 
                 calculatedHeight =
                     ViewConfig.calculateHeight optionalRendererConfig height
+
+                body =
+                    div []
+                        [ Utils.renderTitleFrom widget
+                        , view calculatedWidth calculatedHeight chartData
+                        ]
             in
-                div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ]
-                    [ Utils.renderTitleFrom widget
-                    , view calculatedWidth calculatedHeight chartData
-                    ]
+                div [ class <| ViewConfig.colSpanClass optionalRendererConfig ++ " widget" ] <|
+                    Utils.renderWidgetBody data body
 
         _ ->
             p [ class "data" ] [ Html.text "Sorry, I can only render bar charts from a CHART adapter right now" ]
