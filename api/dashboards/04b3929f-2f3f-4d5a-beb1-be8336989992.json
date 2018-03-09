@@ -73,6 +73,54 @@
       },
       {
         "uuid": "006f0092-5a11-468d-b822-ea57753f45c4",
+        "name": "Operating Costs",
+        "description": "Jul 17 - Jan 18 - YTD Expenditure by Tracking Code",
+        "dataSources": [{
+          "uuid": "35cfdb89-012b-4194-9901-56d55464a4ee",
+          "name": "sheets"
+        }],
+        "adapter": {
+          "type_": "BAR_CHART",
+          "config": {
+            "xLabels": {
+              "start": [2, 287],
+              "end": [12, 287]
+            },
+            "bodyRows": {
+              "start": [2, 288],
+              "end": [12, 288]
+            },
+            "seriesLabels": {
+              "start": [1, 288],
+              "end": [1, 288]
+            },
+            "xAxisLabel": [3, 284],
+            "yAxisLabel": [5, 284]
+          }
+        },
+        "renderer": {
+          "type_": "BAR_CHART",
+          "config": {
+            "colSpan": 6
+          }
+        },
+        "createdAt": "2017-02-06T16:03:55.948Z",
+        "updatedAt": "2017-02-06T16:03:55.948Z",
+        "tagList": [],
+        "author": {
+          "username": "msp",
+          "bio": "beautifully flawed creation .. \n\n",
+          "image": "https://static.productionready.io/images/smiley-cyrus.jpg",
+          "following": false
+        },
+        "favorited": false,
+        "favoritesCount": 0,
+        "data": {
+          "data": []
+        }
+      },
+      {
+        "uuid": "006f0092-5a11-468d-b822-ea57753f45c4",
         "name": "Client Profitability",
         "description": "Client Profitability",
         "dataSources": [{
@@ -100,7 +148,7 @@
         "renderer": {
           "type_": "BAR_CHART_HORIZONTAL",
           "config": {
-            "colSpan": 12
+            "colSpan": 6
           }
         },
         "createdAt": "2017-02-06T16:03:55.948Z",

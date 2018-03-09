@@ -115,31 +115,34 @@
       },
       {
         "uuid": "006f0092-5a11-468d-b822-ea57753f45c4",
-        "name": "Operating Costs",
-        "description": "Jul 17 - Jan 18 - YTD Expenditure by Tracking Code",
+        "name": "Client Concentration - trend from March 2017",
+        "description": "Client Concentration - trend from March 2017",
         "dataSources": [{
           "uuid": "35cfdb89-012b-4194-9901-56d55464a4ee",
           "name": "sheets"
         }],
         "adapter": {
-          "type_": "BAR_CHART",
+          "type_": "LINE_CHART",
           "config": {
             "xLabels": {
-              "start": [2, 287],
-              "end": [12, 287]
+              "start": [5, 148],
+              "end": [15, 152]
             },
             "bodyRows": {
-              "start": [2, 288],
-              "end": [12, 288]
+              "start": [5, 149],
+              "end": [15, 152]
             },
             "seriesLabels": {
-              "start": [1, 288],
-              "end": [1, 288]
-            }
+              "start": [1, 149],
+              "end": [1, 152]
+            },
+            "xAxisLabel": [5, 146],
+            "yAxisLabel": [3, 146]
+
           }
         },
         "renderer": {
-          "type_": "BAR_CHART",
+          "type_": "LINE_CHART",
           "config": {
             "colSpan": 6
           }
