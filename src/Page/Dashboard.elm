@@ -455,7 +455,8 @@ update session msg model =
                         []
 
                     joinChannel phxSocket channels commands =
-                        case Debug.log "joinChannel" <| List.head channels of
+                        -- case Debug.log "joinChannel" <| List.head channels of
+                        case List.head channels of
                             Just ( fullChannelName, channel ) ->
                                 let
                                     ( updatedPhxSocket, phxCmd ) =

@@ -20,12 +20,7 @@ import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (..)
 
 
-chartPadding : ChartPadding
-chartPadding =
-    { defaultChartPadding
-        | right = ViewConfig.largePadding
-        , totalHorizontal = ViewConfig.largePadding * 2
-    }
+-- Public ----------------------------------------------------------------------
 
 
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
@@ -59,6 +54,10 @@ render optionalRendererConfig width height widget data =
                 [ Html.text
                     "Sorry, I can only render line/bar combo charts from a LINE_AND_BAR_CHART adapter right now"
                 ]
+
+
+
+-- Private ---------------------------------------------------------------------
 
 
 view : String -> Int -> Int -> Chart.Data -> Chart.Data -> Html msg
@@ -160,3 +159,11 @@ view namespace w h lineChart barChart =
                 , [ ChartAxisLabels.renderRightYAxisLabel w h lineChart.yAxisLabel chartPadding ]
                 ]
             )
+
+
+chartPadding : ChartPadding
+chartPadding =
+    { defaultChartPadding
+        | right = ViewConfig.largePadding
+        , totalHorizontal = ViewConfig.largePadding * 2
+    }

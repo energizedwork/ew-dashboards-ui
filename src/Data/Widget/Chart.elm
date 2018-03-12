@@ -1,6 +1,6 @@
 module Data.Widget.Chart exposing (Data)
 
-import Data.Widget.Table exposing (Row, Cell)
+import Data.Widget.Table exposing (Cell, Row)
 
 
 type alias Data =

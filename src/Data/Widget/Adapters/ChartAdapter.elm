@@ -18,9 +18,35 @@ import Json.Decode as Json exposing (Value)
 import Util
 
 
+-- Public ----------------------------------------------------------------------
+
+
 defaultConfig : Dict String Json.Value
 defaultConfig =
     Dict.empty
+
+
+adapt : AdapterConfig.Config -> Data -> Orientation -> Chart.Data
+adapt optionalConfig data orientation =
+    let
+        tableData =
+            TableAdapter.adapt optionalConfig data orientation
+
+        chartData =
+            { tableData
+                | seriesLabels =
+                    extractSeriesLabels optionalConfig data
+                , xAxisLabel =
+                    extractXAxisLabel optionalConfig data
+                , yAxisLabel =
+                    extractYAxisLabel optionalConfig data
+                , forecastPosition =
+                    extractCellPosition "forecastPosition" optionalConfig data
+                        |> Maybe.map String.toInt
+                        |> Maybe.map (Result.withDefault 0)
+            }
+    in
+        chartData
 
 
 extractSeriesLabels : Dict String Json.Value -> Table.Data -> Maybe Table.Cells
@@ -55,6 +81,10 @@ extractYAxisLabel config data =
     extractCellPosition "yAxisLabel" config data
 
 
+
+-- Private ----------------------------------------------------------------------
+
+
 extractCellPosition : String -> Dict String Json.Value -> Table.Data -> Maybe Cell
 extractCellPosition configKey config data =
     case Dict.get configKey config of
@@ -72,26 +102,3 @@ extractCellPosition configKey config data =
 
         Nothing ->
             Nothing
-
-
-adapt : AdapterConfig.Config -> Data -> Orientation -> Chart.Data
-adapt optionalConfig data orientation =
-    let
-        tableData =
-            TableAdapter.adapt optionalConfig data orientation
-
-        chartData =
-            { tableData
-                | seriesLabels =
-                    extractSeriesLabels optionalConfig data
-                , xAxisLabel =
-                    extractXAxisLabel optionalConfig data
-                , yAxisLabel =
-                    extractYAxisLabel optionalConfig data
-                , forecastPosition =
-                    extractCellPosition "forecastPosition" optionalConfig data
-                        |> Maybe.map String.toInt
-                        |> Maybe.map (Result.withDefault 0)
-            }
-    in
-        chartData

@@ -1,14 +1,16 @@
-module Data.Widget.Definition exposing (decoder)
+module Data.Widget.Definition exposing (decoder, Definition)
 
-import Data.Widget.Config as DefinitionConfig
+import Data.Widget.Config as AdapterConfig
 import Json.Decode as Decode exposing (Decoder, Value, dict, maybe, string)
-import Json.Decode.Extra
 import Json.Decode.Pipeline as Pipeline exposing (custom, decode, hardcoded, optional, required)
+
+
+-- Public ----------------------------------------------------------------------
 
 
 type alias Definition =
     { type_ : String
-    , config : Maybe DefinitionConfig.Config
+    , config : Maybe AdapterConfig.Config
     }
 
 
@@ -18,6 +20,10 @@ decoder =
         |> required "type_" Decode.string
         |> optional "config"
             (maybe
-                (Decode.dict Decode.value)
+                AdapterConfig.decoder
             )
             Nothing
+
+
+
+-- Private ---------------------------------------------------------------------

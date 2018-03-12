@@ -6,6 +6,9 @@ import Data.Widget.Definition as Definition exposing (decoder)
 import Json.Decode as Decode exposing (Decoder, Value, dict, maybe, string)
 
 
+-- Public ----------------------------------------------------------------------
+
+
 type Adapter
     = TABLE AdapterConfig.Config
     | CHART AdapterConfig.Config
@@ -56,3 +59,7 @@ decoder =
                     somethingElse ->
                         Decode.fail <| "Unknown adapter: " ++ somethingElse
             )
+
+
+
+-- Private ---------------------------------------------------------------------

@@ -1,13 +1,15 @@
 module Data.Widget.Adapters.LineAndBarAdapterTest exposing (..)
 
 import Data.Widget.Adapters.AdapterTestData as TD
-import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder)
+import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), decoder, encode)
 import Data.Widget.Adapters.CellRange as CellRange exposing (CellRange, encode)
 import Data.Widget.Adapters.LineAndBarAdapter as LineAndBarAdapter exposing (adapt)
+import Data.Widget.Config as AdapterConfig
 import Data.Widget.Table as Table exposing (Data)
 import Dict exposing (Dict)
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
+import Json.Decode as Decode exposing (decodeValue)
 import Json.Encode as Encode exposing (..)
 import List.Extra
 import Test exposing (..)
@@ -38,51 +40,46 @@ adapterConfigTest =
         defaultConfig =
             LineAndBarAdapter.defaultConfig
 
+        suppliedJSONConfig =
+            """
+            {
+              "line": {
+                  "bodyRows": {
+                    "start": [5, 2],
+                    "end": [10, 3]
+                  },
+                  "seriesLabels": {
+                    "start": [13, 2],
+                    "end": [13, 5]
+                  },
+                  "xLabels": {
+                    "start": [5, 3],
+                    "end": [10, 3]
+                  },
+                  "xAxisLabel": [13, 2],
+                  "yAxisLabel": [13, 3]
+              },
+              "bar": {
+                  "bodyRows": {
+                    "start": [5, 4],
+                    "end": [10, 5]
+                  },
+                  "seriesLabels": {
+                    "start": [13, 2],
+                    "end": [13, 5]
+                  },
+                  "xLabels": {
+                    "start": [5, 3],
+                    "end": [10, 3]
+                  },
+                  "yAxisLabel": [13, 4]
+              }
+            }
+            """
+
         suppliedConfig =
-            Dict.fromList
-                [ ( "lineRows"
-                  , CellRange.encode <|
-                        CellRange
-                            (CellPosition ( 5, 2 ))
-                            (CellPosition ( 10, 3 ))
-                  )
-                , ( "lineSeriesLabels"
-                  , CellRange.encode <|
-                        CellRange
-                            (CellPosition ( 13, 2 ))
-                            (CellPosition ( 13, 5 ))
-                  )
-                , ( "barRows"
-                  , CellRange.encode <|
-                        CellRange
-                            (CellPosition ( 5, 4 ))
-                            (CellPosition ( 10, 5 ))
-                  )
-                , ( "barSeriesLabels"
-                  , CellRange.encode <|
-                        CellRange
-                            (CellPosition ( 13, 2 ))
-                            (CellPosition ( 13, 5 ))
-                  )
-                , ( "xLabels"
-                  , CellRange.encode <|
-                        CellRange
-                            (CellPosition ( 5, 3 ))
-                            (CellPosition ( 10, 3 ))
-                  )
-                , ( "lineXAxisLabel"
-                  , CellPosition.encode <|
-                        CellPosition ( 13, 2 )
-                  )
-                , ( "lineYAxisLabel"
-                  , CellPosition.encode <|
-                        CellPosition ( 13, 3 )
-                  )
-                , ( "barYAxisLabel"
-                  , CellPosition.encode <|
-                        CellPosition ( 13, 4 )
-                  )
-                ]
+            Decode.decodeString AdapterConfig.decoder suppliedJSONConfig
+                |> Result.withDefault AdapterConfig.default
 
         -- functions under test!
         ( defaultLineChart, defaultBarChart ) =
@@ -235,7 +232,7 @@ adapterConfigTest =
                 , Test.test "max value is extracted from bar rows" suppliedBarMaxValue
                 , Test.test "x-axis labels are the third row" suppliedXLabels
                 , Test.test "x-axis label is as specified" suppliedXAxisLabel
-                , Test.test "line charty-axis label is as specified" suppliedLineYAxisLabel
-                , Test.test "bar charty-axis label is as specified" suppliedBarYAxisLabel
+                , Test.test "line chart y-axis label is as specified" suppliedLineYAxisLabel
+                , Test.test "bar chart y-axis label is as specified" suppliedBarYAxisLabel
                 ]
             ]
