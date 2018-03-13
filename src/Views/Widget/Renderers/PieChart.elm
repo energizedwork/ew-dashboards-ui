@@ -157,14 +157,7 @@ view width height data =
     in
         svg [ Svg.Attributes.width (toString width ++ "px"), Svg.Attributes.height (toString height ++ "px") ] <|
             List.concat
-                [ [ Svg.style []
-                        [ Svg.text """
-                            .segment text { display: none; }
-                            .segment:hover { opacity: 0.7; cursor: crosshair; }
-                            .segment:hover text { display: inline; z-index: 9999; }
-                          """ ]
-                  ]
-                , [ g [ transform ("translate(" ++ toString (width // 2) ++ "," ++ toString (height // 2) ++ ")") ]
+                [ [ g [ transform ("translate(" ++ toString (width // 2) ++ "," ++ toString (height // 2) ++ ")") ]
                         [ g [] <| List.indexedMap makeSlice pieData
                           -- , g [] <| List.map2 makeLabel pieData data
                         ]

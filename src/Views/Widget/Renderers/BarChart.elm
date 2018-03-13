@@ -166,13 +166,7 @@ view w h chartData =
             , Svg.Attributes.height (toString h ++ "px")
             ]
             (List.concat
-                [ [ Svg.style []
-                        [ Svg.text """
-                            .column text { display: none; }
-                            .column:hover rect { opacity: 0.7; cursor: crosshair; }
-                            .column:hover text { display: inline; z-index: 9999; }
-                          """ ]
-                  , renderXAxis w h firstDataTuple defaultChartPadding
+                [ [ renderXAxis w h firstDataTuple defaultChartPadding
                   , renderYAxis w h chartData.maxValue defaultChartPadding
                   , Utils.renderYGrid w h defaultChartPadding chartData.maxValue (yScale h chartData.maxValue defaultChartPadding) yGridTicks
                   ]

@@ -194,15 +194,9 @@ view w h chartData =
             , Svg.Attributes.height (toString h ++ "px")
             ]
             (List.concat
-                [ [ Svg.style []
-                        [ Svg.text """
-                            .column text { display: none; }
-                            .column:hover rect { opacity: 0.7; cursor: crosshair; }
-                            .column:hover text { display: inline; z-index: 9999; }
-                          """ ]
-                    -- , Utils.renderDebugGrid w h padding
-                  , renderYAxis w h firstDataTuple padding
+                [ [ renderYAxis w h firstDataTuple padding
                   , renderXAxis w h chartData.maxValue padding
+                    -- , Utils.renderDebugGrid w h padding
                   , Utils.renderXGrid w
                         h
                         padding
