@@ -3,8 +3,8 @@ module Page.Home exposing (Model, Msg, init, update, view)
 {-| The homepage. You can get here via either the / or /#/ routes.
 -}
 
-import Data.Widget as Widget exposing (Tag)
 import Data.Session as Session exposing (Session)
+import Data.Widget as Widget exposing (Tag)
 import Html exposing (..)
 import Html.Attributes exposing (attribute, class, classList, href, id, placeholder)
 import Html.Events exposing (onClick)
@@ -18,7 +18,7 @@ import Views.Dashboard.Feed as Feed exposing (FeedSource, globalFeed, tagFeed, y
 import Views.Page as Page
 
 
--- MODEL --
+-- Model -----------------------------------------------------------------------
 
 
 type alias Model =
@@ -51,7 +51,7 @@ init session =
 
 
 
--- VIEW --
+-- View -----------------------------------------------------------------------
 
 
 view : Session -> Model -> Html Msg
@@ -104,7 +104,7 @@ viewTag tagName =
 
 
 
--- UPDATE --
+-- Update ----------------------------------------------------------------------
 
 
 type Msg

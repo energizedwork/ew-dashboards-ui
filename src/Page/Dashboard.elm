@@ -1,55 +1,60 @@
-module Page.Dashboard exposing (Model, Msg(..), init, update, view, subscriptions)
+module Page.Dashboard
+    exposing
+        ( Model
+        , Msg(..)
+        , init
+        , update
+        , view
+        , subscriptions
+        )
 
 import Data.Dashboard as Dashboard exposing (Dashboard)
-import Data.Widget as Widget exposing (..)
-import Data.Widget.Author as Author exposing (Author)
-import Data.Session as Session exposing (Session)
-import Data.User as User exposing (User)
-import Data.UserPhoto as UserPhoto
 import Data.DataSource as DataSource exposing (..)
 import Data.DataSourceMessage as DataSourceMessage exposing (DataSourceMessage, decoder)
+import Data.Session as Session exposing (Session)
 import Data.UUID as UUID
+import Data.User as User exposing (User)
+import Data.UserPhoto as UserPhoto
+import Data.Widget as Widget exposing (..)
+import Data.Widget.Author as Author exposing (Author)
+import Data.Widget.Table as Table exposing (Cell, Data, decoder)
 import Date exposing (Date)
 import Date.Format
+import Dict
 import Html exposing (..)
-import Html.Attributes exposing (attribute, class, disabled, href, id, placeholder, value, type_)
+import Html.Attributes exposing (attribute, class, disabled, href, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Http
+import Json.Decode as JD exposing (field)
+import Json.Encode as JE
 import Page.Errored as Errored exposing (PageLoadError, pageLoadError)
+import Phoenix.Channel
+import Phoenix.Push
+import Phoenix.Socket
 import Request.Dashboard
 import Request.Profile
 import Route
 import Task exposing (Task)
 import Util exposing ((=>), pair, viewIf)
-import Views.Dashboard.Favorite as Favorite
 import Views.Author
 import Views.Dashboard
+import Views.Dashboard.Favorite as Favorite
 import Views.Errors
 import Views.Page as Page
 import Views.User.Follow as Follow
-import Data.Widget.Table as Table exposing (Data, Cell, decoder)
 import Views.Widget.Renderers.Renderer as Renderer
 import Views.Widget.Renderers.RendererMessage as RendererMessage exposing (..)
-import Json.Encode as JE
-import Json.Decode as JD exposing (field)
-import Phoenix.Socket
-import Phoenix.Channel
-import Phoenix.Push
-import Dict
 import Window exposing (..)
 
 
--- CONSTANTS
--- TODO Pass in via a Flag
+-- Constants -------------------------------------------------------------------
 
 
 socketServer : String
 socketServer =
+    -- TODO Pass in via a Flag
+    -- "ws://localhost:4000/socket/websocket"
     "wss://ew-dashboards-staging.herokuapp.com/socket/websocket"
-
-
-
--- "ws://localhost:4000/socket/websocket"
 
 
 channelName : DataSource -> String
@@ -58,8 +63,18 @@ channelName dataSource =
         |> DataSource.toChannel
 
 
+user : String
+user =
+    "msp"
 
--- MODEL --
+
+userParams : JE.Value
+userParams =
+    JE.object [ ( "user_id", JE.string user ) ]
+
+
+
+-- Model -----------------------------------------------------------------------
 
 
 type alias Model =
@@ -73,27 +88,16 @@ type alias Model =
     }
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.batch
-        [ Window.resizes (\{ height, width } -> ResizeWindow width height)
-        , Phoenix.Socket.listen model.phxSocket PhoenixMsg
-        ]
-
-
-user : String
-user =
-    "msp"
-
-
-userParams : JE.Value
-userParams =
-    JE.object [ ( "user_id", JE.string user ) ]
-
-
 init : Session -> UUID.UUID -> Task PageLoadError Model
 init session slug =
     let
+        initPhxSocket =
+            Phoenix.Socket.init socketServer
+
+        initPhxSocketWithDebug =
+            Phoenix.Socket.init socketServer
+                |> Phoenix.Socket.withDebug
+
         maybeAuthToken =
             Maybe.map .token session.user
 
@@ -102,23 +106,24 @@ init session slug =
                 |> Http.toTask
 
         handleLoadError err =
-            pageLoadError Page.Other ("Dashboard is currently unavailable. " ++ (toString err))
+            pageLoadError Page.Other
+                ("Dashboard is currently unavailable. "
+                    ++ (toString err)
+                )
 
         initModel =
-            Model [] "" [] Nothing initPhxSocket
+            Model []
+                ""
+                []
+                Nothing
+                initPhxSocket
     in
         Task.map2 initModel loadWidget Window.size
             |> Task.mapError handleLoadError
 
 
-initPhxSocket : Phoenix.Socket.Socket Msg
-initPhxSocket =
-    Phoenix.Socket.init socketServer
 
-
-
--- |> Phoenix.Socket.withDebug
--- VIEW --
+-- View ------------------------------------------------------------------------
 
 
 view : Session -> Model -> Html Msg
@@ -136,28 +141,7 @@ view session model =
         -- below is for dev only! saves having to wait for a websocket if you're working on UI..
         -- use in conjunction with dev-data-test.json for Widget config
         devData =
-            Data
-                [ [ "Client A", "2,482,780", "1,294,181" ]
-                , [ "Client B", "39,500", "(11,400)" ]
-                , [ "Client C", "394,000", "187,147" ]
-                ]
-
-        -- devData =
-        --     Data
-        --         [ [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
-        --         , List.range 100 111 |> List.map toString
-        --         , List.range 200 211 |> List.map toString
-        --         , List.range 300 311 |> List.map toString
-        --         , List.range 400 411 |> List.map toString
-        --         , List.range 500 511 |> List.map toString
-        --         , List.range 600 611 |> List.map toString
-        --         , List.range 700 711 |> List.map toString
-        --         , List.range 800 811 |> List.map toString
-        --         , List.range 900 911 |> List.map toString
-        --         , List.range 1000 1011 |> List.map toString
-        --         , List.range 1100 1111 |> List.map toString
-        --         , List.range 1200 1211 |> List.map toString
-        --         ]
+            createDevData
     in
         div [ class "article-page" ]
             [ viewBanner model.errors dashboard author session.user
@@ -268,8 +252,22 @@ renderMessage str =
     li [] [ text str ]
 
 
+favoriteButton : Dashboard -> Html Msg
+favoriteButton dashboard =
+    let
+        favoriteText =
+            " Favorite Dashboard (" ++ toString dashboard.favoritesCount ++ ")"
+    in
+        Favorite.button (\_ -> ToggleFavorite) dashboard [] [ text favoriteText ]
 
--- UPDATE --
+
+followButton : Follow.State record -> Html Msg
+followButton =
+    Follow.button (\_ -> ToggleFollow)
+
+
+
+-- Update ----------------------------------------------------------------------
 
 
 type Msg
@@ -289,6 +287,14 @@ type Msg
     | ShowLeftMessage String
     | RendererMsg RendererMessage.Msg
     | NoOp
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ Window.resizes (\{ height, width } -> ResizeWindow width height)
+        , Phoenix.Socket.listen model.phxSocket PhoenixMsg
+        ]
 
 
 update : Session -> Msg -> Model -> ( Model, Cmd Msg )
@@ -423,7 +429,12 @@ update session msg model =
                         in
                             ( { model
                                 | messages =
-                                    ((chatMessage.user ++ ": " ++ (toString chatMessage.body)) :: model.messages)
+                                    ((chatMessage.user
+                                        ++ ": "
+                                        ++ (toString chatMessage.body)
+                                     )
+                                        :: model.messages
+                                    )
                                 , dashboard = updatedDashboard
                               }
                             , Cmd.none
@@ -443,8 +454,10 @@ update session msg model =
                             channel =
                                 Phoenix.Channel.init fullChannelName
                                     |> Phoenix.Channel.withPayload userParams
-                                    |> Phoenix.Channel.onJoin (always (ShowJoinedMessage fullChannelName))
-                                    |> Phoenix.Channel.onClose (always (ShowLeftMessage fullChannelName))
+                                    |> Phoenix.Channel.onJoin
+                                        (always (ShowJoinedMessage fullChannelName))
+                                    |> Phoenix.Channel.onClose
+                                        (always (ShowLeftMessage fullChannelName))
                         in
                             ( fullChannelName, channel )
 
@@ -471,9 +484,15 @@ update session msg model =
                                                 []
 
                                     listeningSocket =
-                                        updatedPhxSocket |> Phoenix.Socket.on "new:msg" fullChannelName ReceiveChatMessage
+                                        updatedPhxSocket
+                                            |> Phoenix.Socket.on "new:msg"
+                                                fullChannelName
+                                                ReceiveChatMessage
                                 in
-                                    joinChannel listeningSocket remainingChannels (phxCmd :: commands)
+                                    joinChannel
+                                        listeningSocket
+                                        remainingChannels
+                                        (phxCmd :: commands)
 
                             Nothing ->
                                 ( phxSocket, commands )
@@ -500,12 +519,24 @@ update session msg model =
                     )
 
             ShowJoinedMessage channelName ->
-                ( { model | messages = ("Joined channel " ++ channelName) :: model.messages }
+                ( { model
+                    | messages =
+                        ("Joined channel "
+                            ++ channelName
+                        )
+                            :: model.messages
+                  }
                 , Cmd.none
                 )
 
             ShowLeftMessage channelName ->
-                ( { model | messages = ("Left channel " ++ channelName) :: model.messages }
+                ( { model
+                    | messages =
+                        ("Left channel "
+                            ++ channelName
+                        )
+                            :: model.messages
+                  }
                 , Cmd.none
                 )
 
@@ -582,18 +613,31 @@ update session msg model =
 
 
 
--- INTERNAL --
+-- Internal --------------------------------------------------------------------
 
 
-favoriteButton : Dashboard -> Html Msg
-favoriteButton dashboard =
-    let
-        favoriteText =
-            " Favorite Dashboard (" ++ toString dashboard.favoritesCount ++ ")"
-    in
-        Favorite.button (\_ -> ToggleFavorite) dashboard [] [ text favoriteText ]
+createDevData : Data
+createDevData =
+    Data
+        [ [ "Client A", "2,482,780", "1,294,181" ]
+        , [ "Client B", "39,500", "(11,400)" ]
+        , [ "Client C", "394,000", "187,147" ]
+        ]
 
 
-followButton : Follow.State record -> Html Msg
-followButton =
-    Follow.button (\_ -> ToggleFollow)
+
+--     Data
+--         [ [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
+--         , List.range 100 111 |> List.map toString
+--         , List.range 200 211 |> List.map toString
+--         , List.range 300 311 |> List.map toString
+--         , List.range 400 411 |> List.map toString
+--         , List.range 500 511 |> List.map toString
+--         , List.range 600 611 |> List.map toString
+--         , List.range 700 711 |> List.map toString
+--         , List.range 800 811 |> List.map toString
+--         , List.range 900 911 |> List.map toString
+--         , List.range 1000 1011 |> List.map toString
+--         , List.range 1100 1111 |> List.map toString
+--         , List.range 1200 1211 |> List.map toString
+--         ]
