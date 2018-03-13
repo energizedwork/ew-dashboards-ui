@@ -95,7 +95,9 @@ adapterConfigTest =
             \_ -> defaultActualChartData.maxValue |> Expect.equal 412
 
         defaultXLabels =
-            \_ -> defaultActualChartData.xLabels |> Expect.equal (Just TD.headerRow)
+            \_ ->
+                defaultActualChartData.xLabels
+                    |> Expect.equal (Just TD.headerRow)
 
         defaultSeriesLabels =
             \_ ->
@@ -136,7 +138,12 @@ adapterConfigTest =
             \_ -> suppliedActualChartData.maxValue |> Expect.equal 210
 
         suppliedXLabels =
-            \_ -> suppliedActualChartData.xLabels |> Expect.equal (Just [ "205", "206", "207", "208", "209", "210" ])
+            \_ ->
+                suppliedActualChartData.xLabels
+                    |> Expect.equal
+                        (Just
+                            [ "205", "206", "207", "208", "209", "210" ]
+                        )
 
         suppliedSeriesLabels =
             \_ ->

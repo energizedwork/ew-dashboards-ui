@@ -25,29 +25,37 @@
         "adapter": {
           "type_": "LINE_AND_BAR_CHART",
           "config": {
-            "xLabels": {
-              "start": [2, 18],
-              "end": [9, 18]
+            "line": {
+              "xLabels": {
+                "start": [2, 18],
+                "end": [9, 18]
+              },
+              "bodyRows": {
+                "start": [2, 22],
+                "end": [9, 23]
+              },
+              "seriesLabels": {
+                "start": [1, 22],
+                "end": [1, 23]
+              },
+              "yAxisLabel": [3, 16],
+              "xAxisLabel": [5, 15]
             },
-            "barRows": {
-              "start": [2, 19],
-              "end": [9, 21]
-            },
-            "barSeriesLabels": {
-              "start": [1, 19],
-              "end": [1, 21]
-            },
-            "lineRows": {
-              "start": [2, 22],
-              "end": [9, 23]
-            },
-            "lineSeriesLabels": {
-              "start": [1, 22],
-              "end": [1, 23]
-            },
-            "barYAxisLabel": [3, 15],
-            "lineYAxisLabel": [3, 16],
-            "lineXAxisLabel": [5, 15]
+            "bar": {
+              "xLabels": {
+                "start": [2, 18],
+                "end": [9, 18]
+              },
+              "bodyRows": {
+                "start": [2, 19],
+                "end": [9, 21]
+              },
+              "seriesLabels": {
+                "start": [1, 19],
+                "end": [1, 21]
+              },
+              "yAxisLabel": [3, 15]
+            }
           }
         },
         "renderer": {
