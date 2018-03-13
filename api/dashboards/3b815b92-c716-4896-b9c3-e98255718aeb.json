@@ -28,7 +28,7 @@
             "subtitleCell": [3, 5],
             "actualCell": [3, 6],
             "targetCell": [3, 7],
-            "changeCell": [3, 8],
+            "progressCell": [3, 8],
             "lastUpdatedCell": [3, 10]
           }
         },
@@ -67,7 +67,7 @@
             "subtitleCell": [6, 5],
             "actualCell": [6, 6],
             "targetCell": [6, 7],
-            "changeCell": [6, 8],
+            "progressCell": [6, 8],
             "lastUpdatedCell": [6, 10]
           }
         },
@@ -106,7 +106,7 @@
             "subtitleCell": [9, 5],
             "actualCell": [9, 6],
             "targetCell": [9, 7],
-            "changeCell": [9, 8],
+            "progressCell": [9, 8],
             "lastUpdatedCell": [9, 10]
           }
         },

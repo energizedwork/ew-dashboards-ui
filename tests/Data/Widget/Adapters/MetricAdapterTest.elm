@@ -34,7 +34,7 @@ adapterConfigTest =
         suppliedConfigTarget =
             CellPosition.encode <| CellPosition ( 2, 3 )
 
-        suppliedConfigChange =
+        suppliedConfigProgress =
             CellPosition.encode <| CellPosition ( 3, 3 )
 
         suppliedConfigLastUpdated =
@@ -45,7 +45,7 @@ adapterConfigTest =
                 [ ( "subtitleCell", suppliedConfigSubtitle )
                 , ( "actualCell", suppliedConfigActual )
                 , ( "targetCell", suppliedConfigTarget )
-                , ( "changeCell", suppliedConfigChange )
+                , ( "progressCell", suppliedConfigProgress )
                 , ( "lastUpdatedCell", suppliedConfigLastUpdated )
                 ]
 
@@ -66,7 +66,7 @@ adapterConfigTest =
         expectedDefaultTarget =
             \_ -> Expect.equal defaultTargetFigure "Jan"
 
-        expectedDefaultChange =
+        expectedDefaultProgress =
             \_ -> Expect.equal defaultChangeFigure "Jan"
 
         expectedDefaultLastUpdated =
@@ -81,7 +81,7 @@ adapterConfigTest =
         expectedSuppliedTarget =
             \_ -> Expect.equal suppliedTargetFigure "202"
 
-        expectedSuppliedChange =
+        expectedSuppliedProgress =
             \_ -> Expect.equal suppliedChangeFigure "203"
 
         expectedSuppliedLastUpdated =
@@ -92,14 +92,14 @@ adapterConfigTest =
                 [ Test.test "subtitle is figure at A1" expectedDefaultSubtitle
                 , Test.test "actual is figure at A1" expectedDefaultActual
                 , Test.test "target is figure at A1" expectedDefaultTarget
-                , Test.test "change is figure at A1" expectedDefaultChange
+                , Test.test "progress is figure at A1" expectedDefaultProgress
                 , Test.test "lastUpdated is figure at A1" expectedDefaultLastUpdated
                 ]
             , Test.describe "with supplied Config"
                 [ Test.test "subtitle is figure at A2" expectedSuppliedSubtitle
                 , Test.test "actual is figure at B2" expectedSuppliedActual
                 , Test.test "target is figure at B3" expectedSuppliedTarget
-                , Test.test "change is figure at C3" expectedSuppliedChange
+                , Test.test "progress is figure at C3" expectedSuppliedProgress
                 , Test.test "lastUpdated is figure at C4" expectedSuppliedLastUpdated
                 ]
             ]

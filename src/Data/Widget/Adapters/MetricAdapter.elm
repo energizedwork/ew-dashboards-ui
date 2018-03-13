@@ -27,7 +27,7 @@ adapt optionalConfig data =
             valueForCell rows optionalConfig "targetCell"
 
         changeValue =
-            valueForCell rows optionalConfig "changeCell"
+            valueForCell rows optionalConfig "progressCell"
 
         lastUpdatedValue =
             valueForCell rows optionalConfig "lastUpdatedCell"
@@ -41,7 +41,7 @@ defaultConfig =
         [ ( "subtitleCell", CellPosition.encode defaultPosition )
         , ( "actualCell", CellPosition.encode defaultPosition )
         , ( "targetCell", CellPosition.encode defaultPosition )
-        , ( "changeCell", CellPosition.encode defaultPosition )
+        , ( "progressCell", CellPosition.encode defaultPosition )
         , ( "lastUpdatedCell", CellPosition.encode defaultPosition )
         ]
 

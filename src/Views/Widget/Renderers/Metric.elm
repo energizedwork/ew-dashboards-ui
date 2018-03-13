@@ -19,7 +19,7 @@ render optionalRendererConfig width height widget data =
     case widget.adapter of
         METRIC config ->
             let
-                ( subtitle, actual, target, change, lastUpdated ) =
+                ( subtitle, actual, target, progress, lastUpdated ) =
                     MetricAdapter.adapt config data
 
                 calculatedWidth =
@@ -34,7 +34,8 @@ render optionalRendererConfig width height widget data =
                         , div [ class "metric-body" ]
                             [ p [ class "subtitle" ] [ text subtitle ]
                             , h3 [ class "actual" ] [ text actual ]
-                            , h4 [ class "change" ] [ text change ]
+                            , h4 [ class "progress" ] [ text progress ]
+                            , p [ class "top-label" ] [ text <| "of target:" ]
                             , p [ class "forecast" ] [ text target ]
                             , p [ class "last-updated" ] [ text <| "updated: " ++ lastUpdated ]
                             ]
