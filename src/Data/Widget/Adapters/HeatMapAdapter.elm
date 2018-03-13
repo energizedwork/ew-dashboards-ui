@@ -4,6 +4,9 @@ import Data.Widget.Table as Table exposing (Data, Row, Cell)
 import Views.Widget.Renderers.Utils as Utils exposing (..)
 
 
+-- Public ----------------------------------------------------------------------
+
+
 adapt : Data -> ( Row, List Row, Float, List String, List String )
 adapt data =
     let
@@ -57,3 +60,7 @@ adapt data =
             List.head row |> Maybe.withDefault ""
     in
         ( headerRow, bodyRows, maxValue, xLabels, yLabels )
+
+
+
+-- Private ---------------------------------------------------------------------

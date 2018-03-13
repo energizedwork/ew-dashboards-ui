@@ -10,10 +10,7 @@ import Json.Decode as Json exposing (Value)
 import NumberParser
 
 
--- Possible values:
--- "bodyRows"
--- "xLabels"
--- "yLabels"
+-- Public ----------------------------------------------------------------------
 
 
 type Orientation
@@ -205,3 +202,7 @@ adapt optionalConfig data orientation =
             noXAxisLabel
             noYAxisLabel
             noForecastPosition
+
+
+
+-- Private ---------------------------------------------------------------------

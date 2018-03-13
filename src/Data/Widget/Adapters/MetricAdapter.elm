@@ -1,4 +1,4 @@
-module Data.Widget.Adapters.MetricAdapter exposing (defaultConfig, adapt)
+module Data.Widget.Adapters.MetricAdapter exposing (adapt, defaultConfig)
 
 import Data.Widget.Adapters.CellPosition as CellPosition exposing (CellPosition(..), encode, decoder, defaultPosition)
 import Data.Widget.Config as AdapterConfig
@@ -6,6 +6,33 @@ import Data.Widget.Table as Table exposing (Data)
 import Array
 import Dict exposing (Dict)
 import Json.Decode as Json exposing (Value)
+
+
+-- Public ----------------------------------------------------------------------
+
+
+adapt : AdapterConfig.Config -> Data -> ( String, String, String, String, String )
+adapt optionalConfig data =
+    let
+        rows =
+            Array.fromList data.rows
+
+        subtitleValue =
+            valueForCell rows optionalConfig "subtitleCell"
+
+        actualValue =
+            valueForCell rows optionalConfig "actualCell"
+
+        targetValue =
+            valueForCell rows optionalConfig "targetCell"
+
+        changeValue =
+            valueForCell rows optionalConfig "changeCell"
+
+        lastUpdatedValue =
+            valueForCell rows optionalConfig "lastUpdatedCell"
+    in
+        ( subtitleValue, actualValue, targetValue, changeValue, lastUpdatedValue )
 
 
 defaultConfig : Dict String Json.Value
@@ -17,6 +44,10 @@ defaultConfig =
         , ( "changeCell", CellPosition.encode defaultPosition )
         , ( "lastUpdatedCell", CellPosition.encode defaultPosition )
         ]
+
+
+
+-- Private ---------------------------------------------------------------------
 
 
 rowForCell : Array.Array (List String) -> CellPosition -> List String
@@ -47,27 +78,3 @@ valueForCell rows config key =
 
             Nothing ->
                 ""
-
-
-adapt : AdapterConfig.Config -> Data -> ( String, String, String, String, String )
-adapt optionalConfig data =
-    let
-        rows =
-            Array.fromList data.rows
-
-        subtitleValue =
-            valueForCell rows optionalConfig "subtitleCell"
-
-        actualValue =
-            valueForCell rows optionalConfig "actualCell"
-
-        targetValue =
-            valueForCell rows optionalConfig "targetCell"
-
-        changeValue =
-            valueForCell rows optionalConfig "changeCell"
-
-        lastUpdatedValue =
-            valueForCell rows optionalConfig "lastUpdatedCell"
-    in
-        ( subtitleValue, actualValue, targetValue, changeValue, lastUpdatedValue )

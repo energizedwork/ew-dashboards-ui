@@ -21,11 +21,6 @@ import Util
 -- Public ----------------------------------------------------------------------
 
 
-defaultConfig : Dict String Json.Value
-defaultConfig =
-    Dict.empty
-
-
 adapt : AdapterConfig.Config -> Data -> Orientation -> Chart.Data
 adapt optionalConfig data orientation =
     let
@@ -47,6 +42,11 @@ adapt optionalConfig data orientation =
             }
     in
         chartData
+
+
+defaultConfig : Dict String Json.Value
+defaultConfig =
+    Dict.empty
 
 
 extractSeriesLabels : Dict String Json.Value -> Table.Data -> Maybe Table.Cells
@@ -82,7 +82,7 @@ extractYAxisLabel config data =
 
 
 
--- Private ----------------------------------------------------------------------
+-- Private ---------------------------------------------------------------------
 
 
 extractCellPosition : String -> Dict String Json.Value -> Table.Data -> Maybe Cell
