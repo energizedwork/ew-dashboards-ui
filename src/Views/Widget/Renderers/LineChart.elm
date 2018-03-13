@@ -1,14 +1,14 @@
 module Views.Widget.Renderers.LineChart
     exposing
-        ( render
+        ( legendLabel
+        , render
+        , renderLegend
         , renderLines
         , renderLine
         , renderXAxis
         , renderYAxis
         , xScale
         , yScale
-        , renderLegend
-        , legendLabel
         )
 
 import Array exposing (..)
@@ -33,6 +33,9 @@ import Views.Widget.Renderers.Utils as Utils exposing (..)
 import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
 import Visualization.Shape as Shape
+
+
+-- Public ----------------------------------------------------------------------
 
 
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
@@ -68,114 +71,6 @@ render optionalRendererConfig width height widget data =
 
         _ ->
             p [ class "data" ] [ Html.text "Sorry, I can only render line charts from a CHART adapter right now" ]
-
-
-lineColours : Array Color.Color
-lineColours =
-    Array.fromList (List.reverse Scale.category10)
-
-
-getLineColour : Int -> String
-getLineColour index =
-    get index lineColours
-        |> Maybe.withDefault Color.black
-        |> Color.Convert.colorToHex
-
-
-view : String -> Int -> Int -> Chart.Data -> Svg msg
-view namespace w h chartData =
-    let
-        ( forecastPosition, requiresForecast ) =
-            case chartData.forecastPosition of
-                Just forecastPosition ->
-                    ( forecastPosition - 1, True )
-
-                Nothing ->
-                    ( 0, False )
-
-        actualsWidth =
-            case requiresForecast of
-                True ->
-                    (chartDimensions.w // xTicksCount) * forecastPosition
-
-                False ->
-                    chartDimensions.w
-
-        noPadding =
-            Nothing
-
-        forecastWidth =
-            chartDimensions.w - actualsWidth
-
-        chartDimensions =
-            ChartRenderer.calculateDimensions w h (Just padding)
-
-        actualsDimensions =
-            ChartRenderer.calculateDimensions actualsWidth chartDimensions.h noPadding
-
-        forecastsDimensions =
-            ChartRenderer.calculateDimensions forecastWidth chartDimensions.h noPadding
-
-        firstRow =
-            List.head chartData.data
-                |> Maybe.withDefault []
-
-        indexedData =
-            Array.toIndexedList (Array.fromList chartData.data)
-
-        xTicksCount =
-            List.length firstRow
-
-        yTicksCount =
-            5
-
-        defaultOptions =
-            Axis.defaultOptions
-
-        opts =
-            { defaultOptions
-                | orientation = Axis.Left
-                , tickCount = yTicksCount
-                , tickSizeOuter = 0
-            }
-
-        padding =
-            defaultChartPadding
-
-        yGridTicks =
-            Scale.ticks (yScale h chartData.maxValue padding) yTicksCount
-
-        ( lineRenderer, forecastRenderer ) =
-            let
-                forecast =
-                    True
-            in
-                case requiresForecast of
-                    True ->
-                        ( renderLines namespace w h chartData.maxValue firstRow indexedData padding (not forecast)
-                        , renderLines namespace w h chartData.maxValue firstRow indexedData padding (forecast)
-                        )
-
-                    False ->
-                        ( renderLines namespace w h chartData.maxValue firstRow indexedData padding (not forecast)
-                        , []
-                        )
-    in
-        svg [ Svg.Attributes.width (toString w ++ "px"), Svg.Attributes.height (toString h ++ "px") ]
-            (List.concat
-                [ [ ChartRenderer.renderClipPaths namespace actualsDimensions forecastsDimensions
-                  , renderXAxis w h xTicksCount (xScale w firstRow padding) padding
-                  , renderYAxis w h (yScale h chartData.maxValue padding) opts padding
-                  , Utils.renderYGrid w h padding chartData.maxValue (yScale h chartData.maxValue padding) yGridTicks
-                    -- , Utils.renderDebugGrid w h padding
-                  ]
-                , lineRenderer
-                , forecastRenderer
-                , renderLegend w h chartData.seriesLabels
-                , [ ChartAxisLabels.renderXAxisLabel w h chartData.xAxisLabel padding ]
-                , [ ChartAxisLabels.renderLeftYAxisLabel h chartData.yAxisLabel padding ]
-                ]
-            )
 
 
 renderLines :
@@ -329,6 +224,118 @@ renderLegend width height seriesLabels =
             ChartLegend.createLabels seriesLabels legendLabel
     in
         ChartLegend.renderBottomCenterAligned width height labels
+
+
+
+-- Private ---------------------------------------------------------------------
+
+
+lineColours : Array Color.Color
+lineColours =
+    Array.fromList (List.reverse Scale.category10)
+
+
+getLineColour : Int -> String
+getLineColour index =
+    get index lineColours
+        |> Maybe.withDefault Color.black
+        |> Color.Convert.colorToHex
+
+
+view : String -> Int -> Int -> Chart.Data -> Svg msg
+view namespace w h chartData =
+    let
+        ( forecastPosition, requiresForecast ) =
+            case chartData.forecastPosition of
+                Just forecastPosition ->
+                    ( forecastPosition - 1, True )
+
+                Nothing ->
+                    ( 0, False )
+
+        actualsWidth =
+            case requiresForecast of
+                True ->
+                    (chartDimensions.w // xTicksCount) * forecastPosition
+
+                False ->
+                    chartDimensions.w
+
+        noPadding =
+            Nothing
+
+        forecastWidth =
+            chartDimensions.w - actualsWidth
+
+        chartDimensions =
+            ChartRenderer.calculateDimensions w h (Just padding)
+
+        actualsDimensions =
+            ChartRenderer.calculateDimensions actualsWidth chartDimensions.h noPadding
+
+        forecastsDimensions =
+            ChartRenderer.calculateDimensions forecastWidth chartDimensions.h noPadding
+
+        firstRow =
+            List.head chartData.data
+                |> Maybe.withDefault []
+
+        indexedData =
+            Array.toIndexedList (Array.fromList chartData.data)
+
+        xTicksCount =
+            List.length firstRow
+
+        yTicksCount =
+            5
+
+        defaultOptions =
+            Axis.defaultOptions
+
+        opts =
+            { defaultOptions
+                | orientation = Axis.Left
+                , tickCount = yTicksCount
+                , tickSizeOuter = 0
+            }
+
+        padding =
+            defaultChartPadding
+
+        yGridTicks =
+            Scale.ticks (yScale h chartData.maxValue padding) yTicksCount
+
+        ( lineRenderer, forecastRenderer ) =
+            let
+                forecast =
+                    True
+            in
+                case requiresForecast of
+                    True ->
+                        ( renderLines namespace w h chartData.maxValue firstRow indexedData padding (not forecast)
+                        , renderLines namespace w h chartData.maxValue firstRow indexedData padding (forecast)
+                        )
+
+                    False ->
+                        ( renderLines namespace w h chartData.maxValue firstRow indexedData padding (not forecast)
+                        , []
+                        )
+    in
+        svg [ Svg.Attributes.width (toString w ++ "px"), Svg.Attributes.height (toString h ++ "px") ]
+            (List.concat
+                [ [ ChartRenderer.renderClipPaths namespace actualsDimensions forecastsDimensions
+                  , renderXAxis w h xTicksCount (xScale w firstRow padding) padding
+                  , renderYAxis w h (yScale h chartData.maxValue padding) opts padding
+                  , Utils.renderYGrid w h padding chartData.maxValue (yScale h chartData.maxValue padding) yGridTicks
+                    -- , Utils.renderDebugGrid w h padding
+                  ]
+                , lineRenderer
+                , forecastRenderer
+                , renderLegend w h chartData.seriesLabels
+                , [ ChartAxisLabels.renderXAxisLabel w h chartData.xAxisLabel padding ]
+                , [ ChartAxisLabels.renderLeftYAxisLabel h chartData.yAxisLabel padding ]
+                ]
+            )
 
 
 generateSVGPathDesc :

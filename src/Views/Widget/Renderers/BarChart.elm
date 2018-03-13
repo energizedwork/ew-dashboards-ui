@@ -31,6 +31,9 @@ import Visualization.Axis as Axis exposing (defaultOptions)
 import Visualization.Scale as Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
 
 
+-- Public ----------------------------------------------------------------------
+
+
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
 render optionalRendererConfig width height widget data =
     case widget.adapter of
@@ -56,6 +59,70 @@ render optionalRendererConfig width height widget data =
 
         _ ->
             p [ class "data" ] [ Html.text "Sorry, I can only render bar charts from a CHART adapter right now" ]
+
+
+renderColumns :
+    Int
+    -> Int
+    -> Float
+    -> Int
+    -> List ( Int, List ( String, String ) )
+    -> ChartPadding
+    -> List (Svg msg)
+renderColumns width height maxValue totalRows indexedData chartPadding =
+    List.map
+        (\( index, row ) ->
+            renderColumn width height index totalRows row maxValue chartPadding
+        )
+        indexedData
+
+
+renderColumn :
+    Int
+    -> Int
+    -> Int
+    -> Int
+    -> List ( String, String )
+    -> Float
+    -> ChartPadding
+    -> Svg msg
+renderColumn width height index totalRows row maxValue chartPadding =
+    g [ transform ("translate(" ++ toString chartPadding.left ++ ", " ++ toString chartPadding.top ++ ")"), class "series" ] <|
+        List.map (column height index totalRows (getBarColour index) (xScale width row chartPadding) chartPadding maxValue) row
+
+
+renderXAxis : Int -> Int -> List ( Cell, Cell ) -> ChartPadding -> Svg msg
+renderXAxis width height firstDataTuple chartPadding =
+    g [ transform ("translate(" ++ toString (chartPadding.left - 1) ++ ", " ++ toString (toFloat height - chartPadding.bottom) ++ ")") ]
+        [ xAxis width firstDataTuple chartPadding ]
+
+
+renderYAxis : Int -> Int -> Float -> ChartPadding -> Svg msg
+renderYAxis width height maxValue chartPadding =
+    g [ transform ("translate(" ++ toString (chartPadding.left - 1) ++ ", " ++ toString chartPadding.top ++ ")") ]
+        [ (yAxis height maxValue chartPadding) ]
+
+
+legendLabel : Int -> String -> Svg msg
+legendLabel index labelText =
+    ChartLegend.createHorizontalLabel index labelText "■" getBarColour
+
+
+renderLegend :
+    Int
+    -> Int
+    -> Maybe (List String)
+    -> List (Svg msg)
+renderLegend width height seriesLabels =
+    let
+        labels =
+            ChartLegend.createLabels seriesLabels legendLabel
+    in
+        ChartLegend.renderBottomCenterAligned width height labels
+
+
+
+-- Private ---------------------------------------------------------------------
 
 
 barColours : Array Color.Color
@@ -176,63 +243,3 @@ view w h chartData =
                 , [ ChartAxisLabels.renderLeftYAxisLabel h chartData.yAxisLabel defaultChartPadding ]
                 ]
             )
-
-
-renderColumns :
-    Int
-    -> Int
-    -> Float
-    -> Int
-    -> List ( Int, List ( String, String ) )
-    -> ChartPadding
-    -> List (Svg msg)
-renderColumns width height maxValue totalRows indexedData chartPadding =
-    List.map
-        (\( index, row ) ->
-            renderColumn width height index totalRows row maxValue chartPadding
-        )
-        indexedData
-
-
-renderColumn :
-    Int
-    -> Int
-    -> Int
-    -> Int
-    -> List ( String, String )
-    -> Float
-    -> ChartPadding
-    -> Svg msg
-renderColumn width height index totalRows row maxValue chartPadding =
-    g [ transform ("translate(" ++ toString chartPadding.left ++ ", " ++ toString chartPadding.top ++ ")"), class "series" ] <|
-        List.map (column height index totalRows (getBarColour index) (xScale width row chartPadding) chartPadding maxValue) row
-
-
-renderXAxis : Int -> Int -> List ( Cell, Cell ) -> ChartPadding -> Svg msg
-renderXAxis width height firstDataTuple chartPadding =
-    g [ transform ("translate(" ++ toString (chartPadding.left - 1) ++ ", " ++ toString (toFloat height - chartPadding.bottom) ++ ")") ]
-        [ xAxis width firstDataTuple chartPadding ]
-
-
-renderYAxis : Int -> Int -> Float -> ChartPadding -> Svg msg
-renderYAxis width height maxValue chartPadding =
-    g [ transform ("translate(" ++ toString (chartPadding.left - 1) ++ ", " ++ toString chartPadding.top ++ ")") ]
-        [ (yAxis height maxValue chartPadding) ]
-
-
-legendLabel : Int -> String -> Svg msg
-legendLabel index labelText =
-    ChartLegend.createHorizontalLabel index labelText "■" getBarColour
-
-
-renderLegend :
-    Int
-    -> Int
-    -> Maybe (List String)
-    -> List (Svg msg)
-renderLegend width height seriesLabels =
-    let
-        labels =
-            ChartLegend.createLabels seriesLabels legendLabel
-    in
-        ChartLegend.renderBottomCenterAligned width height labels

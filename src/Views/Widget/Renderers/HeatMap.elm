@@ -29,6 +29,10 @@ type alias Model =
     }
 
 
+
+-- Public ----------------------------------------------------------------------
+
+
 render : Int -> Int -> Widget -> Table.Data -> Bool -> Html RendererMessage.Msg
 render width height widget data updatable =
     case widget.adapter of
@@ -100,6 +104,17 @@ render width height widget data updatable =
             p [ class "data" ] [ Html.text "Sorry, I can only render line charts from a HEAT_MAP / UPDATABLE_HEAT_MAP adapter right now" ]
 
 
+colourScaleFrom : String -> Float -> Float
+colourScaleFrom amount maxValue =
+    Scale.convert
+        (colourScale maxValue)
+        (String.toFloat amount |> Result.withDefault 0)
+
+
+
+-- Private ---------------------------------------------------------------------
+
+
 w : Float
 w =
     ViewConfig.largeWidth
@@ -124,13 +139,6 @@ getCellColour index =
 colourScale : Float -> ContinuousScale
 colourScale maxValue =
     Scale.linear ( 0, maxValue ) ( 0, 1 )
-
-
-colourScaleFrom : String -> Float -> Float
-colourScaleFrom amount maxValue =
-    Scale.convert
-        (colourScale maxValue)
-        (String.toFloat amount |> Result.withDefault 0)
 
 
 draw : Model -> Svg msg

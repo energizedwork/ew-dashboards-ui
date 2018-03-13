@@ -20,6 +20,9 @@ import Visualization.Shape as Shape exposing (defaultPieConfig)
 import Views.Widget.Renderers.ChartLegend as ChartLegend
 
 
+-- Public ----------------------------------------------------------------------
+
+
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
 render optionalRendererConfig width height widget data =
     case widget.adapter of
@@ -59,6 +62,10 @@ render optionalRendererConfig width height widget data =
 
         _ ->
             p [ class "data" ] [ Html.text "Sorry, I can only render pie charts from a TABLE adapter right now" ]
+
+
+
+-- Private ---------------------------------------------------------------------
 
 
 padding : Float
@@ -138,22 +145,22 @@ view width height data =
             in
                 label ++ ": " ++ amount
 
-        -- makeLabel slice ( label, value ) =
-        --     text_
-        --         [ transform
-        --             ("translate"
-        --                 ++ toString
-        --                     (Shape.centroid
-        --                         { slice
-        --                             | innerRadius = (radius width height) - 40
-        --                             , outerRadius = (radius width height) - 20
-        --                         }
-        --                     )
-        --             )
-        --         , dy ".35em"
-        --         , textAnchor "middle"
-        --         ]
-        --         [ Svg.text label ]
+        makeLabel slice ( label, value ) =
+            text_
+                [ transform
+                    ("translate"
+                        ++ toString
+                            (Shape.centroid
+                                { slice
+                                    | innerRadius = (radius width height) - 40
+                                    , outerRadius = (radius width height) - 20
+                                }
+                            )
+                    )
+                , dy ".35em"
+                , textAnchor "middle"
+                ]
+                [ Svg.text label ]
     in
         svg [ Svg.Attributes.width (toString width ++ "px"), Svg.Attributes.height (toString height ++ "px") ] <|
             List.concat

@@ -11,6 +11,9 @@ import Views.Widget.Renderers.Config as ViewConfig
 import Views.Widget.Renderers.Utils as Utils
 
 
+-- Public ----------------------------------------------------------------------
+
+
 render : RendererConfig.Config -> Int -> Int -> Widget -> Table.Data -> Html msg
 render optionalRendererConfig width height widget data =
     case widget.adapter of
@@ -52,6 +55,10 @@ render optionalRendererConfig width height widget data =
 
         _ ->
             p [ class "data" ] [ text "Sorry, I can only render tables from a TABLE adapter right now" ]
+
+
+
+-- Private ---------------------------------------------------------------------
 
 
 padding : Float
