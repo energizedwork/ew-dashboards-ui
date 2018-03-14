@@ -35,9 +35,8 @@ render optionalRendererConfig width height widget data =
                             [ p [ class "subtitle" ] [ text subtitle ]
                             , h3 [ class "actual" ] [ text actual ]
                             , h4 [ class "progress" ] [ text progress ]
-                            , p [ class "top-label" ] [ text <| "of target:" ]
-                            , p [ class "forecast" ] [ text target ]
-                            , p [ class "last-updated" ] [ text <| "updated: " ++ lastUpdated ]
+                            , p [ class "forecast" ] [ text <| "Target: " ++ target ]
+                            , p [ class "last-updated" ] [ text <| "Updated: " ++ lastUpdated ]
                             ]
                         ]
             in
